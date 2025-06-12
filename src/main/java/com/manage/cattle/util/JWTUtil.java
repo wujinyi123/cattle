@@ -54,6 +54,15 @@ public class JWTUtil {
      * @return String
      */
     public static String getToken(HttpServletRequest request) {
+
+        String token = request.getHeader("token");
+        if (StringUtils.isNotBlank(token)) {
+            return token;
+        }
+        token = request.getParameter("token");
+        if (StringUtils.isNotBlank(token)) {
+            return token;
+        }
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -64,11 +73,7 @@ public class JWTUtil {
                 }
             }
         }
-        String token = request.getHeader("token");
-        if (StringUtils.isNotBlank(token)) {
-            return token;
-        }
-        return request.getParameter("token");
+        return "";
     }
 
     /**

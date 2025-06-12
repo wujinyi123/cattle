@@ -9,5 +9,5 @@ public interface UserService {
 
     UserDTO getCurrentUser();
 
-    PageInfo<UserDTO> pageUser(String username, String name);
+    PageInfo<UserDTO> pageUser(int pageNum, int pageSize, String username, String name);
 }

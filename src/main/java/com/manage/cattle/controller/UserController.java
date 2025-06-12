@@ -30,8 +30,10 @@ public class UserController {
     }
 
     @GetMapping("/pageUser")
-    public PageInfo<UserDTO> pageUser(@RequestParam(value = "username", required = false) String username,
+    public PageInfo<UserDTO> pageUser(@RequestParam("pageNum") int pageNum,
+                                      @RequestParam("pageSize") int pageSize,
+                                      @RequestParam(value = "username", required = false) String username,
                                       @RequestParam(value = "name", required = false) String name) {
-        return userService.pageUser(username, name);
+        return userService.pageUser(pageNum, pageSize, username, name);
     }
 }

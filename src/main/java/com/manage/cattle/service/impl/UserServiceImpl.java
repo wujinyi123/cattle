@@ -1,6 +1,7 @@
 package com.manage.cattle.service.impl;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.UserDao;
 import com.manage.cattle.dto.UserDTO;
@@ -42,7 +43,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PageInfo<UserDTO> pageUser(String username, String name) {
+    public PageInfo<UserDTO> pageUser(int pageNum, int pageSize, String username, String name) {
+        PageHelper.startPage(pageNum, pageSize);
         return new PageInfo<>(userDao.listUser(username, name));
     }
 }
