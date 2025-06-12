@@ -24,7 +24,12 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
 
     @SneakyThrows
     @Override
-    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType,
+                                  ServerHttpRequest request, ServerHttpResponse response) {
+        if (body instanceof ExceptionAdvice.ErrorResponseEntity entity) {
+            response.setStatusCode(entity.getCode());
+            return objectMapper.writeValueAsString(new ResponseEntity<>(entity.getMessage(), entity.getCode()));
+        }
         if (body instanceof ResponseEntity) {
             return body;
         }
