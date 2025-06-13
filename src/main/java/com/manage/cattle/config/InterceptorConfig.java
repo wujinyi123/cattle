@@ -21,7 +21,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 //拦截所有请求
                 .addPathPatterns("/**")
                 //不需要拦截的请求
-                .excludePathPatterns("/user/login","/user/logout","/user/getInfo");
+                .excludePathPatterns("/user/login", "/user/logout", "/user/getInfo");
     }
 
 }

@@ -1,4 +1,4 @@
-package com.manage.cattle.qo;
+package com.manage.cattle.qo.base;
 
 import lombok.Data;
 

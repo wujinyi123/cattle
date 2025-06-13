@@ -1,27 +1,35 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.manage.cattle.dao.UserDao">
-    <select id="login" resultType="com.manage.cattle.dto.UserDTO">
+<mapper namespace="com.manage.cattle.dao.base.UserDao">
+    <select id="listRole" resultType="com.manage.cattle.dto.base.RoleDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            username,name,roleId
+            username,name,job,roleCode,phone
+        from t_role
+        order by id
+    </select>
+
+    <select id="login" resultType="com.manage.cattle.dto.base.UserDTO">
+        select
+            id,createUser,createTime,updateUser,updateTime,
+            roleCode,roleName,roleDesc
         from t_user
         where username=#{username} and password=#{password}
     </select>
 
-    <select id="getUser" resultType="com.manage.cattle.dto.UserDTO">
+    <select id="getUser" resultType="com.manage.cattle.dto.base.UserDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            username,name,roleId
+            username,name,job,roleCode,phone,status
         from t_user
         where username=#{username}
     </select>
 
-    <select id="listUser" resultType="com.manage.cattle.dto.UserDTO">
+    <select id="listUser" resultType="com.manage.cattle.dto.base.UserDTO">
         select
-               id,createUser,createTime,updateUser,updateTime,
-               username,name,roleId
+            id,createUser,createTime,updateUser,updateTime,
+            username,name,job,roleCode,phone,status
         from t_user
         where 1=1
         <if test="username!=null and username!=''">
@@ -29,6 +37,15 @@
         </if>
         <if test="name!=null and name!=''">
             and name like concat('%',#{name},'%')
+        </if>
+        <if test="job!=null and job!=''">
+            and job like concat('%',#{job},'%')
+        </if>
+        <if test="roleCode!=null and roleCode!=''">
+            and roleCode=#{roleCode}
+        </if>
+        <if test="phone!=null and phone!=''">
+            and phone like concat('%',#{phone},'%')
         </if>
         order by username
     </select>
