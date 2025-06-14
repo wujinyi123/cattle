@@ -5,7 +5,7 @@
     <select id="listRole" resultType="com.manage.cattle.dto.base.RoleDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            username,name,job,roleCode,phone
+            roleCode,roleName,roleDesc
         from t_role
         order by id
     </select>
@@ -13,7 +13,7 @@
     <select id="login" resultType="com.manage.cattle.dto.base.UserDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            roleCode,roleName,roleDesc
+            username,name,job,roleCode,phone,status
         from t_user
         where username=#{username} and password=#{password}
     </select>

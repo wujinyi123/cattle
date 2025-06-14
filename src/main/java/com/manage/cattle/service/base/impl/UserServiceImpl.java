@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<RoleDTO> listRole() {
-        return null;
+        return userDao.listRole();
     }
 
     @Override
