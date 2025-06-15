@@ -3,6 +3,7 @@ package com.manage.cattle.util;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -102,7 +103,8 @@ public class JWTUtil {
      */
     public static String getUsername() {
         String token = getToken();
-        DecodedJWT decodedJWT = getPayload(token);
-        return decodedJWT.getPayload();
+        DecodedJWT jwt = getPayload(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        return claims.get("username").asString();
     }
 }

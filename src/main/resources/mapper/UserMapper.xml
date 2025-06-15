@@ -2,26 +2,18 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.manage.cattle.dao.base.UserDao">
-    <select id="listRole" resultType="com.manage.cattle.dto.base.RoleDTO">
-        select
-            id,createUser,createTime,updateUser,updateTime,
-            roleCode,roleName,roleDesc
-        from t_role
-        order by id
-    </select>
-
     <select id="login" resultType="com.manage.cattle.dto.base.UserDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            username,name,job,roleCode,phone,status
+            username,name,job,phone,isSysAdmin,status
         from t_user
-        where username=#{username} and password=#{password}
+        where username=#{username} and password=#{password} and status='incumbent'
     </select>
 
     <select id="getUser" resultType="com.manage.cattle.dto.base.UserDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            username,name,job,roleCode,phone,status
+            username,name,job,phone,isSysAdmin,status
         from t_user
         where username=#{username}
     </select>
@@ -29,7 +21,7 @@
     <select id="listUser" resultType="com.manage.cattle.dto.base.UserDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            username,name,job,roleCode,phone,status
+            username,name,job,phone,isSysAdmin,status
         from t_user
         where 1=1
         <if test="username!=null and username!=''">
@@ -41,12 +33,58 @@
         <if test="job!=null and job!=''">
             and job like concat('%',#{job},'%')
         </if>
-        <if test="roleCode!=null and roleCode!=''">
-            and roleCode=#{roleCode}
-        </if>
         <if test="phone!=null and phone!=''">
             and phone like concat('%',#{phone},'%')
         </if>
+        <if test="isSysAdmin!=null and isSysAdmin!=''">
+            and isSysAdmin=#{isSysAdmin}
+        </if>
+        <if test="status!=null and status!=''">
+            and status=#{status}
+        </if>
         order by username
     </select>
+
+    <insert id="addUser">
+        insert into t_user(createUser,createTime,updateUser,updateTime,
+                           username,password,name,
+                           job,phone,isSysAdmin,status)
+        values (#{createUser},now(),#{updateUser},now(),
+                #{username},#{password},#{name},
+                #{job},#{phone},#{isSysAdmin},#{status})
+    </insert>
+
+    <update id="updateUser">
+        update t_user
+        set updateUser=#{updateUser},updateTime=now(),
+            name=#{name},job=#{job},phone=#{phone},
+            isSysAdmin=#{isSysAdmin},status=#{status}
+        where username=#{username}
+    </update>
+
+    <update id="setUserStatus">
+        update t_user
+        set updateUser=#{updateUser},updateTime=now(),status=#{status}
+        where username in
+        <foreach collection="usernameList" index="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="resetPassword">
+        update t_user
+        set updateUser=#{updateUser},updateTime=now(),password=#{password}
+        where username in
+        <foreach collection="usernameList" index="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <delete id="delUser">
+        delete from t_user
+        where username in
+        <foreach collection="usernameList" index="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
 </mapper>

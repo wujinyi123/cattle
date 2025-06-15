@@ -8,6 +8,7 @@ public class UserQO extends PageQO {
     private String username;
     private String name;
     private String job;
-    private String roleCode;
     private String phone;
+    private String isSysAdmin;
+    private String status;
 }
