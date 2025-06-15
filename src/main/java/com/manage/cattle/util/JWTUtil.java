@@ -27,7 +27,7 @@ public class JWTUtil {
      * @return token字符串
      */
     public static String createToken(Map<String, String> payload) {
-        // 指定token过期时间为1天
+        // 指定token过期时间为1小时
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.SECOND, EXPIRATION_TIME);
         JWTCreator.Builder builder = JWT.create();
@@ -55,7 +55,6 @@ public class JWTUtil {
      * @return String
      */
     public static String getToken(HttpServletRequest request) {
-
         String token = request.getHeader("token");
         if (StringUtils.isNotBlank(token)) {
             return token;
@@ -106,5 +105,17 @@ public class JWTUtil {
         DecodedJWT jwt = getPayload(token);
         Map<String, Claim> claims = jwt.getClaims();
         return claims.get("username").asString();
+    }
+
+    /**
+     * getIsSysAdmin
+     *
+     * @return String
+     */
+    public static String getIsSysAdmin() {
+        String token = getToken();
+        DecodedJWT jwt = getPayload(token);
+        Map<String, Claim> claims = jwt.getClaims();
+        return claims.get("isSysAdmin").asString();
     }
 }

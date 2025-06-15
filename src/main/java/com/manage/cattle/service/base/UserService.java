@@ -8,15 +8,15 @@ import com.manage.cattle.qo.base.UserQO;
 import java.util.List;
 
 public interface UserService {
-    UserDTO login(LoginQO loginQO);
+    UserDTO login(LoginQO qo);
 
     UserDTO getCurrentUser();
 
-    PageInfo<UserDTO> pageUser(UserQO userQO);
+    PageInfo<UserDTO> pageUser(UserQO qo);
 
     UserDTO getUser(String username);
 
-    int saveUser(String type, UserDTO userDTO);
+    int saveUser(String type, UserDTO dto);
 
     int setUserStatus(String status, List<String> usernameList);
 

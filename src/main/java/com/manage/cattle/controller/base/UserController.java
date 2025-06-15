@@ -23,8 +23,8 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/login")
-    public UserDTO login(@RequestBody LoginQO loginQO) {
-        return userService.login(loginQO);
+    public UserDTO login(@RequestBody LoginQO qo) {
+        return userService.login(qo);
     }
 
     @GetMapping("/getCurrentUser")
@@ -33,8 +33,8 @@ public class UserController {
     }
 
     @GetMapping("/pageUser")
-    public PageInfo<UserDTO> pageUser(UserQO userQO) {
-        return userService.pageUser(userQO);
+    public PageInfo<UserDTO> pageUser(UserQO qo) {
+        return userService.pageUser(qo);
     }
 
     @GetMapping("/getUser")
@@ -43,8 +43,8 @@ public class UserController {
     }
 
     @PostMapping("/saveUser")
-    public int saveUser(@RequestParam("type") String type, @RequestBody UserDTO userDTO) {
-        return userService.saveUser(type, userDTO);
+    public int saveUser(@RequestParam("type") String type, @RequestBody UserDTO dto) {
+        return userService.saveUser(type, dto);
     }
 
     @PostMapping("/setUserStatus")

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-
 @Service
 public class UserServiceImpl implements UserService {
     @Value("${default.password}")
@@ -31,17 +30,18 @@ public class UserServiceImpl implements UserService {
     private UserDao userDao;
 
     @Override
-    public UserDTO login(LoginQO loginQO) {
-        if (StringUtils.isAnyBlank(loginQO.getUsername(), loginQO.getPassword())) {
+    public UserDTO login(LoginQO qo) {
+        if (StringUtils.isAnyBlank(qo.getUsername(), qo.getPassword())) {
             throw new LoginException("账号密码不能为空");
         }
-        UserDTO userDTO = userDao.login(loginQO);
-        if (Objects.isNull(userDTO)) {
+        UserDTO dto = userDao.login(qo);
+        if (Objects.isNull(dto)) {
             throw new LoginException("密码错误");
         }
-        String token = JWTUtil.createToken(Map.of("username", userDTO.getUsername(), "name", userDTO.getName()));
-        userDTO.setToken(token);
-        return userDTO;
+        Map<String, String> payload = Map.of("username", dto.getUsername(), "name", dto.getName(), "isSysAdmin", dto.getIsSysAdmin());
+        String token = JWTUtil.createToken(payload);
+        dto.setToken(token);
+        return dto;
     }
 
     @Override
@@ -51,9 +51,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PageInfo<UserDTO> pageUser(UserQO userQO) {
-        PageHelper.startPage(userQO);
-        return new PageInfo<>(userDao.listUser(userQO));
+    public PageInfo<UserDTO> pageUser(UserQO qo) {
+        PageHelper.startPage(qo);
+        return new PageInfo<>(userDao.listUser(qo));
     }
 
     @Override
@@ -63,24 +63,26 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public int saveUser(String type, UserDTO userDTO) {
+    public int saveUser(String type, UserDTO dto) {
+        onlySysAdminAction();
         String username = JWTUtil.getUsername();
-        userDTO.setCreateUser(username);
-        userDTO.setUpdateUser(username);
+        dto.setCreateUser(username);
+        dto.setUpdateUser(username);
         if ("add".equals(type)) {
-            if (Objects.nonNull(userDao.getUser(userDTO.getUsername()))) {
+            if (Objects.nonNull(userDao.getUser(dto.getUsername()))) {
                 throw new BusinessException("账号已存在");
             }
-            userDTO.setPassword(defaultPassword);
-            return userDao.addUser(userDTO);
+            dto.setPassword(defaultPassword);
+            return userDao.addUser(dto);
         } else {
-            return userDao.updateUser(userDTO);
+            return userDao.updateUser(dto);
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int setUserStatus(String status, List<String> usernameList) {
+        onlySysAdminAction();
         String username = JWTUtil.getUsername();
         UpdateUserDTO dto = new UpdateUserDTO();
         dto.setUpdateUser(username);
@@ -92,6 +94,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int resetPassword(List<String> usernameList) {
+        onlySysAdminAction();
         String username = JWTUtil.getUsername();
         UpdateUserDTO dto = new UpdateUserDTO();
         dto.setUpdateUser(username);
@@ -103,6 +106,14 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int delUser(List<String> usernameList) {
+        onlySysAdminAction();
         return userDao.delUser(usernameList);
+    }
+
+    private void onlySysAdminAction() {
+        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        if (!"Y".equals(isSysAdmin)) {
+            throw new BusinessException("仅系统管理员操作");
+        }
     }
 }

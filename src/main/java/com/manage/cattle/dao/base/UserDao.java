@@ -9,15 +9,15 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 public interface UserDao {
-    UserDTO login(LoginQO loginQO);
+    UserDTO login(LoginQO qo);
 
     UserDTO getUser(@Param("username") String username);
 
-    List<UserDTO> listUser(UserQO userQO);
+    List<UserDTO> listUser(UserQO qo);
 
-    int addUser(UserDTO userDTO);
+    int addUser(UserDTO dto);
 
-    int updateUser(UserDTO userDTO);
+    int updateUser(UserDTO dto);
 
     int setUserStatus(UpdateUserDTO dto);
 
