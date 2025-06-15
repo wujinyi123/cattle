@@ -1,5 +1,6 @@
 package com.manage.cattle.dao.base;
 
+import com.manage.cattle.dto.base.UpdateUserDTO;
 import com.manage.cattle.dto.base.UserDTO;
 import com.manage.cattle.qo.base.LoginQO;
 import com.manage.cattle.qo.base.UserQO;
@@ -18,9 +19,9 @@ public interface UserDao {
 
     int updateUser(UserDTO userDTO);
 
-    int setUserStatus(@Param("updateUser") String updateUser, @Param("status") String status, @Param("usernameList") List<String> usernameList);
+    int setUserStatus(UpdateUserDTO dto);
 
-    int resetPassword(@Param("updateUser") String updateUser, @Param("password") String password, @Param("usernameList") List<String> usernameList);
+    int resetPassword(UpdateUserDTO dto);
 
-    int delUser(@Param("usernameList") List<String> usernameList);
+    int delUser(List<String> list);
 }
