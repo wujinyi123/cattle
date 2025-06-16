@@ -3,7 +3,6 @@ package com.manage.cattle.service.base.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.UserDao;
-import com.manage.cattle.dto.base.UpdateUserDTO;
 import com.manage.cattle.dto.base.UserDTO;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.exception.LoginException;
@@ -11,6 +10,7 @@ import com.manage.cattle.qo.base.LoginQO;
 import com.manage.cattle.qo.base.UserQO;
 import com.manage.cattle.service.base.UserService;
 import com.manage.cattle.util.JWTUtil;
+import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int saveUser(String type, UserDTO dto) {
-        onlySysAdminAction();
+        PermissionUtil.onlySysAdmin();
         String username = JWTUtil.getUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
@@ -82,38 +82,23 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int setUserStatus(String status, List<String> usernameList) {
-        onlySysAdminAction();
+        PermissionUtil.onlySysAdmin();
         String username = JWTUtil.getUsername();
-        UpdateUserDTO dto = new UpdateUserDTO();
-        dto.setUpdateUser(username);
-        dto.setStatus(status);
-        dto.setUsernameList(usernameList);
-        return userDao.setUserStatus(dto);
+        return userDao.setUserStatus(username, status, usernameList);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int resetPassword(List<String> usernameList) {
-        onlySysAdminAction();
+        PermissionUtil.onlySysAdmin();
         String username = JWTUtil.getUsername();
-        UpdateUserDTO dto = new UpdateUserDTO();
-        dto.setUpdateUser(username);
-        dto.setPassword(defaultPassword);
-        dto.setUsernameList(usernameList);
-        return userDao.resetPassword(dto);
+        return userDao.resetPassword(username, defaultPassword, usernameList);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int delUser(List<String> usernameList) {
-        onlySysAdminAction();
+        PermissionUtil.onlySysAdmin();
         return userDao.delUser(usernameList);
-    }
-
-    private void onlySysAdminAction() {
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
-        if (!"Y".equals(isSysAdmin)) {
-            throw new BusinessException("仅系统管理员操作");
-        }
     }
 }

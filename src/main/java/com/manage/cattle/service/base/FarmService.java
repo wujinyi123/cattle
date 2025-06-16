@@ -9,6 +9,8 @@ import java.util.List;
 public interface FarmService {
     PageInfo<FarmDTO> pageFarm(FarmQO qo);
 
+    FarmDTO getFarm(String farmId);
+
     int saveFarm(String type, FarmDTO dto);
 
     int delFarm(List<String> farmIds);

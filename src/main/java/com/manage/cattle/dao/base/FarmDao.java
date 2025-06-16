@@ -9,6 +9,8 @@ import java.util.List;
 public interface FarmDao {
     List<FarmDTO> listFarm(FarmQO qo);
 
+    FarmDTO getFarmById(@Param("farmId") String farmId);
+
     FarmDTO getFarm(@Param("farmName") String farmName);
 
     int addFarm(FarmDTO dto);

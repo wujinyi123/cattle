@@ -14,6 +14,14 @@
         order by farmName
     </select>
 
+    <select id="getFarmById" resultType="com.manage.cattle.dto.base.FarmDTO">
+        select
+            id,createUser,createTime,updateUser,updateTime,
+            farmId,farmName,owner,admin,employee,address,area,scale
+        from t_farm
+        where farmId=#{farmId}
+    </select>
+
     <select id="getFarm" resultType="com.manage.cattle.dto.base.FarmDTO">
         select
             id,createUser,createTime,updateUser,updateTime,

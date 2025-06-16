@@ -25,6 +25,11 @@ public class FarmController {
         return farmService.pageFarm(qo);
     }
 
+    @GetMapping("/getFarm")
+    public FarmDTO getFarm(@RequestParam("farmId") String farmId) {
+        return farmService.getFarm(farmId);
+    }
+
     @PostMapping("/saveFarm")
     public int saveFarm(@RequestParam("type") String type, @RequestBody FarmDTO dto) {
         return farmService.saveFarm(type, dto);

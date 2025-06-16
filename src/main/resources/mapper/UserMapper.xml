@@ -66,7 +66,7 @@
         update t_user
         set updateUser=#{updateUser},updateTime=now(),status=#{status}
         where username in
-        <foreach collection="usernameList" index="item" open="(" separator="," close=")">
+        <foreach collection="usernameList" item="item" open="(" separator="," close=")">
             #{item}
         </foreach>
     </update>
@@ -75,7 +75,7 @@
         update t_user
         set updateUser=#{updateUser},updateTime=now(),password=#{password}
         where username in
-        <foreach collection="usernameList" index="item" open="(" separator="," close=")">
+        <foreach collection="usernameList" item="item" open="(" separator="," close=")">
             #{item}
         </foreach>
     </update>
@@ -83,7 +83,7 @@
     <delete id="delUser">
         delete from t_user
         where username in
-        <foreach collection="list" index="item" open="(" separator="," close=")">
+        <foreach collection="usernameList" item="item" open="(" separator="," close=")">
             #{item}
         </foreach>
     </delete>
