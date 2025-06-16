@@ -54,12 +54,16 @@ public class FarmServiceImpl implements FarmService {
         if (StringUtils.isNotBlank(dto.getAdmin())) {
             List<String> adminList = Arrays.stream(dto.getAdmin().split(",")).toList();
             List<String> errUser = adminList.stream().filter(item -> !userList.contains(item)).toList();
-            throw new BusinessException("管理员(" + String.join(",", errUser) + ")账号不正确");
+            if (errUser.size() > 0) {
+                throw new BusinessException("管理员(" + String.join(",", errUser) + ")账号不正确");
+            }
         }
         if (StringUtils.isNotBlank(dto.getEmployee())) {
             List<String> employeeList = Arrays.stream(dto.getEmployee().split(",")).toList();
             List<String> errUser = employeeList.stream().filter(item -> !userList.contains(item)).toList();
-            throw new BusinessException("员工(" + String.join(",", errUser) + ")账号不正确");
+            if (errUser.size() > 0) {
+                throw new BusinessException("员工(" + String.join(",", errUser) + ")账号不正确");
+            }
         }
         String username = JWTUtil.getUsername();
         dto.setCreateUser(username);

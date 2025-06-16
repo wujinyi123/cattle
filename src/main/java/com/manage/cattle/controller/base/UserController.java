@@ -6,7 +6,6 @@ import com.manage.cattle.qo.base.LoginQO;
 import com.manage.cattle.qo.base.UserQO;
 import com.manage.cattle.service.base.UserService;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +34,11 @@ public class UserController {
     @GetMapping("/pageUser")
     public PageInfo<UserDTO> pageUser(UserQO qo) {
         return userService.pageUser(qo);
+    }
+
+    @GetMapping("/listUser")
+    public List<UserDTO> listUser() {
+        return userService.listUser();
     }
 
     @GetMapping("/getUser")

@@ -21,7 +21,8 @@
     <select id="listUser" resultType="com.manage.cattle.dto.base.UserDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            username,name,job,phone,isSysAdmin,status
+            username,name,concat(name,'(',username,')') title,
+               job,phone,isSysAdmin,status
         from t_user
         where 1=1
         <if test="username!=null and username!=''">

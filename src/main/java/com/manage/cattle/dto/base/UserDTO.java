@@ -9,6 +9,7 @@ public class UserDTO extends BaseDTO {
     private String password;
     private String token;
     private String name;
+    private String title;
     private String job;
     private String phone;
     private String isSysAdmin;

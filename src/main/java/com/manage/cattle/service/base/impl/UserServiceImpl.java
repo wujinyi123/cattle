@@ -57,6 +57,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserDTO> listUser() {
+        UserQO qo = new UserQO();
+        qo.setStatus("incumbent");
+        return userDao.listUser(qo);
+    }
+
+    @Override
     public UserDTO getUser(String username) {
         return userDao.getUser(username);
     }

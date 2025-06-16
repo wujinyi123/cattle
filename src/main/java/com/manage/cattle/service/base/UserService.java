@@ -14,6 +14,8 @@ public interface UserService {
 
     PageInfo<UserDTO> pageUser(UserQO qo);
 
+    List<UserDTO> listUser();
+
     UserDTO getUser(String username);
 
     int saveUser(String type, UserDTO dto);
