@@ -35,6 +35,11 @@ public class FarmController {
         return farmService.saveFarm(type, dto);
     }
 
+    @PostMapping("/saveAdminEmployee")
+    public int saveAdminEmployee(@RequestBody FarmDTO dto) {
+        return farmService.saveAdminEmployee(dto);
+    }
+
     @PostMapping("/delFarm")
     public int delFarm(@RequestBody List<String> farmIds) {
         return farmService.delFarm(farmIds);

@@ -51,20 +51,7 @@ public class FarmServiceImpl implements FarmService {
         if (!userList.contains(dto.getOwner())) {
             throw new BusinessException("负责人账号不正确");
         }
-        if (StringUtils.isNotBlank(dto.getAdmin())) {
-            List<String> adminList = Arrays.stream(dto.getAdmin().split(",")).toList();
-            List<String> errUser = adminList.stream().filter(item -> !userList.contains(item)).toList();
-            if (errUser.size() > 0) {
-                throw new BusinessException("管理员(" + String.join(",", errUser) + ")账号不正确");
-            }
-        }
-        if (StringUtils.isNotBlank(dto.getEmployee())) {
-            List<String> employeeList = Arrays.stream(dto.getEmployee().split(",")).toList();
-            List<String> errUser = employeeList.stream().filter(item -> !userList.contains(item)).toList();
-            if (errUser.size() > 0) {
-                throw new BusinessException("员工(" + String.join(",", errUser) + ")账号不正确");
-            }
-        }
+        checkAdminEmployee(userList, dto);
         String username = JWTUtil.getUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
@@ -76,6 +63,45 @@ public class FarmServiceImpl implements FarmService {
             return farmDao.addFarm(dto);
         } else {
             return farmDao.updateFarm(dto);
+        }
+    }
+
+    @Override
+    public int saveAdminEmployee(FarmDTO dto) {
+        FarmDTO farmDTO = farmDao.getFarmById(dto.getFarmId());
+        if (Objects.isNull(farmDTO)) {
+            throw new BusinessException("牧场不存在");
+        }
+        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String username = JWTUtil.getUsername();
+        if (!"Y".equals(isSysAdmin) && !username.equals(farmDTO.getOwner())) {
+            throw new BusinessException("无权修改");
+        }
+        UserQO qo = new UserQO();
+        qo.setStatus("incumbent");
+        List<String> userList = userDao.listUser(qo).stream().map(UserDTO::getUsername).toList();
+        checkAdminEmployee(userList, dto);
+        dto.setCreateUser(username);
+        dto.setUpdateUser(username);
+        return farmDao.saveAdminEmployee(dto);
+    }
+
+    private void checkAdminEmployee(List<String> userList, FarmDTO dto) {
+        if (StringUtils.isNotBlank(dto.getAdmin())) {
+            List<String> adminList = Arrays.stream(dto.getAdmin().split(",")).sorted().toList();
+            List<String> errUser = adminList.stream().filter(item -> !userList.contains(item)).toList();
+            if (errUser.size() > 0) {
+                throw new BusinessException("管理员(" + String.join(",", errUser) + ")账号不正确");
+            }
+            dto.setAdmin(String.join(",", adminList));
+        }
+        if (StringUtils.isNotBlank(dto.getEmployee())) {
+            List<String> employeeList = Arrays.stream(dto.getEmployee().split(",")).sorted().toList();
+            List<String> errUser = employeeList.stream().filter(item -> !userList.contains(item)).toList();
+            if (errUser.size() > 0) {
+                throw new BusinessException("员工(" + String.join(",", errUser) + ")账号不正确");
+            }
+            dto.setAdmin(String.join(",", employeeList));
         }
     }
 

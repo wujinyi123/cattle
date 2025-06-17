@@ -45,6 +45,13 @@
         where farmId=#{farmId}
     </update>
 
+    <update id="saveAdminEmployee">
+        update t_farm
+        set updateUser=#{updateUser},updateTime=now(),
+            admin=#{admin},employee=#{employee}
+        where farmId=#{farmId}
+    </update>
+
     <delete id="delFarm">
         delete from t_farm
         where farmId in
