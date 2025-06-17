@@ -2,12 +2,16 @@ package com.manage.cattle.service.base;
 
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dto.base.FarmDTO;
+import com.manage.cattle.dto.base.FarmZoneDTO;
 import com.manage.cattle.qo.base.FarmQO;
+import com.manage.cattle.qo.base.FarmZoneQO;
 
 import java.util.List;
 
 public interface FarmService {
     PageInfo<FarmDTO> pageFarm(FarmQO qo);
+
+    List<FarmDTO> listFarm();
 
     FarmDTO getFarm(String farmId);
 
@@ -16,4 +20,12 @@ public interface FarmService {
     int saveAdminEmployee(FarmDTO dto);
 
     int delFarm(List<String> farmIds);
+
+    PageInfo<FarmZoneDTO> pageFarmZone(FarmZoneQO qo);
+
+    FarmZoneDTO getFarmZone(String farmZoneId);
+
+    int saveFarmZone(String type, FarmZoneDTO dto);
+
+    int delFarmZone(List<String> farmZoneIds);
 }

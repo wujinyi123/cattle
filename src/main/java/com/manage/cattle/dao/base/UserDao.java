@@ -22,5 +22,5 @@ public interface UserDao {
 
     int resetPassword(@Param("updateUser") String updateUser, @Param("password") String password, @Param("usernameList") List<String> usernameList);
 
-    int delUser(@Param("usernameList") List<String> usernameList);
+    int delUser(List<String> list);
 }

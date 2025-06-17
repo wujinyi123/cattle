@@ -6,9 +6,11 @@ import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.base.UserDao;
 import com.manage.cattle.dto.base.FarmDTO;
+import com.manage.cattle.dto.base.FarmZoneDTO;
 import com.manage.cattle.dto.base.UserDTO;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.qo.base.FarmQO;
+import com.manage.cattle.qo.base.FarmZoneQO;
 import com.manage.cattle.qo.base.UserQO;
 import com.manage.cattle.service.base.FarmService;
 import com.manage.cattle.util.JWTUtil;
@@ -18,9 +20,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class FarmServiceImpl implements FarmService {
@@ -34,6 +40,11 @@ public class FarmServiceImpl implements FarmService {
     public PageInfo<FarmDTO> pageFarm(FarmQO qo) {
         PageHelper.startPage(qo);
         return new PageInfo<>(farmDao.listFarm(qo));
+    }
+
+    @Override
+    public List<FarmDTO> listFarm() {
+        return farmDao.listFarm(new FarmQO());
     }
 
     @Override
@@ -75,7 +86,7 @@ public class FarmServiceImpl implements FarmService {
         String isSysAdmin = JWTUtil.getIsSysAdmin();
         String username = JWTUtil.getUsername();
         if (!"Y".equals(isSysAdmin) && !username.equals(farmDTO.getOwner())) {
-            throw new BusinessException("无权修改");
+            throw new BusinessException("权限不足");
         }
         UserQO qo = new UserQO();
         qo.setStatus("incumbent");
@@ -110,5 +121,64 @@ public class FarmServiceImpl implements FarmService {
     public int delFarm(List<String> farmIds) {
         PermissionUtil.onlySysAdmin();
         return farmDao.delFarm(farmIds);
+    }
+
+    @Override
+    public PageInfo<FarmZoneDTO> pageFarmZone(FarmZoneQO qo) {
+        PageHelper.startPage(qo);
+        PageInfo<FarmZoneDTO> pageInfo = new PageInfo<>(farmDao.listFarmZone(qo));
+        List<String> farmZoneIds = pageInfo.getList().stream().map(FarmZoneDTO::getFarmZoneId).toList();
+        if (farmZoneIds.size() > 0) {
+            Map<String, FarmDTO> farmMap = farmDao.listFarmByZoneIds(farmZoneIds).stream().collect(Collectors.toMap(FarmDTO::getFarmId,
+                    Function.identity()));
+            pageInfo.getList().forEach(item -> item.setFarmDTO(farmMap.get(item.getFarmId())));
+        }
+        return pageInfo;
+    }
+
+    @Override
+    public FarmZoneDTO getFarmZone(String farmZoneId) {
+        return farmDao.getFarmZoneById(farmZoneId);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int saveFarmZone(String type, FarmZoneDTO dto) {
+        FarmDTO farmDTO = farmDao.getFarmById(dto.getFarmId());
+        if (Objects.isNull(farmDTO)) {
+            throw new BusinessException("牧场不存在");
+        }
+        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String username = JWTUtil.getUsername();
+        List<String> adminList = StringUtils.isNotBlank(farmDTO.getAdmin()) ? Arrays.asList(farmDTO.getAdmin().split(",")) : new ArrayList<>();
+        if (!"Y".equals(isSysAdmin) && !username.equals(farmDTO.getOwner()) && !adminList.contains(username)) {
+            throw new BusinessException("权限不足");
+        }
+        dto.setCreateUser(username);
+        dto.setUpdateUser(username);
+        if ("add".equals(type)) {
+            if (Objects.nonNull(farmDao.getFarmZone(dto.getFarmZoneCode()))) {
+                throw new BusinessException("圈舍编号已存在");
+            }
+            dto.setFarmZoneId(IdUtil.getSnowflakeNextIdStr());
+            return farmDao.addFarmZone(dto);
+        } else {
+            return farmDao.updateFarmZone(dto);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int delFarmZone(List<String> farmZoneIds) {
+        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String username = JWTUtil.getUsername();
+        List<FarmDTO> farmList = farmDao.listFarmByZoneIds(farmZoneIds);
+        for (FarmDTO farmDTO : farmList) {
+            List<String> adminList = StringUtils.isNotBlank(farmDTO.getAdmin()) ? Arrays.asList(farmDTO.getAdmin().split(",")) : new ArrayList<>();
+            if (!"Y".equals(isSysAdmin) && !username.equals(farmDTO.getOwner()) && !adminList.contains(username)) {
+                throw new BusinessException("权限不足");
+            }
+        }
+        return farmDao.delFarmZone(farmZoneIds);
     }
 }

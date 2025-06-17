@@ -84,7 +84,7 @@
     <delete id="delUser">
         delete from t_user
         where username in
-        <foreach collection="usernameList" item="item" open="(" separator="," close=")">
+        <foreach collection="list" item="item" open="(" separator="," close=")">
             #{item}
         </foreach>
     </delete>

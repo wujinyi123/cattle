@@ -2,7 +2,9 @@ package com.manage.cattle.controller.base;
 
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dto.base.FarmDTO;
+import com.manage.cattle.dto.base.FarmZoneDTO;
 import com.manage.cattle.qo.base.FarmQO;
+import com.manage.cattle.qo.base.FarmZoneQO;
 import com.manage.cattle.service.base.FarmService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,11 @@ public class FarmController {
         return farmService.pageFarm(qo);
     }
 
+    @GetMapping("/listFarm")
+    public List<FarmDTO> listFarm() {
+        return farmService.listFarm();
+    }
+
     @GetMapping("/getFarm")
     public FarmDTO getFarm(@RequestParam("farmId") String farmId) {
         return farmService.getFarm(farmId);
@@ -43,5 +50,25 @@ public class FarmController {
     @PostMapping("/delFarm")
     public int delFarm(@RequestBody List<String> farmIds) {
         return farmService.delFarm(farmIds);
+    }
+
+    @GetMapping("/pageFarmZone")
+    public PageInfo<FarmZoneDTO> pageFarmZone(FarmZoneQO qo) {
+        return farmService.pageFarmZone(qo);
+    }
+
+    @GetMapping("/getFarmZone")
+    public FarmZoneDTO getFarmZone(@RequestParam("farmZoneId") String farmZoneId) {
+        return farmService.getFarmZone(farmZoneId);
+    }
+
+    @PostMapping("/saveFarmZone")
+    public int saveFarmZone(@RequestParam("type") String type, @RequestBody FarmZoneDTO dto) {
+        return farmService.saveFarmZone(type, dto);
+    }
+
+    @PostMapping("/delFarmZone")
+    public int delFarmZone(@RequestBody List<String> farmZoneIds) {
+        return farmService.delFarmZone(farmZoneIds);
     }
 }
