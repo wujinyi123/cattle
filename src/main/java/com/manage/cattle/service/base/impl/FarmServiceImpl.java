@@ -13,6 +13,7 @@ import com.manage.cattle.qo.base.FarmQO;
 import com.manage.cattle.qo.base.FarmZoneQO;
 import com.manage.cattle.qo.base.UserQO;
 import com.manage.cattle.service.base.FarmService;
+import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.JWTUtil;
 import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
@@ -23,10 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class FarmServiceImpl implements FarmService {
@@ -99,7 +97,8 @@ public class FarmServiceImpl implements FarmService {
 
     private void checkAdminEmployee(List<String> userList, FarmDTO dto) {
         if (StringUtils.isNotBlank(dto.getAdmin())) {
-            List<String> adminList = Arrays.stream(dto.getAdmin().split(",")).sorted().toList();
+            List<String> adminList = CommonUtil.stringToList(dto.getAdmin());
+            adminList.sort(String::compareTo);
             List<String> errUser = adminList.stream().filter(item -> !userList.contains(item)).toList();
             if (errUser.size() > 0) {
                 throw new BusinessException("管理员(" + String.join(",", errUser) + ")账号不正确");
@@ -107,7 +106,8 @@ public class FarmServiceImpl implements FarmService {
             dto.setAdmin(String.join(",", adminList));
         }
         if (StringUtils.isNotBlank(dto.getEmployee())) {
-            List<String> employeeList = Arrays.stream(dto.getEmployee().split(",")).sorted().toList();
+            List<String> employeeList = CommonUtil.stringToList(dto.getEmployee());
+            employeeList.sort(String::compareTo);
             List<String> errUser = employeeList.stream().filter(item -> !userList.contains(item)).toList();
             if (errUser.size() > 0) {
                 throw new BusinessException("员工(" + String.join(",", errUser) + ")账号不正确");
@@ -126,14 +126,14 @@ public class FarmServiceImpl implements FarmService {
     @Override
     public PageInfo<FarmZoneDTO> pageFarmZone(FarmZoneQO qo) {
         PageHelper.startPage(qo);
-        PageInfo<FarmZoneDTO> pageInfo = new PageInfo<>(farmDao.listFarmZone(qo));
-        List<String> farmZoneIds = pageInfo.getList().stream().map(FarmZoneDTO::getFarmZoneId).toList();
-        if (farmZoneIds.size() > 0) {
-            Map<String, FarmDTO> farmMap = farmDao.listFarmByZoneIds(farmZoneIds).stream().collect(Collectors.toMap(FarmDTO::getFarmId,
-                    Function.identity()));
-            pageInfo.getList().forEach(item -> item.setFarmDTO(farmMap.get(item.getFarmId())));
-        }
-        return pageInfo;
+        return new PageInfo<>(farmDao.listFarmZone(qo));
+    }
+
+    @Override
+    public List<FarmZoneDTO> listFarmZone(String farmId) {
+        FarmZoneQO qo = new FarmZoneQO();
+        qo.setFarmId(farmId);
+        return farmDao.listFarmZone(qo);
     }
 
     @Override
@@ -150,7 +150,7 @@ public class FarmServiceImpl implements FarmService {
         }
         String isSysAdmin = JWTUtil.getIsSysAdmin();
         String username = JWTUtil.getUsername();
-        List<String> adminList = StringUtils.isNotBlank(farmDTO.getAdmin()) ? Arrays.asList(farmDTO.getAdmin().split(",")) : new ArrayList<>();
+        List<String> adminList = CommonUtil.stringToList(farmDTO.getAdmin());
         if (!"Y".equals(isSysAdmin) && !username.equals(farmDTO.getOwner()) && !adminList.contains(username)) {
             throw new BusinessException("权限不足");
         }
@@ -174,7 +174,7 @@ public class FarmServiceImpl implements FarmService {
         String username = JWTUtil.getUsername();
         List<FarmDTO> farmList = farmDao.listFarmByZoneIds(farmZoneIds);
         for (FarmDTO farmDTO : farmList) {
-            List<String> adminList = StringUtils.isNotBlank(farmDTO.getAdmin()) ? Arrays.asList(farmDTO.getAdmin().split(",")) : new ArrayList<>();
+            List<String> adminList = CommonUtil.stringToList(farmDTO.getAdmin());
             if (!"Y".equals(isSysAdmin) && !username.equals(farmDTO.getOwner()) && !adminList.contains(username)) {
                 throw new BusinessException("权限不足");
             }

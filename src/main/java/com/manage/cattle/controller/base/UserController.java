@@ -42,17 +42,17 @@ public class UserController {
     }
 
     @GetMapping("/getUser")
-    public UserDTO getUser(@RequestParam("username") String username) {
+    public UserDTO getUser(@RequestParam String username) {
         return userService.getUser(username);
     }
 
     @PostMapping("/saveUser")
-    public int saveUser(@RequestParam("type") String type, @RequestBody UserDTO dto) {
+    public int saveUser(@RequestParam String type, @RequestBody UserDTO dto) {
         return userService.saveUser(type, dto);
     }
 
     @PostMapping("/setUserStatus")
-    public int setUserStatus(@RequestParam("status") String status,
+    public int setUserStatus(@RequestParam String status,
                              @RequestBody List<String> usernameList) {
         return userService.setUserStatus(status, usernameList);
     }

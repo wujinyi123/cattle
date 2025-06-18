@@ -4,14 +4,18 @@ import com.manage.cattle.dto.BaseDTO;
 import lombok.Data;
 
 @Data
-public class FarmZoneDTO extends BaseDTO {
+public class CattleDTO extends BaseDTO {
     private String farmId;
     private String farmName;
     private String farmOwner;
     private String farmAdmin;
     private String farmZoneId;
     private String farmZoneCode;
-    private String farmZoneRemark;
-    private Integer size;
-    private Integer currentSize;
+    private String cattleId;
+    private String cattleCode;
+    private String cattleName;
+    private String breed;
+    private String sex;
+    private String birthday;
+    private String remark;
 }

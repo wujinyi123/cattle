@@ -33,12 +33,12 @@ public class FarmController {
     }
 
     @GetMapping("/getFarm")
-    public FarmDTO getFarm(@RequestParam("farmId") String farmId) {
+    public FarmDTO getFarm(@RequestParam String farmId) {
         return farmService.getFarm(farmId);
     }
 
     @PostMapping("/saveFarm")
-    public int saveFarm(@RequestParam("type") String type, @RequestBody FarmDTO dto) {
+    public int saveFarm(@RequestParam String type, @RequestBody FarmDTO dto) {
         return farmService.saveFarm(type, dto);
     }
 
@@ -57,13 +57,18 @@ public class FarmController {
         return farmService.pageFarmZone(qo);
     }
 
+    @GetMapping("/listFarmZone")
+    public List<FarmZoneDTO> listFarmZone(@RequestParam String farmId) {
+        return farmService.listFarmZone(farmId);
+    }
+
     @GetMapping("/getFarmZone")
-    public FarmZoneDTO getFarmZone(@RequestParam("farmZoneId") String farmZoneId) {
+    public FarmZoneDTO getFarmZone(@RequestParam String farmZoneId) {
         return farmService.getFarmZone(farmZoneId);
     }
 
     @PostMapping("/saveFarmZone")
-    public int saveFarmZone(@RequestParam("type") String type, @RequestBody FarmZoneDTO dto) {
+    public int saveFarmZone(@RequestParam String type, @RequestBody FarmZoneDTO dto) {
         return farmService.saveFarmZone(type, dto);
     }
 

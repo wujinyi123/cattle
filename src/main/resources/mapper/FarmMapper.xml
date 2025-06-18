@@ -76,20 +76,22 @@
 
     <select id="listFarmZone" resultType="com.manage.cattle.dto.base.FarmZoneDTO">
         select
-            id,createUser,createTime,updateUser,updateTime,
-            farmId,farmZoneId,farmZoneCode,farmZoneRemark,size
-        from t_farm_zone
+            fz.id,fz.createUser,fz.createTime,fz.updateUser,fz.updateTime,
+            f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,
+            fz.farmZoneId,fz.farmZoneCode,fz.farmZoneRemark,fz.size
+        from t_farm_zone fz
+        left join t_farm f on fz.farmId=f.farmId
         where 1=1
         <if test="farmId!=null and farmId!=''">
-            and farmId=#{farmId}
+            and fz.farmId=#{farmId}
         </if>
         <if test="farmZoneCode!=null and farmZoneCode!=''">
-            and farmZoneCode like concat('%',#{farmZoneCode},'%')
+            and fz.farmZoneCode like concat('%',#{farmZoneCode},'%')
         </if>
         <if test="farmZoneRemark!=null and farmZoneRemark!=''">
-            and farmZoneRemark like concat('%',#{farmZoneRemark},'%')
+            and fz.farmZoneRemark like concat('%',#{farmZoneRemark},'%')
         </if>
-        order by farmZoneCode
+        order by farmName,farmZoneCode
     </select>
 
     <select id="getFarmZoneById" resultType="com.manage.cattle.dto.base.FarmZoneDTO">

@@ -23,6 +23,8 @@ public interface FarmService {
 
     PageInfo<FarmZoneDTO> pageFarmZone(FarmZoneQO qo);
 
+    List<FarmZoneDTO> listFarmZone(String farmId);
+
     FarmZoneDTO getFarmZone(String farmZoneId);
 
     int saveFarmZone(String type, FarmZoneDTO dto);
