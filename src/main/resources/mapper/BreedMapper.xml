@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.manage.cattle.dao.breed.BreedDao">
+    <select id="listBeedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
+        select
+            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+            tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
+            tc.farmZoneId,tz.farmZoneCode,t.cattleId,tc.cattleCode,
+            t.frozenSemenCode,t.frozenSemenBreed,t.breedingDay,t.breedingMethod,t.operateUser
+        from t_breed_register t
+        left join t_cattle tc on t.cattleId=tc.cattleId
+        left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
+        left join t_farm tf on tz.farmId=tf.farmId
+        where 1=1
+        <if test="farmName!=null and farmName!=''">
+            and tf.farmName like concat('%',#{farmName},'%')
+        </if>
+        <if test="farmZoneCode!=null and farmZoneCode!=''">
+            and tz.farmZoneCode like concat('%',#{farmZoneCode},'%')
+        </if>
+        <if test="cattleCode!=null and cattleCode!=''">
+            and tc.cattleCode like concat('%',#{cattleCode},'%')
+        </if>
+        <if test="frozenSemenCode!=null and frozenSemenCode!=''">
+            and t.frozenSemenCode like concat('%',#{frozenSemenCode},'%')
+        </if>
+        <if test="frozenSemenBreed!=null and frozenSemenBreed!=''">
+            and t.frozenSemenBreed=#{frozenSemenBreed}
+        </if>
+        <if test="breedingDay!=null and breedingDay!=''">
+            and t.breedingDay=#{breedingDay}
+        </if>
+        <if test="breedingMethod!=null and breedingMethod!=''">
+            and t.breedingMethod=#{breedingMethod}
+        </if>
+        <if test="operateUser!=null and operateUser!=''">
+            and t.operateUser like concat('%',#{operateUser},'%')
+        </if>
+        order by breedingDay desc,farmName,farmZoneCode,cattleCode
+    </select>
+
+    <select id="listBeedRegisterByIds" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
+        select
+        t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+        tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
+        tc.farmZoneId,tz.farmZoneCode,t.cattleId,tc.cattleCode,
+        t.frozenSemenCode,t.frozenSemenBreed,t.breedingDay,t.breedingMethod,t.operateUser
+        from t_breed_register t
+        left join t_cattle tc on t.cattleId=tc.cattleId
+        left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
+        left join t_farm tf on tz.farmId=tf.farmId
+        where t.id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        order by breedingDay desc,farmName,farmZoneCode,cattleCode
+    </select>
+
+    <insert id="addBeedRegister">
+        insert into t_breed_register(createUser,createTime,updateUser,updateTime,
+                                     cattleId,frozenSemenCode,frozenSemenBreed,
+                                     breedingDay,breedingMethod,operateUser)
+        values (#{createUser},now(),#{updateUser},now(),
+                #{cattleId},#{frozenSemenCode},#{frozenSemenBreed},
+                #{breedingDay},#{breedingMethod},#{operateUser})
+    </insert>
+
+    <delete id="delBeedRegister">
+        delete from t_breed_register
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+</mapper>

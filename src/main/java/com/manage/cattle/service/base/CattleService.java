@@ -1,6 +1,7 @@
 package com.manage.cattle.service.base;
 
 import com.github.pagehelper.PageInfo;
+import com.manage.cattle.dto.NodeDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.qo.base.CattleQO;
 
@@ -14,4 +15,8 @@ public interface CattleService {
     int saveCattle(String type, CattleDTO dto);
 
     int delCattle(List<String> cattleIds);
+
+    List<CattleDTO> listCattle();
+
+    List<NodeDTO> treeCattle();
 }

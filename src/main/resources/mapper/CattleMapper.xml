@@ -5,7 +5,7 @@
     <select id="listCattle" resultType="com.manage.cattle.dto.base.CattleDTO">
         select
             c.id,c.createUser,c.createTime,c.updateUser,c.updateTime,
-            f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,
+            f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,f.employee farmEmployee,
             fz.farmZoneId,fz.farmZoneCode,
             c.cattleId,c.cattleCode,c.cattleName,c.breed,c.sex,c.birthday,c.remark
         from t_cattle c
@@ -42,7 +42,7 @@
     <select id="getCattleById" resultType="com.manage.cattle.dto.base.CattleDTO">
         select
             c.id,c.createUser,c.createTime,c.updateUser,c.updateTime,
-            f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,
+            f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,f.employee farmEmployee,
             fz.farmZoneId,fz.farmZoneCode,
             c.cattleId,c.cattleCode,c.cattleName,c.breed,c.sex,c.birthday,c.remark
         from t_cattle c
@@ -85,4 +85,13 @@
             #{item}
         </foreach>
     </delete>
+
+    <select id="treeCattle" resultType="com.manage.cattle.dto.NodeDTO">
+        select farmId id, farmName name, 'farm' type, '' parentId from t_farm
+        union all
+        select farmZoneId id, farmZoneCode name, 'farmZone' type, farmId parentId from t_farm_zone
+        union all
+        select cattleId id, cattleCode name, 'cattle' type, farmZoneId parentId from t_cattle
+        order by name
+    </select>
 </mapper>

@@ -8,8 +8,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Calendar;
 import java.util.Map;
@@ -43,9 +41,7 @@ public class JWTUtil {
      * @return String
      */
     public static String getToken() {
-        ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = attrs.getRequest();
-        return getToken(request);
+        return getToken(CommonUtil.getHttpServletRequest());
     }
 
     /**

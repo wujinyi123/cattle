@@ -5,6 +5,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.CattleDao;
 import com.manage.cattle.dao.base.FarmDao;
+import com.manage.cattle.dto.NodeDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.FarmDTO;
 import com.manage.cattle.exception.BusinessException;
@@ -74,5 +75,16 @@ public class CattleServiceImpl implements CattleService {
             throw new BusinessException("权限不足");
         }
         return cattleDao.delCattle(cattleIds);
+    }
+
+    @Override
+    public List<CattleDTO> listCattle() {
+        return cattleDao.listCattle(new CattleQO());
+    }
+
+    @Override
+    public List<NodeDTO> treeCattle() {
+        List<NodeDTO> list = cattleDao.treeCattle();
+        return NodeDTO.getTree(list);
     }
 }

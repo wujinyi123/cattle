@@ -1,5 +1,6 @@
 package com.manage.cattle.dao.base;
 
+import com.manage.cattle.dto.NodeDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.qo.base.CattleQO;
 import org.apache.ibatis.annotations.Param;
@@ -18,4 +19,6 @@ public interface CattleDao {
     int updateCattle(CattleDTO dto);
 
     int delCattle(List<String> list);
+
+    List<NodeDTO> treeCattle();
 }
