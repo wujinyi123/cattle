@@ -42,8 +42,8 @@ public class CattleController {
     }
 
     @GetMapping("/listCattle")
-    public List<CattleDTO> listCattle() {
-        return cattleService.listCattle();
+    public List<CattleDTO> listCattle(CattleQO qo) {
+        return cattleService.listCattle(qo);
     }
 
     @GetMapping("/treeCattle")

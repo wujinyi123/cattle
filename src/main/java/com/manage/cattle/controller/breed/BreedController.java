@@ -1,7 +1,9 @@
 package com.manage.cattle.controller.breed;
 
 import com.github.pagehelper.PageInfo;
+import com.manage.cattle.dto.breed.BreedPregnancyCheckDTO;
 import com.manage.cattle.dto.breed.BreedRegisterDTO;
+import com.manage.cattle.qo.breed.BreedPregnancyCheckQO;
 import com.manage.cattle.qo.breed.BreedRegisterQO;
 import com.manage.cattle.service.bread.BreedService;
 import jakarta.annotation.Resource;
@@ -32,5 +34,20 @@ public class BreedController {
     @PostMapping("/delBeedRegister")
     public int delBeedRegister(@RequestBody List<Integer> ids) {
         return breedService.delBeedRegister(ids);
+    }
+
+    @GetMapping("/pageBeedPregnancyCheck")
+    public PageInfo<BreedPregnancyCheckDTO> pageBeedPregnancyCheck(BreedPregnancyCheckQO qo) {
+        return breedService.pageBeedPregnancyCheck(qo);
+    }
+
+    @PostMapping("/addBeedPregnancyCheck")
+    public int addBeedPregnancyCheck(@RequestBody BreedPregnancyCheckDTO dto) {
+        return breedService.addBeedPregnancyCheck(dto);
+    }
+
+    @PostMapping("/delBeedPregnancyCheck")
+    public int delBeedPregnancyCheck(@RequestBody List<Integer> ids) {
+        return breedService.delBeedPregnancyCheck(ids);
     }
 }

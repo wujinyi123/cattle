@@ -78,8 +78,8 @@ public class CattleServiceImpl implements CattleService {
     }
 
     @Override
-    public List<CattleDTO> listCattle() {
-        return cattleDao.listCattle(new CattleQO());
+    public List<CattleDTO> listCattle(CattleQO qo) {
+        return cattleDao.listCattle(qo);
     }
 
     @Override

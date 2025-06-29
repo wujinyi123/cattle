@@ -16,7 +16,7 @@ public interface CattleService {
 
     int delCattle(List<String> cattleIds);
 
-    List<CattleDTO> listCattle();
+    List<CattleDTO> listCattle(CattleQO qo);
 
     List<NodeDTO> treeCattle();
 }
