@@ -22,5 +22,9 @@ public interface UserDao {
 
     int resetPassword(@Param("updateUser") String updateUser, @Param("password") String password, @Param("usernameList") List<String> usernameList);
 
+    int updatePassword(@Param("username") String username, @Param("password") String password);
+
+    int updatePhone(@Param("username") String username, @Param("phone") String phone);
+
     int delUser(List<String> list);
 }

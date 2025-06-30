@@ -1,5 +1,6 @@
 package com.manage.cattle.controller.base;
 
+import cn.hutool.json.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dto.base.UserDTO;
 import com.manage.cattle.qo.base.LoginQO;
@@ -60,6 +61,16 @@ public class UserController {
     @PostMapping("/resetPassword")
     public int resetPassword(@RequestBody List<String> usernameList) {
         return userService.resetPassword(usernameList);
+    }
+
+    @PostMapping("/updatePassword")
+    public int updatePassword(@RequestBody JSONObject jsonObject) {
+        return userService.updatePassword(jsonObject);
+    }
+
+    @PostMapping("/updatePhone")
+    public int updatePhone(@RequestBody JSONObject jsonObject) {
+        return userService.updatePhone(jsonObject);
     }
 
     @PostMapping("/delUser")

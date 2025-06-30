@@ -1,5 +1,6 @@
 package com.manage.cattle.service.base;
 
+import cn.hutool.json.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dto.base.UserDTO;
 import com.manage.cattle.qo.base.LoginQO;
@@ -23,6 +24,10 @@ public interface UserService {
     int setUserStatus(String status, List<String> usernameList);
 
     int resetPassword(List<String> usernameList);
+
+    int updatePassword(JSONObject jsonObject);
+
+    int updatePhone(JSONObject jsonObject);
 
     int delUser(List<String> usernameList);
 }

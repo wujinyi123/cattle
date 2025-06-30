@@ -1,5 +1,6 @@
 package com.manage.cattle.service.base.impl;
 
+import cn.hutool.json.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.FarmDao;
@@ -113,6 +114,37 @@ public class UserServiceImpl implements UserService {
         PermissionUtil.onlySysAdmin();
         String username = JWTUtil.getUsername();
         return userDao.resetPassword(username, defaultPassword, usernameList);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int updatePassword(JSONObject jsonObject) {
+        String username = JWTUtil.getUsername();
+        String password = jsonObject.get("password", String.class);
+        String newPassword = jsonObject.get("newPassword", String.class);
+        String confirmPassword = jsonObject.get("confirmPassword", String.class);
+        if (StringUtils.isAnyBlank(password, newPassword, confirmPassword)) {
+            throw new BusinessException("新旧密码均不能为空");
+        }
+        UserDTO user = userDao.login(new LoginQO(username, password));
+        if (Objects.isNull(user)) {
+            throw new BusinessException("密码不正确");
+        }
+        if (!StringUtils.equals(newPassword, confirmPassword)) {
+            throw new BusinessException("两次新密码不一致");
+        }
+        return userDao.updatePassword(username, newPassword);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int updatePhone(JSONObject jsonObject) {
+        String username = JWTUtil.getUsername();
+        String phone = jsonObject.get("phone", String.class);
+        if (StringUtils.isBlank(phone)) {
+            throw new BusinessException("联系方式不能为空");
+        }
+        return userDao.updatePhone(username, phone);
     }
 
     @Transactional(rollbackFor = Exception.class)

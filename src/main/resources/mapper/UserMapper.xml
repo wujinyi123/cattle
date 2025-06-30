@@ -81,6 +81,18 @@
         </foreach>
     </update>
 
+    <update id="updatePassword">
+        update t_user
+        set updateUser=#{username},updateTime=now(),password=#{password}
+        where username=#{username}
+    </update>
+
+    <update id="updatePhone">
+        update t_user
+        set updateUser=#{username},updateTime=now(),phone=#{phone}
+        where username=#{username}
+    </update>
+
     <delete id="delUser">
         delete from t_user
         where username in
