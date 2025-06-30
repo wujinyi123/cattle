@@ -21,8 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -75,6 +73,7 @@ public class FarmServiceImpl implements FarmService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public int saveAdminEmployee(FarmDTO dto) {
         FarmDTO farmDTO = farmDao.getFarmById(dto.getFarmId());

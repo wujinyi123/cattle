@@ -36,6 +36,18 @@
         <if test="remark!=null and remark!=''">
             and c.remark like concat('%',#{remark},'%')
         </if>
+        <if test="cattleIds!=null and cattleIds.size()>0">
+            and c.cattleId in
+            <foreach collection="cattleIds" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="cattleCodes!=null and cattleCodes.size()>0">
+            and c.cattleCode in
+            <foreach collection="cattleCodes" item="code" open="(" separator="," close=")">
+                #{code}
+            </foreach>
+        </if>
         order by farmName,farmZoneCode,cattleCode
     </select>
 

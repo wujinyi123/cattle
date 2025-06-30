@@ -1,29 +1,39 @@
 package com.manage.cattle.dao.breed;
 
 import com.manage.cattle.dto.breed.BreedPregnancyCheckDTO;
+import com.manage.cattle.dto.breed.BreedPregnancyResultDTO;
 import com.manage.cattle.dto.breed.BreedRegisterDTO;
 import com.manage.cattle.qo.breed.BreedPregnancyCheckQO;
+import com.manage.cattle.qo.breed.BreedPregnancyResultQO;
 import com.manage.cattle.qo.breed.BreedRegisterQO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
 public interface BreedDao {
-    List<BreedRegisterDTO> listBeedRegister(BreedRegisterQO qo);
+    List<BreedRegisterDTO> listBreedRegister(BreedRegisterQO qo);
 
-    List<BreedRegisterDTO> listBeedRegisterByIds(List<Integer> list);
+    List<BreedRegisterDTO> listBreedRegisterByIds(List<Integer> list);
 
-    BreedRegisterDTO getBeedRegister(@Param("registerId") String registerId);
+    BreedRegisterDTO getBreedRegister(@Param("registerId") String registerId);
 
-    int addBeedRegister(BreedRegisterDTO dto);
+    int addBreedRegister(BreedRegisterDTO dto);
 
-    int delBeedRegister(List<Integer> list);
+    int delBreedRegister(List<Integer> list);
 
-    List<BreedPregnancyCheckDTO> listBeedPregnancyCheck(BreedPregnancyCheckQO qo);
+    List<BreedPregnancyCheckDTO> listBreedPregnancyCheck(BreedPregnancyCheckQO qo);
 
-    List<BreedPregnancyCheckDTO> listBeedPregnancyCheckByIds(List<Integer> list);
+    List<BreedPregnancyCheckDTO> listBreedPregnancyCheckByIds(List<Integer> list);
 
-    int addBeedPregnancyCheck(BreedPregnancyCheckDTO dto);
+    int addBreedPregnancyCheck(BreedPregnancyCheckDTO dto);
 
-    int delBeedPregnancyCheck(List<Integer> list);
+    int delBreedPregnancyCheck(List<Integer> list);
+
+    List<BreedPregnancyResultDTO> listBreedPregnancyResult(BreedPregnancyResultQO qo);
+
+    List<BreedPregnancyResultDTO> listBreedPregnancyResultByIds(List<Integer> list);
+
+    int addBreedPregnancyResult(BreedPregnancyResultDTO dto);
+
+    int delBreedPregnancyResult(List<Integer> list);
 }

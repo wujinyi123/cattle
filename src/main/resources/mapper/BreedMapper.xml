@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.manage.cattle.dao.breed.BreedDao">
-    <select id="listBeedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
+    <select id="listBreedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
             t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
@@ -43,7 +43,7 @@
         order by breedingDay desc,farmName,farmZoneCode,cattleCode
     </select>
 
-    <select id="listBeedRegisterByIds" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
+    <select id="listBreedRegisterByIds" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
         select
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
         t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
@@ -60,7 +60,7 @@
         order by breedingDay desc,farmName,farmZoneCode,cattleCode
     </select>
 
-    <select id="getBeedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
+    <select id="getBreedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
             t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
@@ -73,7 +73,7 @@
         where t.registerId=#{registerId}
     </select>
 
-    <insert id="addBeedRegister">
+    <insert id="addBreedRegister">
         insert into t_breed_register(createUser,createTime,updateUser,updateTime,
                                      registerId,cattleId,frozenSemenCode,frozenSemenBreed,
                                      breedingDay,breedingMethod,operateUser)
@@ -82,7 +82,7 @@
                 #{breedingDay},#{breedingMethod},#{operateUser})
     </insert>
 
-    <delete id="delBeedRegister">
+    <delete id="delBreedRegister">
         delete from t_breed_register
         where id in
         <foreach collection="list" item="item" open="(" separator="," close=")">
@@ -90,7 +90,7 @@
         </foreach>
     </delete>
 
-    <select id="listBeedPregnancyCheck" resultType="com.manage.cattle.dto.breed.BreedPregnancyCheckDTO">
+    <select id="listBreedPregnancyCheck" resultType="com.manage.cattle.dto.breed.BreedPregnancyCheckDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
             t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
@@ -129,7 +129,7 @@
         order by checkDay desc,farmName,farmZoneCode,cattleCode
     </select>
 
-    <select id="listBeedPregnancyCheckByIds" resultType="com.manage.cattle.dto.breed.BreedPregnancyCheckDTO">
+    <select id="listBreedPregnancyCheckByIds" resultType="com.manage.cattle.dto.breed.BreedPregnancyCheckDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
             t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
@@ -147,15 +147,90 @@
         order by checkDay desc,farmName,farmZoneCode,cattleCode
     </select>
 
-    <insert id="addBeedPregnancyCheck">
+    <insert id="addBreedPregnancyCheck">
         insert into t_breed_pregnancy_check(createUser,createTime,updateUser,updateTime,
                                             registerId,checkDay,checkUser,result)
         values (#{createUser},now(),#{updateUser},now(),
                 #{registerId},#{checkDay},#{checkUser},#{result})
     </insert>
 
-    <delete id="delBeedPregnancyCheck">
+    <delete id="delBreedPregnancyCheck">
         delete from t_breed_pregnancy_check
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="listBreedPregnancyResult" resultType="com.manage.cattle.dto.breed.BreedPregnancyResultDTO">
+        select
+        t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+        t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
+        tc.farmZoneId,tz.farmZoneCode,tr.cattleId,tc.cattleCode,
+        t.resultDay,t.operaUser,t.result,t.remark,t.childrenIds
+        from t_breed_pregnancy_result t
+        left join t_breed_register tr on t.registerId=tr.registerId
+        left join t_cattle tc on tr.cattleId=tc.cattleId
+        left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
+        left join t_farm tf on tz.farmId=tf.farmId
+        where 1=1
+        <if test="registerId!=null and registerId!=''">
+            and t.registerId like concat('%',#{registerId},'%')
+        </if>
+        <if test="farmName!=null and farmName!=''">
+            and tf.farmName like concat('%',#{farmName},'%')
+        </if>
+        <if test="farmZoneCode!=null and farmZoneCode!=''">
+            and tz.farmZoneCode like concat('%',#{farmZoneCode},'%')
+        </if>
+        <if test="cattleCode!=null and cattleCode!=''">
+            and tc.cattleCode like concat('%',#{cattleCode},'%')
+        </if>
+        <if test="resultDayStart!=null and resultDayStart!=''">
+            and t.resultDay &gt;= #{resultDayStart}
+        </if>
+        <if test="resultDayEnd!=null and resultDayEnd!=''">
+            and t.resultDay &lt;= #{resultDayEnd}
+        </if>
+        <if test="operaUser!=null and operaUser!=''">
+            and t.operaUser like concat('%',#{operaUser},'%')
+        </if>
+        <if test="result!=null and result!=''">
+            and t.result=#{result}
+        </if>
+        <if test="remark!=null and remark!=''">
+            and tc.remark like concat('%',#{remark},'%')
+        </if>
+        order by resultDay desc,farmName,farmZoneCode,cattleCode
+    </select>
+
+    <select id="listBreedPregnancyResultByIds" resultType="com.manage.cattle.dto.breed.BreedPregnancyResultDTO">
+        select
+        t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+        t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
+        tc.farmZoneId,tz.farmZoneCode,t.cattleId,tc.cattleCode,
+        t.resultDay,t.operaUser,t.result,t.remark,t.childrenIds
+        from t_breed_pregnancy_result t
+        left join t_breed_register tr on t.registerId=tr.registerId
+        left join t_cattle tc on tr.cattleId=tc.cattleId
+        left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
+        left join t_farm tf on tz.farmId=tf.farmId
+        where t.id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        order by resultDay desc,farmName,farmZoneCode,cattleCode
+    </select>
+
+    <insert id="addBreedPregnancyResult">
+        insert into t_breed_pregnancy_result(createUser,createTime,updateUser,updateTime,
+                                             registerId,resultDay,operaUser,result,remark,childrenIds)
+        values (#{createUser},now(),#{updateUser},now(),
+                #{registerId},#{resultDay},#{operaUser},#{result},#{remark},#{childrenIds})
+    </insert>
+
+    <delete id="delBreedPregnancyResult">
+        delete from t_breed_pregnancy_result
         where id in
         <foreach collection="list" item="item" open="(" separator="," close=")">
             #{item}

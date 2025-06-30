@@ -9,8 +9,8 @@ public class BreedPregnancyResultQO extends PageQO {
     private String farmName;
     private String farmZoneCode;
     private String cattleCode;
-    private String dayStart;
-    private String dayEnd;
+    private String resultDayStart;
+    private String resultDayEnd;
     private String operaUser;
     private String result;
     private String remark;

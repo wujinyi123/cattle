@@ -2,13 +2,17 @@ package com.manage.cattle.service.base.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.base.UserDao;
+import com.manage.cattle.dto.base.FarmDTO;
 import com.manage.cattle.dto.base.UserDTO;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.exception.LoginException;
+import com.manage.cattle.qo.base.FarmQO;
 import com.manage.cattle.qo.base.LoginQO;
 import com.manage.cattle.qo.base.UserQO;
 import com.manage.cattle.service.base.UserService;
+import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.JWTUtil;
 import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
@@ -29,6 +33,9 @@ public class UserServiceImpl implements UserService {
     @Resource
     private UserDao userDao;
 
+    @Resource
+    private FarmDao farmDao;
+
     @Override
     public UserDTO login(LoginQO qo) {
         if (StringUtils.isAnyBlank(qo.getUsername(), qo.getPassword())) {
@@ -47,7 +54,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getCurrentUser() {
         String username = JWTUtil.getUsername();
-        return userDao.getUser(username);
+        UserDTO userDTO = userDao.getUser(username);
+        List<FarmDTO> farmList = farmDao.listFarm(new FarmQO());
+        userDTO.setFarmList(farmList.stream().filter(dto -> username.equals(dto.getOwner())
+                        || CommonUtil.stringToList(dto.getAdmin()).contains(username)
+                        || CommonUtil.stringToList(dto.getEmployee()).contains(username))
+                .toList());
+        return userDTO;
     }
 
     @Override

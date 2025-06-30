@@ -1,12 +1,16 @@
 package com.manage.cattle.dto.breed;
 
+import com.manage.cattle.dto.base.CattleDTO;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class BreedPregnancyResultDTO extends BreedBaseDTO {
-    private String day;
+    private String resultDay;
     private String operaUser;
     private String result;
     private String remark;
-    private String children;
+    private String childrenIds;
+    private List<CattleDTO> children;
 }

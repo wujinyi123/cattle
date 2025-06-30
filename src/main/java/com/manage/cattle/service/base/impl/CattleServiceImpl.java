@@ -15,6 +15,7 @@ import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.JWTUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +39,7 @@ public class CattleServiceImpl implements CattleService {
         return cattleDao.getCattleById(cattleId);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public int saveCattle(String type, CattleDTO dto) {
         FarmDTO farmDTO = farmDao.getFarmById(dto.getFarmId());
@@ -63,6 +65,7 @@ public class CattleServiceImpl implements CattleService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public int delCattle(List<String> cattleIds) {
         String isSysAdmin = JWTUtil.getIsSysAdmin();
