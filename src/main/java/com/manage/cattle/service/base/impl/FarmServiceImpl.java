@@ -3,12 +3,15 @@ package com.manage.cattle.service.base.impl;
 import cn.hutool.core.util.IdUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.manage.cattle.dao.base.CattleDao;
 import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.base.UserDao;
+import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.FarmDTO;
 import com.manage.cattle.dto.base.FarmZoneDTO;
 import com.manage.cattle.dto.base.UserDTO;
 import com.manage.cattle.exception.BusinessException;
+import com.manage.cattle.qo.base.CattleQO;
 import com.manage.cattle.qo.base.FarmQO;
 import com.manage.cattle.qo.base.FarmZoneQO;
 import com.manage.cattle.qo.base.UserQO;
@@ -31,6 +34,9 @@ public class FarmServiceImpl implements FarmService {
 
     @Resource
     private UserDao userDao;
+
+    @Resource
+    private CattleDao cattleDao;
 
     @Override
     public PageInfo<FarmDTO> pageFarm(FarmQO qo) {
@@ -125,7 +131,17 @@ public class FarmServiceImpl implements FarmService {
     @Override
     public PageInfo<FarmZoneDTO> pageFarmZone(FarmZoneQO qo) {
         PageHelper.startPage(qo);
-        return new PageInfo<>(farmDao.listFarmZone(qo));
+        PageInfo<FarmZoneDTO> pageInfo = new PageInfo<>(farmDao.listFarmZone(qo));
+        if (pageInfo.getList().size() > 0) {
+            List<String> farmZoneIds = pageInfo.getList().stream().map(FarmZoneDTO::getFarmZoneId).toList();
+            CattleQO cattleQO = new CattleQO();
+            cattleQO.setFarmZoneIds(farmZoneIds);
+            List<CattleDTO> cattleList = cattleDao.listCattle(cattleQO);
+            for (FarmZoneDTO dto : pageInfo.getList()) {
+                dto.setCurrentSize((int) cattleList.stream().filter(item -> dto.getFarmZoneId().equals(item.getFarmZoneId())).count());
+            }
+        }
+        return pageInfo;
     }
 
     @Override

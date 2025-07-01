@@ -48,6 +48,12 @@
                 #{code}
             </foreach>
         </if>
+        <if test="farmZoneIds!=null and farmZoneIds.size()>0">
+            and fz.farmZoneId in
+            <foreach collection="farmZoneIds" item="fzId" open="(" separator="," close=")">
+                #{fzId}
+            </foreach>
+        </if>
         order by farmName,farmZoneCode,cattleCode
     </select>
 
