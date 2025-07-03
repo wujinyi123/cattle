@@ -7,11 +7,14 @@
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
             t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
             tc.farmZoneId,tz.farmZoneCode,t.cattleId,tc.cattleCode,
-            t.frozenSemenCode,t.frozenSemenBreed,t.breedingDay,t.breedingMethod,t.operateUser
+            t.frozenSemenCode,t.frozenSemenBreed,sf.value frozenSemenBreedValue,
+            t.breedingDay,t.breedingMethod,sb.value breedingMethodValue,t.operateUser
         from t_breed_register t
         left join t_cattle tc on t.cattleId=tc.cattleId
         left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
         left join t_farm tf on tz.farmId=tf.farmId
+        left join t_sys_config sf on sf.code='cattleBreed' and t.frozenSemenBreed=sf.key
+        left join t_sys_config sb on sb.code='breedingMethod' and t.breedingMethod=sb.key
         where 1=1
         <if test="farmName!=null and farmName!=''">
             and tf.farmName like concat('%',#{farmName},'%')
@@ -85,6 +88,22 @@
     <delete id="delBreedRegister">
         delete from t_breed_register
         where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="delBreedPregnancyCheckByRegisterId">
+        delete from t_breed_pregnancy_check
+        where registerId in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="delBreedPregnancyResultByRegisterId">
+        delete from t_breed_pregnancy_result
+        where registerId in
         <foreach collection="list" item="item" open="(" separator="," close=")">
             #{item}
         </foreach>
@@ -167,12 +186,13 @@
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
         t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
         tc.farmZoneId,tz.farmZoneCode,tr.cattleId,tc.cattleCode,
-        t.resultDay,t.operaUser,t.result,t.remark,t.childrenIds
+        t.resultDay,t.operaUser,t.result,sr.value resultValue,t.remark,t.childrenIds
         from t_breed_pregnancy_result t
         left join t_breed_register tr on t.registerId=tr.registerId
         left join t_cattle tc on tr.cattleId=tc.cattleId
         left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
         left join t_farm tf on tz.farmId=tf.farmId
+        left join t_sys_config sr on sr.code='pregnancyResult' and t.result=sr.key
         where 1=1
         <if test="registerId!=null and registerId!=''">
             and t.registerId like concat('%',#{registerId},'%')

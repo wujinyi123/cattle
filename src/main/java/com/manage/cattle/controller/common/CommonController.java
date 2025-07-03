@@ -36,6 +36,11 @@ public class CommonController {
         return commonService.pageSysConfig(pageNum, pageSize, code);
     }
 
+    @GetMapping("/listSysConfig")
+    public List<SysConfigDTO> listSysConfig(@RequestParam String code) {
+        return commonService.listSysConfig(code);
+    }
+
     @PostMapping("/addSysConfig")
     public int addSysConfig(@RequestBody SysConfigDTO dto) {
         return commonService.addSysConfig(dto);

@@ -12,38 +12,45 @@
 
     <select id="getUser" resultType="com.manage.cattle.dto.base.UserDTO">
         select
-            id,createUser,createTime,updateUser,updateTime,
-            username,name,job,phone,isSysAdmin,status
-        from t_user
-        where username=#{username}
+            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+            t.username,t.name,t.job,t.phone,
+            t.isSysAdmin, si.value isSysAdminValue,
+            t.status, sc.value statusValue
+        from t_user t
+        left join t_sys_config si on si.code='isSysAdmin' and t.isSysAdmin=si.key
+        left join t_sys_config sc on sc.code='userStatus' and t.status=sc.key
+        where t.username=#{username}
     </select>
 
     <select id="listUser" resultType="com.manage.cattle.dto.base.UserDTO">
         select
-            id,createUser,createTime,updateUser,updateTime,
-            username,name,concat(name,'(',username,')') title,
-               job,phone,isSysAdmin,status
-        from t_user
+            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+            t.username,t.name,concat(t.name,'(',t.username,')') title,
+            t.job,t.phone,t.isSysAdmin, si.value isSysAdminValue,
+            t.status, sc.value statusValue
+        from t_user t
+        left join t_sys_config si on si.code='isSysAdmin' and t.isSysAdmin=si.key
+        left join t_sys_config sc on sc.code='userStatus' and t.status=sc.key
         where 1=1
         <if test="username!=null and username!=''">
-            and username like concat('%',#{username},'%')
+            and t.username like concat('%',#{username},'%')
         </if>
         <if test="name!=null and name!=''">
-            and name like concat('%',#{name},'%')
+            and t.name like concat('%',#{name},'%')
         </if>
         <if test="job!=null and job!=''">
-            and job like concat('%',#{job},'%')
+            and t.job like concat('%',#{job},'%')
         </if>
         <if test="phone!=null and phone!=''">
-            and phone like concat('%',#{phone},'%')
+            and t.phone like concat('%',#{phone},'%')
         </if>
         <if test="isSysAdmin!=null and isSysAdmin!=''">
-            and isSysAdmin=#{isSysAdmin}
+            and t.isSysAdmin=#{isSysAdmin}
         </if>
         <if test="status!=null and status!=''">
-            and status=#{status}
+            and t.status=#{status}
         </if>
-        order by username
+        order by t.username
     </select>
 
     <insert id="addUser">

@@ -54,6 +54,11 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
+    public List<SysConfigDTO> listSysConfig(String code) {
+        return commonDao.listSysConfig(code);
+    }
+
+    @Override
     public int addSysConfig(SysConfigDTO dto) {
         PermissionUtil.onlySysAdmin();
         String username = JWTUtil.getUsername();

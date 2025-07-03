@@ -15,6 +15,8 @@ public class UserDTO extends BaseDTO {
     private String job;
     private String phone;
     private String isSysAdmin;
+    private String isSysAdminValue;
     private String status;
+    private String statusValue;
     private List<FarmDTO> farmList;
 }

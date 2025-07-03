@@ -72,22 +72,32 @@ public class BreedServiceImpl implements BreedService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int delBreedRegister(List<Integer> ids) {
+        List<BreedRegisterDTO> breedRegisterList = breedDao.listBreedRegisterByIds(ids);
+        if (breedRegisterList.size() == 0) {
+            throw new BusinessException("查无数据");
+        }
+        List<String> registerIds = breedRegisterList.stream().map(BreedRegisterDTO::getRegisterId).toList();
         String isSysAdmin = JWTUtil.getIsSysAdmin();
         if ("Y".equals(isSysAdmin)) {
-            return breedDao.delBreedRegister(ids);
+            int result = breedDao.delBreedRegister(ids);
+            breedDao.delBreedPregnancyCheckByRegisterId(registerIds);
+            breedDao.delBreedPregnancyResultByRegisterId(registerIds);
+            return result;
         }
         String username = JWTUtil.getUsername();
-        List<BreedRegisterDTO> breedRegisterList = breedDao.listBreedRegisterByIds(ids).stream().filter(item -> {
+        if (breedRegisterList.stream().anyMatch(item -> {
             Set<String> userSet = new HashSet<>();
             userSet.addAll(CommonUtil.stringToList(item.getFarmAdmin()));
             userSet.addAll(CommonUtil.stringToList(item.getFarmOwner()));
             userSet.addAll(CommonUtil.stringToList(item.getFarmEmployee()));
             return !userSet.contains(username);
-        }).toList();
-        if (breedRegisterList.size() > 0) {
+        })) {
             throw new BusinessException("部分权限不足");
         }
-        return breedDao.delBreedRegister(ids);
+        int result = breedDao.delBreedRegister(ids);
+        breedDao.delBreedPregnancyCheckByRegisterId(registerIds);
+        breedDao.delBreedPregnancyResultByRegisterId(registerIds);
+        return result;
     }
 
     @Override

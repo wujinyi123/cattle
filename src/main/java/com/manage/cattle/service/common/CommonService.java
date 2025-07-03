@@ -12,6 +12,8 @@ import java.util.Map;
 public interface CommonService {
     PageInfo<SysConfigDTO> pageSysConfig(int pageNum, int pageSize, String code);
 
+    List<SysConfigDTO> listSysConfig(String code);
+
     int addSysConfig(SysConfigDTO dto);
 
     int delSysConfig(List<Integer> ids);

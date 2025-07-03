@@ -7,10 +7,14 @@
             c.id,c.createUser,c.createTime,c.updateUser,c.updateTime,
             f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,f.employee farmEmployee,
             fz.farmZoneId,fz.farmZoneCode,
-            c.cattleId,c.cattleCode,c.cattleName,c.breed,c.sex,c.birthday,c.remark
+            c.cattleId,c.cattleCode,c.cattleName,
+            c.breed,sb.value breedValue,c.sex,ss.value sexValue,
+            c.birthday,c.remark
         from t_cattle c
         left join t_farm_zone fz on c.farmZoneId=fz.farmZoneId
         left join t_farm f on fz.farmId=f.farmId
+        left join t_sys_config sb on sb.code='cattleBreed' and c.breed=sb.key
+        left join t_sys_config ss on ss.code='cattleSex' and c.sex=ss.key
         where 1=1
         <if test="farmId!=null and farmId!=''">
             and f.farmId=#{farmId}
@@ -62,10 +66,14 @@
             c.id,c.createUser,c.createTime,c.updateUser,c.updateTime,
             f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,f.employee farmEmployee,
             fz.farmZoneId,fz.farmZoneCode,
-            c.cattleId,c.cattleCode,c.cattleName,c.breed,c.sex,c.birthday,c.remark
+            c.cattleId,c.cattleCode,c.cattleName,
+            c.breed,sb.value breedValue,c.sex,ss.value sexValue,
+            c.birthday,c.remark
         from t_cattle c
         left join t_farm_zone fz on c.farmZoneId=fz.farmZoneId
         left join t_farm f on fz.farmId=f.farmId
+        left join t_sys_config sb on sb.code='cattleBreed' and c.breed=sb.key
+        left join t_sys_config ss on ss.code='cattleSex' and c.sex=ss.key
         where c.cattleId=#{cattleId}
     </select>
 
@@ -76,8 +84,8 @@
             fz.farmZoneId,fz.farmZoneCode,
             c.cattleId,c.cattleCode,c.cattleName,c.breed,c.sex,c.birthday,c.remark
         from t_cattle c
-                 left join t_farm_zone fz on c.farmZoneId=fz.farmZoneId
-                 left join t_farm f on fz.farmId=f.farmId
+        left join t_farm_zone fz on c.farmZoneId=fz.farmZoneId
+        left join t_farm f on fz.farmId=f.farmId
         where c.cattleCode=#{cattleCode}
     </select>
 
