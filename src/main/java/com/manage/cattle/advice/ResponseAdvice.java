@@ -1,6 +1,8 @@
 package com.manage.cattle.advice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.manage.cattle.dto.common.FileByteInfo;
+import com.manage.cattle.util.CommonUtil;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import org.springframework.core.MethodParameter;
@@ -29,6 +31,9 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
         if (body instanceof ExceptionAdvice.ErrorResponseEntity entity) {
             response.setStatusCode(entity.getCode());
             return objectMapper.writeValueAsString(new ResponseEntity<>(entity.getMessage(), entity.getCode()));
+        }
+        if (selectedContentType.equals(MediaType.APPLICATION_OCTET_STREAM) && body instanceof byte[]) {
+            return body;
         }
         if (body instanceof ResponseEntity) {
             return body;

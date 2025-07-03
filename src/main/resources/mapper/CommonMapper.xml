@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.manage.cattle.dao.common.CommonDao">
+    <select id="listSysConfig" resultType="com.manage.cattle.dto.common.SysConfigDTO">
+        select
+            id,createUser,createTime,updateUser,updateTime,
+            `code`,`key`,`value`,`sort`
+        from t_sys_config
+        <if test="code!=null and code!=''">
+            where `code`=#{code}
+        </if>
+        order by `code`,`sort`
+    </select>
+
+    <insert id="addSysConfig">
+        insert into t_sys_config(createUser,createTime,updateUser,updateTime,
+                                 `code`,`key`,`value`,`sort`)
+        values (#{createUser},now(),#{updateUser},now(),
+                #{code},#{key},#{value},#{sort})
+    </insert>
+
+    <delete id="delSysConfig">
+        delete from t_sys_config
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+</mapper>

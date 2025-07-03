@@ -6,11 +6,18 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.support.ExcelTypeEnum;
-import com.manage.cattle.dto.common.ExportInfo;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.manage.cattle.dao.common.CommonDao;
+import com.manage.cattle.dto.common.FileByteInfo;
+import com.manage.cattle.dto.common.ImportInfo;
+import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.dto.common.TemplateInfo;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.qo.PageQO;
 import com.manage.cattle.service.common.CommonService;
+import com.manage.cattle.util.JWTUtil;
+import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +26,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -34,10 +42,34 @@ import java.util.Objects;
 @Service
 public class CommonServiceImpl implements CommonService {
     @Resource
+    private CommonDao commonDao;
+
+    @Resource
     private ApplicationContext applicationContext;
 
     @Override
-    public ExportInfo exportFile(Map<String, String> params, String templateCode) {
+    public PageInfo<SysConfigDTO> pageSysConfig(int pageNum, int pageSize, String code) {
+        PageHelper.startPage(pageNum, pageSize);
+        return new PageInfo<>(commonDao.listSysConfig(code));
+    }
+
+    @Override
+    public int addSysConfig(SysConfigDTO dto) {
+        PermissionUtil.onlySysAdmin();
+        String username = JWTUtil.getUsername();
+        dto.setCreateUser(username);
+        dto.setUpdateUser(username);
+        return commonDao.addSysConfig(dto);
+    }
+
+    @Override
+    public int delSysConfig(List<Integer> ids) {
+        PermissionUtil.onlySysAdmin();
+        return commonDao.delSysConfig(ids);
+    }
+
+    @Override
+    public FileByteInfo exportFile(Map<String, String> params, String templateCode) {
         TemplateInfo info = getTemplateInfo(params, templateCode);
         String[] classMethod = info.getExportMethed().split("#");
         JSONArray jsonArray;
@@ -51,17 +83,17 @@ public class CommonServiceImpl implements CommonService {
         } catch (Exception e) {
             throw new BusinessException("获取数据失败");
         }
-        return getExportInfo(info, jsonArray);
+        return getFileByteInfo(info, jsonArray);
     }
 
     @Override
-    public ExportInfo templateFile(String templateCode) {
+    public FileByteInfo templateFile(String templateCode) {
         TemplateInfo info = getTemplateInfo(new HashMap<>(), templateCode, true);
         info.setFileName("模板_" + info.getFileName());
-        return getExportInfo(info, new JSONArray());
+        return getFileByteInfo(info, new JSONArray());
     }
 
-    private ExportInfo getExportInfo(TemplateInfo info, JSONArray jsonArray) {
+    private FileByteInfo getFileByteInfo(TemplateInfo info, JSONArray jsonArray) {
         List<List<String>> headList = new ArrayList<>();
         for (TemplateInfo.Field field : info.getFields()) {
             headList.add(List.of(field.getTitle()));
@@ -83,13 +115,25 @@ public class CommonServiceImpl implements CommonService {
         } catch (Exception e) {
             throw new BusinessException("生成xlsx失败");
         }
-        return new ExportInfo(info.getFileName(), bytes);
+        return new FileByteInfo(info.getFileName(), bytes);
     }
 
     @Override
     public List<String> importRequireField(String templateCode) {
         TemplateInfo info = getTemplateInfo(new HashMap<>(), templateCode, true);
         return info.getFields().stream().filter(item -> "true".equals(item.getRequire())).map(TemplateInfo.Field::getTitle).toList();
+    }
+
+    @Override
+    public ImportInfo importFile(MultipartFile file, String templateCode) {
+        TemplateInfo info = getTemplateInfo(new HashMap<>(), templateCode, true);
+        List<Object> list;
+        try (InputStream is = file.getInputStream()) {
+            list = EasyExcel.read(is).excelType(ExcelTypeEnum.XLSX).sheet(0).doReadSync();
+        } catch (Exception e) {
+            throw new BusinessException("读取xlsx数据失败");
+        }
+        return new ImportInfo();
     }
 
     private TemplateInfo getTemplateInfo(Map<String, String> params, String templateCode) {

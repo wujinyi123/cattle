@@ -1,11 +1,11 @@
 <templates>
     <template code="user" exportMethed="com.manage.cattle.dao.base.UserDao#listUser" qo="com.manage.cattle.qo.base.UserQO"
               dto="com.manage.cattle.dto.base.UserDTO">
-        <field name="username" title="账号" />
-        <field name="name" title="姓名" />
-        <field name="job" title="工种" />
-        <field name="phone" title="联系方式" />
-        <field name="isSysAdmin" title="是否系统管理员" />
-        <field name="status" title="状态" />
+        <field name="username" title="账号" require="true"/>
+        <field name="name" title="姓名" require="true"/>
+        <field name="job" title="工种" require="true"/>
+        <field name="phone" title="联系方式" require="true"/>
+        <field name="isSysAdmin" title="是否系统管理员" require="true"/>
+        <field name="status" title="状态" require="true"/>
     </template>
 </templates>

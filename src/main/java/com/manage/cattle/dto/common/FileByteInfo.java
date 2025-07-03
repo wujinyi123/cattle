@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExportInfo {
+public class FileByteInfo {
     private String fileName;
     private byte[] bytes;
 }
