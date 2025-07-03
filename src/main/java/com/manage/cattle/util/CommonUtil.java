@@ -70,6 +70,6 @@ public class CommonUtil {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         httpHeaders.setContentDispositionFormData("attachment", encode(fileName));
-        return new ResponseEntity<>(bytes, httpHeaders, HttpStatus.CREATED);
+        return new ResponseEntity<>(bytes, httpHeaders, HttpStatus.OK);
     }
 }

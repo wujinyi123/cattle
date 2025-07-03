@@ -5,7 +5,7 @@
         <field name="name" title="姓名" require="true"/>
         <field name="job" title="工种" require="true"/>
         <field name="phone" title="联系方式" require="true"/>
-        <field name="isSysAdmin" title="是否系统管理员" require="true"/>
-        <field name="status" title="状态" require="true"/>
+        <field name="isSysAdminValue" title="是否系统管理员" require="true"/>
+        <field name="statusValue" title="状态" require="true"/>
     </template>
 </templates>
