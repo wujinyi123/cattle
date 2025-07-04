@@ -1,11 +1,9 @@
 package com.manage.cattle.service.base.impl;
 
-import cn.hutool.core.util.IdUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.CattleDao;
 import com.manage.cattle.dao.base.FarmDao;
-import com.manage.cattle.dto.NodeDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.FarmDTO;
 import com.manage.cattle.exception.BusinessException;
@@ -35,8 +33,8 @@ public class CattleServiceImpl implements CattleService {
     }
 
     @Override
-    public CattleDTO getCattle(String cattleId) {
-        return cattleDao.getCattleById(cattleId);
+    public CattleDTO getCattle(String cattleCode) {
+        return cattleDao.getCattle(cattleCode);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -58,7 +56,6 @@ public class CattleServiceImpl implements CattleService {
             if (Objects.nonNull(cattleDao.getCattle(dto.getCattleCode()))) {
                 throw new BusinessException("耳牌号已存在");
             }
-            dto.setCattleId(IdUtil.getSnowflakeNextIdStr());
             return cattleDao.addCattle(dto);
         } else {
             return cattleDao.updateCattle(dto);
@@ -67,27 +64,18 @@ public class CattleServiceImpl implements CattleService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public int delCattle(List<String> cattleIds) {
+    public int delCattle(List<String> cattleCodeList) {
         String isSysAdmin = JWTUtil.getIsSysAdmin();
         if ("Y".equals(isSysAdmin)) {
-            return cattleDao.delCattle(cattleIds);
+            return cattleDao.delCattle(cattleCodeList);
         }
-        List<CattleDTO> cattleList = cattleDao.listCattle(new CattleQO()).stream().filter(item -> cattleIds.contains(item.getCattleId())).toList();
+        CattleQO qo = new CattleQO();
+        qo.setCattleCodeList(cattleCodeList);
+        List<CattleDTO> cattleList = cattleDao.listCattle(qo);
         String username = JWTUtil.getUsername();
         if (cattleList.stream().anyMatch(item -> !username.equals(item.getFarmAdmin()) && !CommonUtil.stringToList(item.getFarmAdmin()).contains(username))) {
             throw new BusinessException("权限不足");
         }
-        return cattleDao.delCattle(cattleIds);
-    }
-
-    @Override
-    public List<CattleDTO> listCattle(CattleQO qo) {
-        return cattleDao.listCattle(qo);
-    }
-
-    @Override
-    public List<NodeDTO> treeCattle() {
-        List<NodeDTO> list = cattleDao.treeCattle();
-        return NodeDTO.getTree(list);
+        return cattleDao.delCattle(cattleCodeList);
     }
 }

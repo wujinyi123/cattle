@@ -23,11 +23,7 @@ public interface FarmDao {
 
     int delFarm(List<String> list);
 
-    List<FarmDTO> listFarmByZoneIds(List<String> list);
-
     List<FarmZoneDTO> listFarmZone(FarmZoneQO qo);
-
-    FarmZoneDTO getFarmZoneById(@Param("farmZoneId") String farmZoneId);
 
     FarmZoneDTO getFarmZone(@Param("farmZoneCode") String farmZoneCode);
 

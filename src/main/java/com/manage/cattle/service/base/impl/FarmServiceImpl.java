@@ -133,12 +133,12 @@ public class FarmServiceImpl implements FarmService {
         PageHelper.startPage(qo);
         PageInfo<FarmZoneDTO> pageInfo = new PageInfo<>(farmDao.listFarmZone(qo));
         if (pageInfo.getList().size() > 0) {
-            List<String> farmZoneIds = pageInfo.getList().stream().map(FarmZoneDTO::getFarmZoneId).toList();
+            List<String> farmZoneCodeList = pageInfo.getList().stream().map(FarmZoneDTO::getFarmZoneCode).toList();
             CattleQO cattleQO = new CattleQO();
-            cattleQO.setFarmZoneIds(farmZoneIds);
+            cattleQO.setFarmZoneCodeList(farmZoneCodeList);
             List<CattleDTO> cattleList = cattleDao.listCattle(cattleQO);
             for (FarmZoneDTO dto : pageInfo.getList()) {
-                dto.setCurrentSize((int) cattleList.stream().filter(item -> dto.getFarmZoneId().equals(item.getFarmZoneId())).count());
+                dto.setCurrentSize((int) cattleList.stream().filter(item -> dto.getFarmZoneCode().equals(item.getFarmZoneCode())).count());
             }
         }
         return pageInfo;
@@ -152,8 +152,8 @@ public class FarmServiceImpl implements FarmService {
     }
 
     @Override
-    public FarmZoneDTO getFarmZone(String farmZoneId) {
-        return farmDao.getFarmZoneById(farmZoneId);
+    public FarmZoneDTO getFarmZone(String farmZoneCode) {
+        return farmDao.getFarmZone(farmZoneCode);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -175,7 +175,6 @@ public class FarmServiceImpl implements FarmService {
             if (Objects.nonNull(farmDao.getFarmZone(dto.getFarmZoneCode()))) {
                 throw new BusinessException("圈舍编号已存在");
             }
-            dto.setFarmZoneId(IdUtil.getSnowflakeNextIdStr());
             return farmDao.addFarmZone(dto);
         } else {
             return farmDao.updateFarmZone(dto);
@@ -184,16 +183,18 @@ public class FarmServiceImpl implements FarmService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public int delFarmZone(List<String> farmZoneIds) {
+    public int delFarmZone(List<String> farmZoneCodeList) {
         String isSysAdmin = JWTUtil.getIsSysAdmin();
         String username = JWTUtil.getUsername();
-        List<FarmDTO> farmList = farmDao.listFarmByZoneIds(farmZoneIds);
-        for (FarmDTO farmDTO : farmList) {
-            List<String> adminList = CommonUtil.stringToList(farmDTO.getAdmin());
-            if (!"Y".equals(isSysAdmin) && !username.equals(farmDTO.getOwner()) && !adminList.contains(username)) {
+        FarmZoneQO qo = new FarmZoneQO();
+        qo.setFarmZoneCodeList(farmZoneCodeList);
+        List<FarmZoneDTO> farmZoneList = farmDao.listFarmZone(qo);
+        for (FarmZoneDTO dto : farmZoneList) {
+            List<String> adminList = CommonUtil.stringToList(dto.getFarmAdmin());
+            if (!"Y".equals(isSysAdmin) && !username.equals(dto.getFarmOwner()) && !adminList.contains(username)) {
                 throw new BusinessException("权限不足");
             }
         }
-        return farmDao.delFarmZone(farmZoneIds);
+        return farmDao.delFarmZone(farmZoneCodeList);
     }
 }

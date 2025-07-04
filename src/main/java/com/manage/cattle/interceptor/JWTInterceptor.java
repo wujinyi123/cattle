@@ -23,7 +23,7 @@ public class JWTInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         //获取令牌token
         String token = JWTUtil.getToken(request);
-        ResponseEntity<Object> responseEntity = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        ResponseEntity<Object> responseEntity;
         try {
             if (StringUtils.isNotBlank(token)) {
                 //验证令牌

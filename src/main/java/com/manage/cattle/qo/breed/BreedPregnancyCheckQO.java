@@ -2,7 +2,9 @@ package com.manage.cattle.qo.breed;
 
 import com.manage.cattle.qo.PageQO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class BreedPregnancyCheckQO extends PageQO {
     private String registerId;

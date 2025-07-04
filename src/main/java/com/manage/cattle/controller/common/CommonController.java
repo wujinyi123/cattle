@@ -1,7 +1,6 @@
 package com.manage.cattle.controller.common;
 
 import com.github.pagehelper.PageInfo;
-import com.manage.cattle.dto.common.FileByteInfo;
 import com.manage.cattle.dto.common.ImportInfo;
 import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.service.common.CommonService;

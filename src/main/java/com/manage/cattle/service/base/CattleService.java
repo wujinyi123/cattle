@@ -1,7 +1,6 @@
 package com.manage.cattle.service.base;
 
 import com.github.pagehelper.PageInfo;
-import com.manage.cattle.dto.NodeDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.qo.base.CattleQO;
 
@@ -10,13 +9,9 @@ import java.util.List;
 public interface CattleService {
     PageInfo<CattleDTO> pageCattle(CattleQO qo);
 
-    CattleDTO getCattle(String cattleId);
+    CattleDTO getCattle(String cattleCode);
 
     int saveCattle(String type, CattleDTO dto);
 
-    int delCattle(List<String> cattleIds);
-
-    List<CattleDTO> listCattle(CattleQO qo);
-
-    List<NodeDTO> treeCattle();
+    int delCattle(List<String> cattleCodeList);
 }

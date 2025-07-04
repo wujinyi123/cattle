@@ -6,21 +6,20 @@
         select
             c.id,c.createUser,c.createTime,c.updateUser,c.updateTime,
             f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,f.employee farmEmployee,
-            fz.farmZoneId,fz.farmZoneCode,
-            c.cattleId,c.cattleCode,c.cattleName,
+            fz.farmZoneCode,c.cattleCode,c.cattleName,
             c.breed,sb.value breedValue,c.sex,ss.value sexValue,
             c.birthday,c.remark
         from t_cattle c
-        left join t_farm_zone fz on c.farmZoneId=fz.farmZoneId
+        left join t_farm_zone fz on c.farmZoneCode=fz.farmZoneCode
         left join t_farm f on fz.farmId=f.farmId
         left join t_sys_config sb on sb.code='cattleBreed' and c.breed=sb.key
         left join t_sys_config ss on ss.code='cattleSex' and c.sex=ss.key
         where 1=1
-        <if test="farmId!=null and farmId!=''">
-            and f.farmId=#{farmId}
+        <if test="farmName!=null and farmName!=''">
+            and f.farmName like concat('%',#{farmName},'%')
         </if>
-        <if test="farmZoneId!=null and farmZoneId!=''">
-            and fz.farmZoneId=#{farmZoneId}
+        <if test="farmZoneCode!=null and farmZoneCode!=''">
+            and fz.farmZoneCode=#{farmZoneCode}
         </if>
         <if test="cattleCode!=null and cattleCode!=''">
             and c.cattleCode like concat('%',#{cattleCode},'%')
@@ -40,84 +39,56 @@
         <if test="remark!=null and remark!=''">
             and c.remark like concat('%',#{remark},'%')
         </if>
-        <if test="cattleIds!=null and cattleIds.size()>0">
-            and c.cattleId in
-            <foreach collection="cattleIds" item="item" open="(" separator="," close=")">
-                #{item}
-            </foreach>
-        </if>
-        <if test="cattleCodes!=null and cattleCodes.size()>0">
+        <if test="cattleCodeList!=null and cattleCodeList.size()>0">
             and c.cattleCode in
-            <foreach collection="cattleCodes" item="code" open="(" separator="," close=")">
+            <foreach collection="cattleCodeList" item="code" open="(" separator="," close=")">
                 #{code}
             </foreach>
         </if>
-        <if test="farmZoneIds!=null and farmZoneIds.size()>0">
-            and fz.farmZoneId in
-            <foreach collection="farmZoneIds" item="fzId" open="(" separator="," close=")">
-                #{fzId}
+        <if test="farmZoneCodeList!=null and farmZoneCodeList.size()>0">
+            and fz.farmZoneCode in
+            <foreach collection="farmZoneCodeList" item="zCode" open="(" separator="," close=")">
+                #{zCode}
             </foreach>
         </if>
         order by farmName,farmZoneCode,cattleCode
     </select>
 
-    <select id="getCattleById" resultType="com.manage.cattle.dto.base.CattleDTO">
-        select
-            c.id,c.createUser,c.createTime,c.updateUser,c.updateTime,
-            f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,f.employee farmEmployee,
-            fz.farmZoneId,fz.farmZoneCode,
-            c.cattleId,c.cattleCode,c.cattleName,
-            c.breed,sb.value breedValue,c.sex,ss.value sexValue,
-            c.birthday,c.remark
-        from t_cattle c
-        left join t_farm_zone fz on c.farmZoneId=fz.farmZoneId
-        left join t_farm f on fz.farmId=f.farmId
-        left join t_sys_config sb on sb.code='cattleBreed' and c.breed=sb.key
-        left join t_sys_config ss on ss.code='cattleSex' and c.sex=ss.key
-        where c.cattleId=#{cattleId}
-    </select>
-
     <select id="getCattle" resultType="com.manage.cattle.dto.base.CattleDTO">
         select
             c.id,c.createUser,c.createTime,c.updateUser,c.updateTime,
-            f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,
-            fz.farmZoneId,fz.farmZoneCode,
-            c.cattleId,c.cattleCode,c.cattleName,c.breed,c.sex,c.birthday,c.remark
+            f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,f.employee farmEmployee,
+            fz.farmZoneCode,c.cattleCode,c.cattleName,
+            c.breed,sb.value breedValue,c.sex,ss.value sexValue,
+            c.birthday,c.remark
         from t_cattle c
-        left join t_farm_zone fz on c.farmZoneId=fz.farmZoneId
-        left join t_farm f on fz.farmId=f.farmId
+                 left join t_farm_zone fz on c.farmZoneCode=fz.farmZoneCode
+                 left join t_farm f on fz.farmId=f.farmId
+                 left join t_sys_config sb on sb.code='cattleBreed' and c.breed=sb.key
+                 left join t_sys_config ss on ss.code='cattleSex' and c.sex=ss.key
         where c.cattleCode=#{cattleCode}
     </select>
 
     <insert id="addCattle">
         insert into t_cattle(createUser,createTime,updateUser,updateTime,
-                             farmZoneId,cattleId,cattleCode,cattleName,breed,sex,birthday,remark)
+                             farmZoneCode,cattleCode,cattleName,breed,sex,birthday,remark)
         values (#{createUser},now(),#{updateUser},now(),
-                #{farmZoneId},#{cattleId},#{cattleCode},#{cattleName},#{breed},#{sex},#{birthday},#{remark})
+                #{farmZoneCode},#{cattleCode},#{cattleName},#{breed},#{sex},#{birthday},#{remark})
     </insert>
 
     <update id="updateCattle">
         update t_cattle
         set updateUser=#{updateUser},updateTime=now(),
-            farmZoneId=#{farmZoneId},cattleCode=#{cattleCode},cattleName=#{cattleName},
+            farmZoneCode=#{farmZoneCode},cattleCode=#{cattleCode},cattleName=#{cattleName},
             breed=#{breed},sex=#{sex},birthday=#{birthday},remark=#{remark}
-        where cattleId=#{cattleId}
+        where cattleCode=#{cattleCode}
     </update>
 
     <delete id="delCattle">
         delete from t_cattle
-        where cattleId in
+        where cattleCode in
         <foreach collection="list" item="item" open="(" separator="," close=")">
             #{item}
         </foreach>
     </delete>
-
-    <select id="treeCattle" resultType="com.manage.cattle.dto.NodeDTO">
-        select farmId id, farmName name, 'farm' type, '' parentId from t_farm
-        union all
-        select farmZoneId id, farmZoneCode name, 'farmZone' type, farmId parentId from t_farm_zone
-        union all
-        select cattleId id, cattleCode name, 'cattle' type, farmZoneId parentId from t_cattle
-        order by name
-    </select>
 </mapper>

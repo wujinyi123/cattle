@@ -63,8 +63,8 @@ public class FarmController {
     }
 
     @GetMapping("/getFarmZone")
-    public FarmZoneDTO getFarmZone(@RequestParam String farmZoneId) {
-        return farmService.getFarmZone(farmZoneId);
+    public FarmZoneDTO getFarmZone(@RequestParam String farmZoneCode) {
+        return farmService.getFarmZone(farmZoneCode);
     }
 
     @PostMapping("/saveFarmZone")
@@ -73,7 +73,7 @@ public class FarmController {
     }
 
     @PostMapping("/delFarmZone")
-    public int delFarmZone(@RequestBody List<String> farmZoneIds) {
-        return farmService.delFarmZone(farmZoneIds);
+    public int delFarmZone(@RequestBody List<String> farmZoneCodeList) {
+        return farmService.delFarmZone(farmZoneCodeList);
     }
 }

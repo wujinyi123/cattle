@@ -1,7 +1,6 @@
 package com.manage.cattle.controller.base;
 
 import com.github.pagehelper.PageInfo;
-import com.manage.cattle.dto.NodeDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.qo.base.CattleQO;
 import com.manage.cattle.service.base.CattleService;
@@ -27,8 +26,8 @@ public class CattleController {
     }
 
     @GetMapping("/getCattle")
-    public CattleDTO getCattle(@RequestParam String cattleId) {
-        return cattleService.getCattle(cattleId);
+    public CattleDTO getCattle(@RequestParam String cattleCode) {
+        return cattleService.getCattle(cattleCode);
     }
 
     @PostMapping("/saveCattle")
@@ -37,17 +36,7 @@ public class CattleController {
     }
 
     @PostMapping("/delCattle")
-    public int delCattle(@RequestBody List<String> cattleIds) {
-        return cattleService.delCattle(cattleIds);
-    }
-
-    @GetMapping("/listCattle")
-    public List<CattleDTO> listCattle(CattleQO qo) {
-        return cattleService.listCattle(qo);
-    }
-
-    @GetMapping("/treeCattle")
-    public List<NodeDTO> treeCattle() {
-        return cattleService.treeCattle();
+    public int delCattle(@RequestBody List<String> cattleCodeList) {
+        return cattleService.delCattle(cattleCodeList);
     }
 }

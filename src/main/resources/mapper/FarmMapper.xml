@@ -60,25 +60,11 @@
         </foreach>
     </delete>
 
-    <select id="listFarmByZoneIds" resultType="com.manage.cattle.dto.base.FarmDTO">
-        select
-            id,createUser,createTime,updateUser,updateTime,
-            farmId,farmName,owner,admin,employee,address,area,scale
-        from t_farm
-        where farmId in (
-            select farmId from t_farm_zone
-            where farmZoneId in
-            <foreach collection="list" item="item" open="(" separator="," close=")">
-                #{item}
-            </foreach>
-            )
-    </select>
-
     <select id="listFarmZone" resultType="com.manage.cattle.dto.base.FarmZoneDTO">
         select
             fz.id,fz.createUser,fz.createTime,fz.updateUser,fz.updateTime,
             f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,
-            fz.farmZoneId,fz.farmZoneCode,fz.farmZoneRemark,fz.size
+            fz.farmZoneCode,fz.farmZoneRemark,fz.size
         from t_farm_zone fz
         left join t_farm f on fz.farmId=f.farmId
         where 1=1
@@ -91,43 +77,40 @@
         <if test="farmZoneRemark!=null and farmZoneRemark!=''">
             and fz.farmZoneRemark like concat('%',#{farmZoneRemark},'%')
         </if>
+        <if test="farmZoneCodeList!=null and farmZoneCodeList.size()>0">
+            and fz.farmZoneCode in
+            <foreach collection="farmZoneCodeList" item="zCode" open="(" separator="," close=")">
+                #{zCode}
+            </foreach>
+        </if>
         order by farmName,farmZoneCode
-    </select>
-
-    <select id="getFarmZoneById" resultType="com.manage.cattle.dto.base.FarmZoneDTO">
-        select
-            id,createUser,createTime,updateUser,updateTime,
-            farmId,farmZoneId,farmZoneCode,farmZoneRemark,size
-        from t_farm_zone
-        where farmZoneId=#{farmZoneId}
     </select>
 
     <select id="getFarmZone" resultType="com.manage.cattle.dto.base.FarmZoneDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            farmId,farmZoneId,farmZoneCode,farmZoneRemark,size
+            farmId,farmZoneCode,farmZoneRemark,size
         from t_farm_zone
         where farmZoneCode=#{farmZoneCode}
     </select>
 
     <insert id="addFarmZone">
         insert into t_farm_zone(createUser,createTime,updateUser,updateTime,
-                                farmId,farmZoneId,farmZoneCode,farmZoneRemark,size)
+                                farmId,farmZoneCode,farmZoneRemark,size)
         values (#{createUser},now(),#{updateUser},now(),
-                #{farmId},#{farmZoneId},#{farmZoneCode},#{farmZoneRemark},#{size})
+                #{farmId},#{farmZoneCode},#{farmZoneRemark},#{size})
     </insert>
 
     <update id="updateFarmZone">
         update t_farm_zone
         set updateUser=#{updateUser},updateTime=now(),
-            farmId=#{farmId},farmZoneCode=#{farmZoneCode},
-            farmZoneRemark=#{farmZoneRemark},size=#{size}
-        where farmZoneId=#{farmZoneId}
+            farmId=#{farmId},farmZoneRemark=#{farmZoneRemark},size=#{size}
+        where farmZoneCode=#{farmZoneCode}
     </update>
 
     <delete id="delFarmZone">
         delete from t_farm_zone
-        where farmZoneId in
+        where farmZoneCode in
         <foreach collection="list" item="item" open="(" separator="," close=")">
             #{item}
         </foreach>

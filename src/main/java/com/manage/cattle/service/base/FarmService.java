@@ -25,9 +25,9 @@ public interface FarmService {
 
     List<FarmZoneDTO> listFarmZone(String farmId);
 
-    FarmZoneDTO getFarmZone(String farmZoneId);
+    FarmZoneDTO getFarmZone(String farmZoneCode);
 
     int saveFarmZone(String type, FarmZoneDTO dto);
 
-    int delFarmZone(List<String> farmZoneIds);
+    int delFarmZone(List<String> farmZoneCodeList);
 }

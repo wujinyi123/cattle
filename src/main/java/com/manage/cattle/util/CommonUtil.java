@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -20,11 +19,6 @@ import java.util.List;
 
 @Slf4j
 public class CommonUtil {
-    /**
-     * 获取HttpServletRequest
-     *
-     * @return HttpServletRequest
-     */
     public static HttpServletRequest getHttpServletRequest() {
         ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         return attrs.getRequest();
@@ -46,18 +40,6 @@ public class CommonUtil {
             return encode.replace("+", "%20");
         } catch (Exception e) {
             log.error("encode失败：" + e);
-        }
-        return str;
-    }
-
-    public static String decode(String str) {
-        if (StringUtils.isBlank(str)) {
-            return str;
-        }
-        try {
-            return URLDecoder.decode(str, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            log.error("decode失败：" + e);
         }
         return str;
     }

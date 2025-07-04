@@ -2,9 +2,11 @@ package com.manage.cattle.dto.breed;
 
 import com.manage.cattle.dto.base.CattleDTO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class BreedPregnancyResultDTO extends BreedBaseDTO {
     private String resultDay;
@@ -12,6 +14,6 @@ public class BreedPregnancyResultDTO extends BreedBaseDTO {
     private String result;
     private String resultValue;
     private String remark;
-    private String childrenIds;
+    private String childrenCodeList;
     private List<CattleDTO> children;
 }

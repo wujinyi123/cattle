@@ -6,12 +6,12 @@
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
             t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
-            tc.farmZoneId,tz.farmZoneCode,t.cattleId,tc.cattleCode,
+            tz.farmZoneCode,tc.cattleCode,
             t.frozenSemenCode,t.frozenSemenBreed,sf.value frozenSemenBreedValue,
             t.breedingDay,t.breedingMethod,sb.value breedingMethodValue,t.operateUser
         from t_breed_register t
-        left join t_cattle tc on t.cattleId=tc.cattleId
-        left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
+        left join t_cattle tc on t.cattleCode=tc.cattleCode
+        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
         left join t_farm tf on tz.farmId=tf.farmId
         left join t_sys_config sf on sf.code='cattleBreed' and t.frozenSemenBreed=sf.key
         left join t_sys_config sb on sb.code='breedingMethod' and t.breedingMethod=sb.key
@@ -50,11 +50,11 @@
         select
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
         t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
-        tc.farmZoneId,tz.farmZoneCode,t.cattleId,tc.cattleCode,
+        tz.farmZoneCode,tc.cattleCode,
         t.frozenSemenCode,t.frozenSemenBreed,t.breedingDay,t.breedingMethod,t.operateUser
         from t_breed_register t
-        left join t_cattle tc on t.cattleId=tc.cattleId
-        left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
+        left join t_cattle tc on t.cattleCode=tc.cattleCode
+        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
         left join t_farm tf on tz.farmId=tf.farmId
         where t.id in
         <foreach collection="list" item="item" open="(" separator="," close=")">
@@ -67,21 +67,21 @@
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
             t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
-            tc.farmZoneId,tz.farmZoneCode,t.cattleId,tc.cattleCode,
+            tz.farmZoneCode,tc.cattleCode,
             t.frozenSemenCode,t.frozenSemenBreed,t.breedingDay,t.breedingMethod,t.operateUser
         from t_breed_register t
-        left join t_cattle tc on t.cattleId=tc.cattleId
-        left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
+        left join t_cattle tc on t.cattleCode=tc.cattleCode
+        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
         left join t_farm tf on tz.farmId=tf.farmId
         where t.registerId=#{registerId}
     </select>
 
     <insert id="addBreedRegister">
         insert into t_breed_register(createUser,createTime,updateUser,updateTime,
-                                     registerId,cattleId,frozenSemenCode,frozenSemenBreed,
+                                     registerId,cattleCode,frozenSemenCode,frozenSemenBreed,
                                      breedingDay,breedingMethod,operateUser)
         values (#{createUser},now(),#{updateUser},now(),
-                #{registerId},#{cattleId},#{frozenSemenCode},#{frozenSemenBreed},
+                #{registerId},#{cattleCode},#{frozenSemenCode},#{frozenSemenBreed},
                 #{breedingDay},#{breedingMethod},#{operateUser})
     </insert>
 
@@ -113,12 +113,12 @@
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
             t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
-            tc.farmZoneId,tz.farmZoneCode,tr.cattleId,tc.cattleCode,
+            tz.farmZoneCode,tc.cattleCode,
             t.checkDay,t.checkUser,t.result
         from t_breed_pregnancy_check t
         left join t_breed_register tr on t.registerId=tr.registerId
-        left join t_cattle tc on tr.cattleId=tc.cattleId
-        left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
+        left join t_cattle tc on tr.cattleCode=tc.cattleCode
+        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
         left join t_farm tf on tz.farmId=tf.farmId
         where 1=1
         <if test="registerId!=null and registerId!=''">
@@ -152,12 +152,12 @@
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
             t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
-            tc.farmZoneId,tz.farmZoneCode,t.cattleId,tc.cattleCode,
+            tz.farmZoneCode,tc.cattleCode,
             t.checkDay,t.checkUser,t.result
         from t_breed_pregnancy_check t
         left join t_breed_register tr on t.registerId=tr.registerId
-        left join t_cattle tc on tr.cattleId=tc.cattleId
-        left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
+        left join t_cattle tc on tr.cattleCode=tc.cattleCode
+        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
         left join t_farm tf on tz.farmId=tf.farmId
         where t.id in
         <foreach collection="list" item="item" open="(" separator="," close=")">
@@ -185,12 +185,12 @@
         select
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
         t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
-        tc.farmZoneId,tz.farmZoneCode,tr.cattleId,tc.cattleCode,
-        t.resultDay,t.operaUser,t.result,sr.value resultValue,t.remark,t.childrenIds
+        tz.farmZoneCode,tc.cattleCode,
+        t.resultDay,t.operaUser,t.result,sr.value resultValue,t.remark,t.childrenCodeList
         from t_breed_pregnancy_result t
         left join t_breed_register tr on t.registerId=tr.registerId
-        left join t_cattle tc on tr.cattleId=tc.cattleId
-        left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
+        left join t_cattle tc on tr.cattleCode=tc.cattleCode
+        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
         left join t_farm tf on tz.farmId=tf.farmId
         left join t_sys_config sr on sr.code='pregnancyResult' and t.result=sr.key
         where 1=1
@@ -228,12 +228,12 @@
         select
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
         t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
-        tc.farmZoneId,tz.farmZoneCode,t.cattleId,tc.cattleCode,
-        t.resultDay,t.operaUser,t.result,t.remark,t.childrenIds
+        tz.farmZoneCode,tc.cattleCode,
+        t.resultDay,t.operaUser,t.result,t.remark,t.childrenCodeList
         from t_breed_pregnancy_result t
         left join t_breed_register tr on t.registerId=tr.registerId
-        left join t_cattle tc on tr.cattleId=tc.cattleId
-        left join t_farm_zone tz on tc.farmZoneId=tz.farmZoneId
+        left join t_cattle tc on tr.cattleCode=tc.cattleCode
+        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
         left join t_farm tf on tz.farmId=tf.farmId
         where t.id in
         <foreach collection="list" item="item" open="(" separator="," close=")">
@@ -244,9 +244,9 @@
 
     <insert id="addBreedPregnancyResult">
         insert into t_breed_pregnancy_result(createUser,createTime,updateUser,updateTime,
-                                             registerId,resultDay,operaUser,result,remark,childrenIds)
+                                             registerId,resultDay,operaUser,result,remark,childrenCodeList)
         values (#{createUser},now(),#{updateUser},now(),
-                #{registerId},#{resultDay},#{operaUser},#{result},#{remark},#{childrenIds})
+                #{registerId},#{resultDay},#{operaUser},#{result},#{remark},#{childrenCodeList})
     </insert>
 
     <delete id="delBreedPregnancyResult">

@@ -2,7 +2,9 @@ package com.manage.cattle.dto.base;
 
 import com.manage.cattle.dto.BaseDTO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class CattleDTO extends BaseDTO {
     private String farmId;
@@ -10,9 +12,7 @@ public class CattleDTO extends BaseDTO {
     private String farmOwner;
     private String farmAdmin;
     private String farmEmployee;
-    private String farmZoneId;
     private String farmZoneCode;
-    private String cattleId;
     private String cattleCode;
     private String cattleName;
     private String breed;
