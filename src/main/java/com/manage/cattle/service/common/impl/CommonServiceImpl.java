@@ -9,12 +9,14 @@ import com.alibaba.excel.support.ExcelTypeEnum;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.common.CommonDao;
+import com.manage.cattle.dto.BaseDTO;
 import com.manage.cattle.dto.common.FileByteInfo;
 import com.manage.cattle.dto.common.ImportInfo;
 import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.dto.common.TemplateInfo;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.qo.PageQO;
+import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.common.CommonService;
 import com.manage.cattle.util.JWTUtil;
 import com.manage.cattle.util.PermissionUtil;
@@ -26,6 +28,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
@@ -37,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -48,14 +52,14 @@ public class CommonServiceImpl implements CommonService {
     private ApplicationContext applicationContext;
 
     @Override
-    public PageInfo<SysConfigDTO> pageSysConfig(int pageNum, int pageSize, String code) {
-        PageHelper.startPage(pageNum, pageSize);
-        return new PageInfo<>(commonDao.listSysConfig(code));
+    public PageInfo<SysConfigDTO> pageSysConfig(SysConfigQO qo) {
+        PageHelper.startPage(qo);
+        return new PageInfo<>(commonDao.listSysConfig(qo));
     }
 
     @Override
-    public List<SysConfigDTO> listSysConfig(String code) {
-        return commonDao.listSysConfig(code);
+    public List<SysConfigDTO> listSysConfig(SysConfigQO qo) {
+        return commonDao.listSysConfig(qo);
     }
 
     @Override
@@ -138,7 +142,50 @@ public class CommonServiceImpl implements CommonService {
         } catch (Exception e) {
             throw new BusinessException("读取xlsx数据失败");
         }
-        return new ImportInfo();
+        if (CollectionUtils.isEmpty(list)) {
+            throw new BusinessException("数据为空");
+        }
+        List<BaseDTO> importList = new ArrayList<>();
+        for (Object obj : list) {
+            BaseDTO dto = new BaseDTO();
+            try {
+                Class<? extends BaseDTO> dtoClass = (Class<? extends BaseDTO>) Class.forName(info.getDtoClass());
+                Map<?, ?> objMap = (Map<?, ?>) obj;
+                Map<String, String> map = new HashMap<>();
+                for (int i = 0; i < info.getFields().size(); i++) {
+                    Object value = objMap.get(i);
+                    if (value == null || "".equals(value.toString())) {
+                        continue;
+                    }
+                    TemplateInfo.Field fieldObj = info.getFields().get(i);
+                    map.put(fieldObj.getName(), value.toString());
+                }
+                String json = JSONUtil.toJsonStr(map);
+                dto = JSONUtil.toBean(json, dtoClass);
+            } catch (Exception e) {
+                log.error("赋值失败" + JSONUtil.toJsonStr(obj));
+            }
+            importList.add(dto);
+        }
+        String[] classMethod = info.getImportMethed().split("#");
+        try {
+            Class<?> clazz = Class.forName(classMethod[0]);
+            Method method = clazz.getDeclaredMethod(classMethod[1], String.class, List.class);
+            Object bean = applicationContext.getBean(clazz);
+            String requireFields = info.getFields().stream()
+                    .filter(item -> "true".equals(item.getRequire()))
+                    .map(TemplateInfo.Field::getName)
+                    .collect(Collectors.joining(","));
+            List<String> errorList = (List<String>) method.invoke(bean, requireFields, importList);
+            ImportInfo importInfo = new ImportInfo();
+            importInfo.setSuccess(importList.size()-errorList.size());
+            importInfo.setFail(errorList.size());
+            importInfo.setErrorList(errorList);
+            return importInfo;
+        } catch (Exception e) {
+            log.error("导入方法导入失败", e);
+            throw new BusinessException("导入方法导入失败");
+        }
     }
 
     private TemplateInfo getTemplateInfo(Map<String, String> params, String templateCode) {
@@ -161,9 +208,11 @@ public class CommonServiceImpl implements CommonService {
         }
         TemplateInfo info = new TemplateInfo();
         info.setCode(templateCode);
-        info.setExportMethed(templateElement.attributeValue("exportMethed"));
         String fileName = templateElement.attributeValue("fileName");
         info.setFileName(StringUtils.isBlank(fileName) ? templateCode + ".xlsx" : fileName);
+        info.setExportMethed(templateElement.attributeValue("exportMethed"));
+        info.setImportMethed(templateElement.attributeValue("importMethed"));
+        info.setDtoClass(templateElement.attributeValue("dto"));
         if (!isImport) {
             try {
                 Class<? extends PageQO> qoClass = (Class<? extends PageQO>) Class.forName(templateElement.attributeValue("qo"));

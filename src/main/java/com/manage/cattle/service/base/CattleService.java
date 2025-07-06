@@ -9,6 +9,10 @@ import java.util.List;
 public interface CattleService {
     PageInfo<CattleDTO> pageCattle(CattleQO qo);
 
+    List<CattleDTO> listCattle(CattleQO qo);
+
+    List<String> importCattle(String requireFields, List<CattleDTO> list);
+
     CattleDTO getCattle(String cattleCode);
 
     int saveCattle(String type, CattleDTO dto);

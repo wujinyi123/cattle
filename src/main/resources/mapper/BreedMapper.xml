@@ -8,8 +8,11 @@
             t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
             tz.farmZoneCode,tc.cattleCode,
             t.frozenSemenCode,t.frozenSemenBreed,sf.value frozenSemenBreedValue,
-            t.breedingDay,t.breedingMethod,sb.value breedingMethodValue,t.operateUser
+            t.breedingDay,t.breedingMethod,sb.value breedingMethodValue,t.operateUser,
+            pr.result pregnancyResult,spr.value pregnancyResultValue
         from t_breed_register t
+        left join t_breed_pregnancy_result pr on t.registerId=pr.registerId
+        left join t_sys_config spr on spr.code='pregnancyResult' and pr.result=spr.key
         left join t_cattle tc on t.cattleCode=tc.cattleCode
         left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
         left join t_farm tf on tz.farmId=tf.farmId

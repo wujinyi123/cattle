@@ -3,6 +3,7 @@ package com.manage.cattle.service.base;
 import cn.hutool.json.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dto.base.UserDTO;
+import com.manage.cattle.dto.common.ImportInfo;
 import com.manage.cattle.qo.base.LoginQO;
 import com.manage.cattle.qo.base.UserQO;
 
@@ -15,7 +16,9 @@ public interface UserService {
 
     PageInfo<UserDTO> pageUser(UserQO qo);
 
-    List<UserDTO> listUser();
+    List<UserDTO> listUser(UserQO qo);
+
+    List<String> importUser(String requireFields, List<UserDTO> list);
 
     UserDTO getUser(String username);
 

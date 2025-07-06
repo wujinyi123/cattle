@@ -1,0 +1,12 @@
+package com.manage.cattle.qo.common;
+
+import com.manage.cattle.qo.PageQO;
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+public class SysConfigQO extends PageQO {
+    private String code;
+    private List<String> codeList;
+}

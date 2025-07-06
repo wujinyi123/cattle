@@ -5,13 +5,16 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.base.UserDao;
+import com.manage.cattle.dao.common.CommonDao;
 import com.manage.cattle.dto.base.FarmDTO;
 import com.manage.cattle.dto.base.UserDTO;
+import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.exception.LoginException;
 import com.manage.cattle.qo.base.FarmQO;
 import com.manage.cattle.qo.base.LoginQO;
 import com.manage.cattle.qo.base.UserQO;
+import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.base.UserService;
 import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.JWTUtil;
@@ -22,9 +25,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -36,6 +42,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private FarmDao farmDao;
+
+    @Resource
+    private CommonDao commonDao;
 
     @Override
     public UserDTO login(LoginQO qo) {
@@ -71,10 +80,46 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> listUser() {
-        UserQO qo = new UserQO();
-        qo.setStatus("incumbent");
+    public List<UserDTO> listUser(UserQO qo) {
         return userDao.listUser(qo);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public List<String> importUser(String requireFields, List<UserDTO> list) {
+        PermissionUtil.onlySysAdmin();
+        String username = JWTUtil.getUsername();
+        String[] requireFieldArr = requireFields.split(",");
+        SysConfigQO qo = new SysConfigQO();
+        qo.setCodeList(Arrays.asList("isSysAdmin", "userStatus"));
+        Map<String, String> codeMap = commonDao.listSysConfig(qo).stream().collect(Collectors.toMap(dto -> dto.getCode() + "#" + dto.getValue(),
+                SysConfigDTO::getKey, (key1, key2) -> key2));
+        List<String> errList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            UserDTO dto = list.get(i);
+            String address = "第" + (i + 2) + "行：";
+            if (!CommonUtil.checkRequire(requireFieldArr, dto)) {
+                errList.add(address + "必填项不能为空");
+                continue;
+            }
+            dto.setIsSysAdmin(codeMap.get("isSysAdmin#" + dto.getIsSysAdminValue()));
+            dto.setStatus(codeMap.get("userStatus#" + dto.getStatusValue()));
+            if (StringUtils.isAnyBlank(dto.getIsSysAdmin(), dto.getStatus())) {
+                errList.add(address + "是否系统管理员或状态错误");
+                continue;
+            }
+            if (userDao.getUser(dto.getUsername()) != null) {
+                errList.add(address + "账号已存在");
+                continue;
+            }
+            dto.setCreateUser(username);
+            dto.setUpdateUser(username);
+            dto.setPassword(defaultPassword);
+            if (userDao.addUser(dto) == 0){
+                errList.add(address + "添加失败");
+            }
+        }
+        return errList;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.manage.cattle.controller.base;
 import cn.hutool.json.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dto.base.UserDTO;
+import com.manage.cattle.dto.common.ImportInfo;
 import com.manage.cattle.qo.base.LoginQO;
 import com.manage.cattle.qo.base.UserQO;
 import com.manage.cattle.service.base.UserService;
@@ -39,7 +40,14 @@ public class UserController {
 
     @GetMapping("/listUser")
     public List<UserDTO> listUser() {
-        return userService.listUser();
+        UserQO qo = new UserQO();
+        qo.setStatus("incumbent");
+        return userService.listUser(qo);
+    }
+
+    @PostMapping("/importUser")
+    public List<String> importUser(@RequestParam String requireFields, @RequestBody List<UserDTO> list) {
+        return userService.importUser(requireFields, list);
     }
 
     @GetMapping("/getUser")

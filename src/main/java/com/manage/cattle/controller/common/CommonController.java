@@ -3,6 +3,7 @@ package com.manage.cattle.controller.common;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dto.common.ImportInfo;
 import com.manage.cattle.dto.common.SysConfigDTO;
+import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.common.CommonService;
 import com.manage.cattle.util.CommonUtil;
 import jakarta.annotation.Resource;
@@ -29,15 +30,13 @@ public class CommonController {
     private CommonService commonService;
 
     @GetMapping("/pageSysConfig")
-    public PageInfo<SysConfigDTO> pageSysConfig(@RequestParam int pageNum,
-                                                @RequestParam int pageSize,
-                                                @RequestParam(required = false) String code) {
-        return commonService.pageSysConfig(pageNum, pageSize, code);
+    public PageInfo<SysConfigDTO> pageSysConfig(SysConfigQO qo) {
+        return commonService.pageSysConfig(qo);
     }
 
     @GetMapping("/listSysConfig")
-    public List<SysConfigDTO> listSysConfig(@RequestParam String code) {
-        return commonService.listSysConfig(code);
+    public List<SysConfigDTO> listSysConfig(SysConfigQO qo) {
+        return commonService.listSysConfig(qo);
     }
 
     @PostMapping("/addSysConfig")

@@ -50,6 +50,12 @@
         <if test="status!=null and status!=''">
             and t.status=#{status}
         </if>
+        <if test="usernameList!=null and usernameList.size()>0">
+            and t.username in
+            <foreach collection="usernameList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
         order by t.username
     </select>
 

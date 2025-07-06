@@ -28,8 +28,13 @@ public class FarmController {
     }
 
     @GetMapping("/listFarm")
-    public List<FarmDTO> listFarm() {
-        return farmService.listFarm();
+    public List<FarmDTO> listFarm(FarmQO qo) {
+        return farmService.listFarm(qo);
+    }
+
+    @PostMapping("/importFarm")
+    public List<String> importFarm(@RequestParam String requireFields, @RequestBody List<FarmDTO> list) {
+        return farmService.importFarm(requireFields, list);
     }
 
     @GetMapping("/getFarm")
@@ -58,8 +63,13 @@ public class FarmController {
     }
 
     @GetMapping("/listFarmZone")
-    public List<FarmZoneDTO> listFarmZone(@RequestParam String farmId) {
-        return farmService.listFarmZone(farmId);
+    public List<FarmZoneDTO> listFarmZone(FarmZoneQO qo) {
+        return farmService.listFarmZone(qo);
+    }
+
+    @PostMapping("/importFarmZone")
+    public List<String> importFarmZone(@RequestParam String requireFields, @RequestBody List<FarmZoneDTO> list) {
+        return farmService.importFarmZone(requireFields, list);
     }
 
     @GetMapping("/getFarmZone")

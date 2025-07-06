@@ -4,8 +4,10 @@ import cn.hutool.core.util.IdUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.CattleDao;
+import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.breed.BreedDao;
 import com.manage.cattle.dto.base.CattleDTO;
+import com.manage.cattle.dto.base.FarmZoneDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyCheckDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyResultDTO;
 import com.manage.cattle.dto.breed.BreedRegisterDTO;
@@ -38,10 +40,18 @@ public class BreedServiceImpl implements BreedService {
     @Resource
     private CattleDao cattleDao;
 
+    @Resource
+    private FarmDao farmDao;
+
     @Override
     public PageInfo<BreedRegisterDTO> pageBreedRegister(BreedRegisterQO qo) {
         PageHelper.startPage(qo);
         return new PageInfo<>(breedDao.listBreedRegister(qo));
+    }
+
+    @Override
+    public List<BreedRegisterDTO> listBreedRegister(BreedRegisterQO qo) {
+        return breedDao.listBreedRegister(qo);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -106,6 +116,11 @@ public class BreedServiceImpl implements BreedService {
         return new PageInfo<>(breedDao.listBreedPregnancyCheck(qo));
     }
 
+    @Override
+    public List<BreedPregnancyCheckDTO> listBreedPregnancyCheck(BreedPregnancyCheckQO qo) {
+        return breedDao.listBreedPregnancyCheck(qo);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addBreedPregnancyCheck(BreedPregnancyCheckDTO dto) {
@@ -144,6 +159,11 @@ public class BreedServiceImpl implements BreedService {
         return pageInfo;
     }
 
+    @Override
+    public List<BreedPregnancyResultDTO> listBreedPregnancyResult(BreedPregnancyResultQO qo) {
+        return breedDao.listBreedPregnancyResult(qo);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addBreedPregnancyResult(BreedPregnancyResultDTO dto) {
@@ -169,6 +189,13 @@ public class BreedServiceImpl implements BreedService {
                         + ")已存在");
             }
             for (CattleDTO cattleDTO : dto.getChildren()) {
+                CattleQO cattleQO = new CattleQO();
+                cattleQO.setFarmZoneCode(cattleDTO.getFarmZoneCode());
+                FarmZoneDTO farmZoneDTO = farmDao.getFarmZone(dto.getFarmZoneCode());
+                List<CattleDTO> existCattleList = cattleDao.listCattle(cattleQO);
+                if (farmZoneDTO.getSize() <= existCattleList.size()) {
+                    throw new BusinessException("圈舍" + farmZoneDTO.getFarmZoneCode() + "牛只已满");
+                }
                 cattleDTO.setCreateUser(username);
                 cattleDTO.setUpdateUser(username);
                 if (cattleDao.addCattle(cattleDTO) == 0) {

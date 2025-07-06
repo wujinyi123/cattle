@@ -20,5 +20,6 @@ public class CattleDTO extends BaseDTO {
     private String sex;
     private String sexValue;
     private String birthday;
+    private String age;
     private String remark;
 }

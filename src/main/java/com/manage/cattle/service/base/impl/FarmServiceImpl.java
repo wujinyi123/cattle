@@ -24,8 +24,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class FarmServiceImpl implements FarmService {
@@ -45,8 +48,49 @@ public class FarmServiceImpl implements FarmService {
     }
 
     @Override
-    public List<FarmDTO> listFarm() {
-        return farmDao.listFarm(new FarmQO());
+    public List<FarmDTO> listFarm(FarmQO qo) {
+        return farmDao.listFarm(qo);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public List<String> importFarm(String requireFields, List<FarmDTO> list) {
+        PermissionUtil.onlySysAdmin();
+        String username = JWTUtil.getUsername();
+        String[] requireFieldArr = requireFields.split(",");
+        List<String> errList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            FarmDTO dto = list.get(i);
+            String address = "第" + (i + 2) + "行：";
+            if (!CommonUtil.checkRequire(requireFieldArr, dto)) {
+                errList.add(address + "必填项不能为空");
+                continue;
+            }
+            Set<String> usernameSet = new HashSet<>();
+            usernameSet.add(dto.getOwner());
+            usernameSet.addAll(CommonUtil.stringToList(dto.getAdmin()));
+            usernameSet.addAll(CommonUtil.stringToList(dto.getEmployee()));
+            UserQO qo = new UserQO();
+            qo.setUsernameList(new ArrayList<>(usernameSet));
+            List<UserDTO> userList = userDao.listUser(qo);
+            List<String> usernameList = userList.stream().map(UserDTO::getUsername).toList();
+            List<String> errorUsername = usernameSet.stream().filter(item -> !usernameList.contains(item)).toList();
+            if (errorUsername.size() > 0) {
+                errList.add(address + "账号(" + String.join(",", errorUsername) + ")不正确");
+                continue;
+            }
+            if (farmDao.getFarm(dto.getFarmName()) != null) {
+                errList.add(address + "牧场已存在");
+                continue;
+            }
+            dto.setCreateUser(username);
+            dto.setUpdateUser(username);
+            dto.setFarmId(IdUtil.getSnowflakeNextIdStr());
+            if (farmDao.addFarm(dto) == 0) {
+                errList.add(address + "添加失败");
+            }
+        }
+        return errList;
     }
 
     @Override
@@ -132,23 +176,64 @@ public class FarmServiceImpl implements FarmService {
     public PageInfo<FarmZoneDTO> pageFarmZone(FarmZoneQO qo) {
         PageHelper.startPage(qo);
         PageInfo<FarmZoneDTO> pageInfo = new PageInfo<>(farmDao.listFarmZone(qo));
-        if (pageInfo.getList().size() > 0) {
-            List<String> farmZoneCodeList = pageInfo.getList().stream().map(FarmZoneDTO::getFarmZoneCode).toList();
-            CattleQO cattleQO = new CattleQO();
-            cattleQO.setFarmZoneCodeList(farmZoneCodeList);
-            List<CattleDTO> cattleList = cattleDao.listCattle(cattleQO);
-            for (FarmZoneDTO dto : pageInfo.getList()) {
-                dto.setCurrentSize((int) cattleList.stream().filter(item -> dto.getFarmZoneCode().equals(item.getFarmZoneCode())).count());
-            }
-        }
+        setCurrentSize(pageInfo.getList());
         return pageInfo;
     }
 
     @Override
-    public List<FarmZoneDTO> listFarmZone(String farmId) {
-        FarmZoneQO qo = new FarmZoneQO();
-        qo.setFarmId(farmId);
-        return farmDao.listFarmZone(qo);
+    public List<FarmZoneDTO> listFarmZone(FarmZoneQO qo) {
+        List<FarmZoneDTO> list = farmDao.listFarmZone(qo);
+        setCurrentSize(list);
+        return list;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public List<String> importFarmZone(String requireFields, List<FarmZoneDTO> list) {
+        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String username = JWTUtil.getUsername();
+        String[] requireFieldArr = requireFields.split(",");
+        List<String> errList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            FarmZoneDTO dto = list.get(i);
+            String address = "第" + (i + 2) + "行：";
+            if (!CommonUtil.checkRequire(requireFieldArr, dto)) {
+                errList.add(address + "必填项不能为空");
+                continue;
+            }
+            FarmDTO farmDTO = farmDao.getFarm(dto.getFarmName());
+            if (farmDTO == null) {
+                errList.add(address + "牧场不存在");
+                continue;
+            }
+            if (!"Y".equals(isSysAdmin) && !username.equals(farmDTO.getOwner()) && !CommonUtil.stringToList(farmDTO.getAdmin()).contains(username)) {
+                errList.add(address + "权限不足");
+                continue;
+            }
+            if (farmDao.getFarmZone(dto.getFarmZoneCode()) != null) {
+                errList.add(address + "圈舍编号已存在");
+                continue;
+            }
+            dto.setCreateUser(username);
+            dto.setUpdateUser(username);
+            dto.setFarmId(farmDTO.getFarmId());
+            if (farmDao.addFarmZone(dto) == 0) {
+                errList.add(address + "添加失败");
+            }
+        }
+        return errList;
+    }
+
+    private void setCurrentSize(List<FarmZoneDTO> list) {
+        if (list.size() > 0) {
+            List<String> farmZoneCodeList = list.stream().map(FarmZoneDTO::getFarmZoneCode).toList();
+            CattleQO cattleQO = new CattleQO();
+            cattleQO.setFarmZoneCodeList(farmZoneCodeList);
+            List<CattleDTO> cattleList = cattleDao.listCattle(cattleQO);
+            for (FarmZoneDTO dto : list) {
+                dto.setCurrentSize((int) cattleList.stream().filter(item -> dto.getFarmZoneCode().equals(item.getFarmZoneCode())).count());
+            }
+        }
     }
 
     @Override

@@ -11,7 +11,9 @@ import java.util.List;
 public interface FarmService {
     PageInfo<FarmDTO> pageFarm(FarmQO qo);
 
-    List<FarmDTO> listFarm();
+    List<FarmDTO> listFarm(FarmQO qo);
+
+    List<String> importFarm(String requireFields, List<FarmDTO> list);
 
     FarmDTO getFarm(String farmId);
 
@@ -23,7 +25,9 @@ public interface FarmService {
 
     PageInfo<FarmZoneDTO> pageFarmZone(FarmZoneQO qo);
 
-    List<FarmZoneDTO> listFarmZone(String farmId);
+    List<FarmZoneDTO> listFarmZone(FarmZoneQO qo);
+
+    List<String> importFarmZone(String requireFields, List<FarmZoneDTO> list);
 
     FarmZoneDTO getFarmZone(String farmZoneCode);
 

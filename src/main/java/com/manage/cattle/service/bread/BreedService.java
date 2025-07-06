@@ -13,17 +13,23 @@ import java.util.List;
 public interface BreedService {
     PageInfo<BreedRegisterDTO> pageBreedRegister(BreedRegisterQO qo);
 
+    List<BreedRegisterDTO> listBreedRegister(BreedRegisterQO qo);
+
     int addBreedRegister(BreedRegisterDTO dto);
 
     int delBreedRegister(List<Integer> ids);
 
     PageInfo<BreedPregnancyCheckDTO> pageBreedPregnancyCheck(BreedPregnancyCheckQO qo);
 
+    List<BreedPregnancyCheckDTO> listBreedPregnancyCheck(BreedPregnancyCheckQO qo);
+
     int addBreedPregnancyCheck(BreedPregnancyCheckDTO dto);
 
     int delBreedPregnancyCheck(List<Integer> ids);
 
     PageInfo<BreedPregnancyResultDTO> pageBreedPregnancyResult(BreedPregnancyResultQO qo);
+
+    List<BreedPregnancyResultDTO> listBreedPregnancyResult(BreedPregnancyResultQO qo);
 
     int addBreedPregnancyResult(BreedPregnancyResultDTO dto);
 

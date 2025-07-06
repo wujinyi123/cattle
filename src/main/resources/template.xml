@@ -1,11 +1,95 @@
 <templates>
-    <template code="user" exportMethed="com.manage.cattle.dao.base.UserDao#listUser" qo="com.manage.cattle.qo.base.UserQO"
+    <template code="user"
+              exportMethed="com.manage.cattle.service.base.UserService#listUser"
+              importMethed="com.manage.cattle.service.base.UserService#importUser"
+              qo="com.manage.cattle.qo.base.UserQO"
               dto="com.manage.cattle.dto.base.UserDTO">
         <field name="username" title="账号" require="true"/>
         <field name="name" title="姓名" require="true"/>
         <field name="job" title="工种" require="true"/>
         <field name="phone" title="联系方式" require="true"/>
-        <field name="isSysAdminValue" title="是否系统管理员" require="true"/>
-        <field name="statusValue" title="状态" require="true"/>
+        <field name="isSysAdminValue" title="是否系统管理员" require="true" code="isSysAdmin" refKey="isSysAdmin"/>
+        <field name="statusValue" title="状态" require="true" code="userStatus" refKey="status"/>
+    </template>
+    <template code="farm"
+              exportMethed="com.manage.cattle.service.base.FarmService#listFarm"
+              importMethed="com.manage.cattle.service.base.FarmService#importFarm"
+              qo="com.manage.cattle.qo.base.FarmQO"
+              dto="com.manage.cattle.dto.base.FarmDTO">
+        <field name="farmName" title="牧场名称" require="true"/>
+        <field name="owner" title="负责人账号" require="true"/>
+        <field name="admin" title="管理员账号"/>
+        <field name="employee" title="员工账号"/>
+        <field name="address" title="地址" require="true"/>
+        <field name="area" title="面积" require="true"/>
+        <field name="scale" title="养殖规模" require="true"/>
+    </template>
+    <template code="farmZone"
+              exportMethed="com.manage.cattle.service.base.FarmService#listFarmZone"
+              importMethed="com.manage.cattle.service.base.FarmService#importFarmZone"
+              qo="com.manage.cattle.qo.base.FarmZoneQO"
+              dto="com.manage.cattle.dto.base.FarmZoneDTO">
+        <field name="farmName" title="牧场名称" require="true"/>
+        <field name="farmOwner" title="负责人账号" noImport="true"/>
+        <field name="farmAdmin" title="管理员账号" noImport="true"/>
+        <field name="farmZoneCode" title="圈舍编号" require="true"/>
+        <field name="farmZoneRemark" title="圈舍备注"/>
+        <field name="size" title="容量" require="true"/>
+        <field name="currentSize" title="当前容量" noImport="true"/>
+    </template>
+    <template code="cattle"
+              exportMethed="com.manage.cattle.service.base.CattleService#listCattle"
+              importMethed="com.manage.cattle.service.base.CattleService#importCattle"
+              qo="com.manage.cattle.qo.base.CattleQO"
+              dto="com.manage.cattle.dto.base.CattleDTO">
+        <field name="farmName" title="牧场名称" noImport="true"/>
+        <field name="farmOwner" title="负责人账号" noImport="true"/>
+        <field name="farmAdmin" title="管理员账号" noImport="true"/>
+        <field name="farmZoneCode" title="圈舍编号" require="true"/>
+        <field name="cattleCode" title="耳牌号" require="true"/>
+        <field name="cattleName" title="牛只名称"/>
+        <field name="breedValue" title="品种" require="true"/>
+        <field name="sexValue" title="性别" require="true"/>
+        <field name="birthday" title="出生日期" require="true"/>
+        <field name="age" title="年龄" noImport="true"/>
+        <field name="remark" title="备注"/>
+    </template>
+    <template code="breedRegister"
+              exportMethed="com.manage.cattle.service.bread.BreedService#listBreedRegister"
+              qo="com.manage.cattle.qo.breed.BreedRegisterQO">
+        <field name="registerId" title="登记号"/>
+        <field name="farmName" title="牧场名称"/>
+        <field name="farmZoneCode" title="圈舍编号"/>
+        <field name="cattleCode" title="牛只耳牌号"/>
+        <field name="frozenSemenCode" title="冻精号"/>
+        <field name="frozenSemenBreedValue" title="冻精品种"/>
+        <field name="breedingDay" title="配种日期"/>
+        <field name="breedingMethodValue" title="配种方法"/>
+        <field name="operateUser" title="输配员"/>
+        <field name="pregnancyResultValue" title="妊娠结果"/>
+    </template>
+    <template code="breedPregnancyCheck"
+              exportMethed="com.manage.cattle.service.bread.BreedService#listBreedPregnancyCheck"
+              qo="com.manage.cattle.qo.breed.BreedPregnancyCheckQO">
+        <field name="registerId" title="登记号"/>
+        <field name="farmName" title="牧场名称"/>
+        <field name="farmZoneCode" title="圈舍编号"/>
+        <field name="cattleCode" title="牛只耳牌号"/>
+        <field name="checkDay" title="检查日期"/>
+        <field name="checkUser" title="检查员"/>
+        <field name="result" title="检查结果"/>
+    </template>
+    <template code="breedPregnancyResult"
+              exportMethed="com.manage.cattle.service.bread.BreedService#listBreedPregnancyResult"
+              qo="com.manage.cattle.qo.breed.BreedPregnancyResultQO">
+        <field name="registerId" title="登记号"/>
+        <field name="farmName" title="牧场名称"/>
+        <field name="farmZoneCode" title="圈舍编号"/>
+        <field name="cattleCode" title="牛只耳牌号"/>
+        <field name="resultDay" title="日期"/>
+        <field name="operaUser" title="操作员"/>
+        <field name="result" title="结果"/>
+        <field name="remark" title="备注"/>
+        <field name="childrenCodeList" title="后代"/>
     </template>
 </templates>
