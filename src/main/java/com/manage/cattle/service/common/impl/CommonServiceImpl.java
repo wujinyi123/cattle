@@ -28,6 +28,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -62,6 +63,7 @@ public class CommonServiceImpl implements CommonService {
         return commonDao.listSysConfig(qo);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public int addSysConfig(SysConfigDTO dto) {
         PermissionUtil.onlySysAdmin();
@@ -71,6 +73,7 @@ public class CommonServiceImpl implements CommonService {
         return commonDao.addSysConfig(dto);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public int delSysConfig(List<Integer> ids) {
         PermissionUtil.onlySysAdmin();

@@ -1,8 +1,6 @@
 package com.manage.cattle.advice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.manage.cattle.dto.common.FileByteInfo;
-import com.manage.cattle.util.CommonUtil;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import org.springframework.core.MethodParameter;

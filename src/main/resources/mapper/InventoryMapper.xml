@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.manage.cattle.dao.inventory.InventoryDao">
+    <select id="listInventoryBuy" resultType="com.manage.cattle.dto.inventory.InventoryBuyDTO">
+        select
+            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+            t.farmId,f.farmName,f.owner farmOwner,t.cattleCode,
+            t.source,t.quarantineCertificate,t.buyDay
+        from t_inventory_buy t
+        left join t_farm f on t.farmId=f.farmId
+        where 1=1
+        <if test="farmName!=null and farmName!=''">
+            and f.farmName like concat('%',#{farmName},'%')
+        </if>
+        <if test="cattleCode!=null and cattleCode!=''">
+            and t.cattleCode like concat('%',#{cattleCode},'%')
+        </if>
+        <if test="source!=null and source!=''">
+            and t.source like concat('%',#{source},'%')
+        </if>
+        <if test="buyDayStart!=null and buyDayStart!=''">
+            and t.buyDay &gt;= #{buyDayStart}
+        </if>
+        <if test="buyDayEnd!=null and buyDayEnd!=''">
+            and t.buyDay &lt;= #{buyDayEnd}
+        </if>
+        <if test="ids!=null and ids.size()>0">
+            and t.id in
+            <foreach collection="ids" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        order by t.buyDay desc
+    </select>
+
+    <insert id="addInventoryBuy">
+        insert into t_inventory_buy(createUser,createTime,updateUser,updateTime,
+                                    farmId,cattleCode,source,quarantineCertificate,buyDay)
+        values (#{createUser},now(),#{updateUser},now(),
+                #{farmId},#{cattleCode},#{source},#{quarantineCertificate},#{buyDay})
+    </insert>
+
+    <delete id="delInventoryBuy">
+        delete from t_inventory_buy
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="listInventorySell" resultType="com.manage.cattle.dto.inventory.InventorySellDTO">
+        select
+        t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+        t.farmId,f.farmName,f.owner farmOwner,t.cattleCode,t.cattleInfo,
+        t.buyerInfo,t.price,t.quarantineCertificate,t.sellDay
+        from t_inventory_sell t
+        left join t_farm f on t.farmId=f.farmId
+        where 1=1
+        <if test="farmName!=null and farmName!=''">
+            and f.farmName like concat('%',#{farmName},'%')
+        </if>
+        <if test="cattleCode!=null and cattleCode!=''">
+            and t.cattleCode like concat('%',#{cattleCode},'%')
+        </if>
+        <if test="buyerInfo!=null and buyerInfo!=''">
+            and t.buyerInfo like concat('%',#{buyerInfo},'%')
+        </if>
+        <if test="quarantineCertificate!=null and quarantineCertificate!=''">
+            and t.quarantineCertificate like concat('%',#{quarantineCertificate},'%')
+        </if>
+        <if test="sellDayStart!=null and sellDayStart!=''">
+            and t.sellDay &gt;= #{sellDayStart}
+        </if>
+        <if test="sellDayEnd!=null and sellDayEnd!=''">
+            and t.sellDay &lt;= #{sellDayEnd}
+        </if>
+        <if test="ids!=null and ids.size()>0">
+            and t.id in
+            <foreach collection="ids" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        order by t.sellDay desc
+    </select>
+
+    <insert id="addInventorySell">
+        insert into t_inventory_sell(createUser,createTime,updateUser,updateTime,
+                                     farmId,cattleCode,cattleInfo,buyerInfo,price,quarantineCertificate,sellDay)
+        values (#{createUser},now(),#{updateUser},now(),
+                #{farmId},#{cattleCode},#{cattleInfo},#{buyerInfo},#{price},#{quarantineCertificate},#{sellDay})
+    </insert>
+
+    <delete id="delInventorySell">
+        delete from t_inventory_sell
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="listInventoryDeath" resultType="com.manage.cattle.dto.inventory.InventoryDeathDTO">
+        select
+        t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+        t.farmId,f.farmName,f.owner farmOwner,t.cattleCode,t.cattleInfo,
+        t.reason,t.handleMethod,t.deathDay
+        from t_inventory_death t
+        left join t_farm f on t.farmId=f.farmId
+        where 1=1
+        <if test="farmName!=null and farmName!=''">
+            and f.farmName like concat('%',#{farmName},'%')
+        </if>
+        <if test="cattleCode!=null and cattleCode!=''">
+            and t.cattleCode like concat('%',#{cattleCode},'%')
+        </if>
+        <if test="reason!=null and reason!=''">
+            and t.reason like concat('%',#{reason},'%')
+        </if>
+        <if test="handleMethod!=null and handleMethod!=''">
+            and t.handleMethod like concat('%',#{handleMethod},'%')
+        </if>
+        <if test="deathDayStart!=null and deathDayStart!=''">
+            and t.deathDay &gt;= #{deathDayStart}
+        </if>
+        <if test="deathDayEnd!=null and deathDayEnd!=''">
+            and t.deathDay &lt;= #{deathDayEnd}
+        </if>
+        <if test="ids!=null and ids.size()>0">
+            and t.id in
+            <foreach collection="ids" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        order by t.deathDay desc
+    </select>
+
+    <insert id="addInventoryDeath">
+        insert into t_inventory_death(createUser,createTime,updateUser,updateTime,
+                                      farmId,cattleCode,cattleInfo,reason,handleMethod,deathDay)
+        values (#{createUser},now(),#{updateUser},now(),
+                #{farmId},#{cattleCode},#{cattleInfo},#{reason},#{handleMethod},#{deathDay})
+    </insert>
+
+    <delete id="delInventoryDeath">
+        delete from t_inventory_death
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

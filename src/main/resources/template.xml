@@ -92,4 +92,32 @@
         <field name="remark" title="备注"/>
         <field name="childrenCodeList" title="后代"/>
     </template>
+    <template code="inventoryBuy"
+              exportMethed="com.manage.cattle.service.inventory.InventoryService#listInventoryBuy"
+              qo="com.manage.cattle.qo.inventory.InventoryBuyQO">
+        <field name="farmName" title="牧场名称"/>
+        <field name="cattleCode" title="牛只耳牌号"/>
+        <field name="source" title="来源"/>
+        <field name="quarantineCertificate" title="检疫证明"/>
+        <field name="buyDay" title="入场时间"/>
+    </template>
+    <template code="inventorySell"
+              exportMethed="com.manage.cattle.service.inventory.InventoryService#listInventorySell"
+              qo="com.manage.cattle.qo.inventory.InventorySellQO">
+        <field name="farmName" title="牧场名称"/>
+        <field name="cattleCode" title="牛只耳牌号"/>
+        <field name="buyerInfo" title="买家信息"/>
+        <field name="price" title="价格"/>
+        <field name="quarantineCertificate" title="检疫证明"/>
+        <field name="sellDay" title="日期"/>
+    </template>
+    <template code="inventoryDeath"
+              exportMethed="com.manage.cattle.service.inventory.InventoryService#listInventoryDeath"
+              qo="com.manage.cattle.qo.inventory.InventoryDeathQO">
+        <field name="farmName" title="牧场名称"/>
+        <field name="cattleCode" title="牛只耳牌号"/>
+        <field name="reason" title="原因"/>
+        <field name="handleMethod" title="处理方式"/>
+        <field name="deathDay" title="日期"/>
+    </template>
 </templates>
