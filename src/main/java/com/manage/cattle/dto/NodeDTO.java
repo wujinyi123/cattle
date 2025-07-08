@@ -1,7 +1,7 @@
 package com.manage.cattle.dto;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -26,9 +26,9 @@ public class NodeDTO {
         for (NodeDTO dto : list) {
             dto.setValue(dto.getId());
             dto.setLabel(dto.getName());
-            dto.setChildren(list.stream().filter(item -> StringUtils.equals(dto.getId(), item.getParentId())).toList());
+            dto.setChildren(list.stream().filter(item -> StrUtil.equals(dto.getId(), item.getParentId())).toList());
         }
-        List<NodeDTO> resultList = list.stream().filter(item -> StringUtils.isBlank(item.getParentId()) || "0".equals(item.getParentId())).toList();
+        List<NodeDTO> resultList = list.stream().filter(item -> StrUtil.isBlank(item.getParentId()) || "0".equals(item.getParentId())).toList();
         path(resultList, new ArrayList<>(), new ArrayList<>());
         return resultList;
     }

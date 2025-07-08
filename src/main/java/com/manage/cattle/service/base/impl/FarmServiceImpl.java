@@ -1,6 +1,7 @@
 package com.manage.cattle.service.base.impl;
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.CattleDao;
@@ -20,7 +21,6 @@ import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.JWTUtil;
 import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -145,7 +145,7 @@ public class FarmServiceImpl implements FarmService {
     }
 
     private void checkAdminEmployee(List<String> userList, FarmDTO dto) {
-        if (StringUtils.isNotBlank(dto.getAdmin())) {
+        if (StrUtil.isNotBlank(dto.getAdmin())) {
             List<String> adminList = CommonUtil.stringToList(dto.getAdmin());
             adminList.sort(String::compareTo);
             List<String> errUser = adminList.stream().filter(item -> !userList.contains(item)).toList();
@@ -154,7 +154,7 @@ public class FarmServiceImpl implements FarmService {
             }
             dto.setAdmin(String.join(",", adminList));
         }
-        if (StringUtils.isNotBlank(dto.getEmployee())) {
+        if (StrUtil.isNotBlank(dto.getEmployee())) {
             List<String> employeeList = CommonUtil.stringToList(dto.getEmployee());
             employeeList.sort(String::compareTo);
             List<String> errUser = employeeList.stream().filter(item -> !userList.contains(item)).toList();

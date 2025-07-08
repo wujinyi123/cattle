@@ -1,5 +1,6 @@
 package com.manage.cattle.util;
 
+import cn.hutool.core.util.StrUtil;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -7,7 +8,6 @@ import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Calendar;
 import java.util.Map;
@@ -52,11 +52,11 @@ public class JWTUtil {
      */
     public static String getToken(HttpServletRequest request) {
         String token = request.getHeader("token");
-        if (StringUtils.isNotBlank(token)) {
+        if (StrUtil.isNotBlank(token)) {
             return token;
         }
         token = request.getParameter("token");
-        if (StringUtils.isNotBlank(token)) {
+        if (StrUtil.isNotBlank(token)) {
             return token;
         }
         Cookie[] cookies = request.getCookies();
@@ -64,7 +64,7 @@ public class JWTUtil {
             for (Cookie cookie : cookies) {
                 String name = cookie.getName();
                 String value = cookie.getValue();
-                if ("token".equals(name) && StringUtils.isNotBlank(value)) {
+                if ("token".equals(name) && StrUtil.isNotBlank(value)) {
                     return value;
                 }
             }

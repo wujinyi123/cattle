@@ -1,6 +1,7 @@
 package com.manage.cattle.service.common.impl;
 
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -22,7 +23,6 @@ import com.manage.cattle.util.JWTUtil;
 import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -212,7 +212,7 @@ public class CommonServiceImpl implements CommonService {
         TemplateInfo info = new TemplateInfo();
         info.setCode(templateCode);
         String fileName = templateElement.attributeValue("fileName");
-        info.setFileName(StringUtils.isBlank(fileName) ? templateCode + ".xlsx" : fileName);
+        info.setFileName(StrUtil.isBlank(fileName) ? templateCode + ".xlsx" : fileName);
         info.setExportMethed(templateElement.attributeValue("exportMethed"));
         info.setImportMethed(templateElement.attributeValue("importMethed"));
         info.setDtoClass(templateElement.attributeValue("dto"));
@@ -223,7 +223,7 @@ public class CommonServiceImpl implements CommonService {
                 Map<String, String> map = new HashMap<>();
                 for (Field field : fields) {
                     String value = params.get(field.getName());
-                    if (StringUtils.isBlank(value)) {
+                    if (StrUtil.isBlank(value)) {
                         continue;
                     }
                     map.put(field.getName(), value);

@@ -1,5 +1,6 @@
 package com.manage.cattle.service.base.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.CattleDao;
@@ -16,7 +17,6 @@ import com.manage.cattle.service.base.CattleService;
 import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.JWTUtil;
 import jakarta.annotation.Resource;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +76,7 @@ public class CattleServiceImpl implements CattleService {
             }
             dto.setBreed(codeMap.get("cattleBreed#" + dto.getBreedValue()));
             dto.setSex(codeMap.get("cattleSex#" + dto.getSexValue()));
-            if (StringUtils.isAnyBlank(dto.getBreed(), dto.getSex())) {
+            if (StrUtil.isBlank(dto.getBreed()) || StrUtil.isBlank(dto.getSex())) {
                 errList.add(address + "品种或性别错误");
                 continue;
             }
@@ -119,7 +119,7 @@ public class CattleServiceImpl implements CattleService {
     private void setAge(CattleDTO dto) {
         String start = dto.getBirthday();
         String end = CommonUtil.dateToStr(new Date());
-        if (StringUtils.equals(start, end)) {
+        if (StrUtil.equals(start, end)) {
             dto.setAge("0天");
             return;
         }

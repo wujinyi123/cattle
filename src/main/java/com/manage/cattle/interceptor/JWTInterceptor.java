@@ -1,5 +1,6 @@
 package com.manage.cattle.interceptor;
 
+import cn.hutool.core.util.StrUtil;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,7 +8,6 @@ import com.manage.cattle.util.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ public class JWTInterceptor implements HandlerInterceptor {
         String token = JWTUtil.getToken(request);
         ResponseEntity<Object> responseEntity;
         try {
-            if (StringUtils.isNotBlank(token)) {
+            if (StrUtil.isNotBlank(token)) {
                 //验证令牌
                 JWTUtil.verify(token);
                 return true;

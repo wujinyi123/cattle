@@ -1,5 +1,6 @@
 package com.manage.cattle.service.base.impl;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -20,7 +21,6 @@ import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.JWTUtil;
 import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO login(LoginQO qo) {
-        if (StringUtils.isAnyBlank(qo.getUsername(), qo.getPassword())) {
+        if (StrUtil.isBlank(qo.getUsername()) || StrUtil.isBlank(qo.getPassword())) {
             throw new LoginException("账号密码不能为空");
         }
         UserDTO dto = userDao.login(qo);
@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
             }
             dto.setIsSysAdmin(codeMap.get("isSysAdmin#" + dto.getIsSysAdminValue()));
             dto.setStatus(codeMap.get("userStatus#" + dto.getStatusValue()));
-            if (StringUtils.isAnyBlank(dto.getIsSysAdmin(), dto.getStatus())) {
+            if (StrUtil.isBlank(dto.getIsSysAdmin()) || StrUtil.isBlank(dto.getStatus())) {
                 errList.add(address + "是否系统管理员或状态错误");
                 continue;
             }
@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
             dto.setCreateUser(username);
             dto.setUpdateUser(username);
             dto.setPassword(defaultPassword);
-            if (userDao.addUser(dto) == 0){
+            if (userDao.addUser(dto) == 0) {
                 errList.add(address + "添加失败");
             }
         }
@@ -168,14 +168,14 @@ public class UserServiceImpl implements UserService {
         String password = jsonObject.get("password", String.class);
         String newPassword = jsonObject.get("newPassword", String.class);
         String confirmPassword = jsonObject.get("confirmPassword", String.class);
-        if (StringUtils.isAnyBlank(password, newPassword, confirmPassword)) {
+        if (StrUtil.isBlank(password) || StrUtil.isBlank(newPassword) || StrUtil.isBlank(confirmPassword)) {
             throw new BusinessException("新旧密码均不能为空");
         }
         UserDTO user = userDao.login(new LoginQO(username, password));
         if (Objects.isNull(user)) {
             throw new BusinessException("密码不正确");
         }
-        if (!StringUtils.equals(newPassword, confirmPassword)) {
+        if (!StrUtil.equals(newPassword, confirmPassword)) {
             throw new BusinessException("两次新密码不一致");
         }
         return userDao.updatePassword(username, newPassword);
@@ -186,7 +186,7 @@ public class UserServiceImpl implements UserService {
     public int updatePhone(JSONObject jsonObject) {
         String username = JWTUtil.getUsername();
         String phone = jsonObject.get("phone", String.class);
-        if (StringUtils.isBlank(phone)) {
+        if (StrUtil.isBlank(phone)) {
             throw new BusinessException("联系方式不能为空");
         }
         return userDao.updatePhone(username, phone);

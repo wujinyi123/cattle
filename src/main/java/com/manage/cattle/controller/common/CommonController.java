@@ -1,5 +1,6 @@
 package com.manage.cattle.controller.common;
 
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dto.common.ImportInfo;
 import com.manage.cattle.dto.common.SysConfigDTO;
@@ -8,7 +9,6 @@ import com.manage.cattle.service.common.CommonService;
 import com.manage.cattle.util.CommonUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,7 +54,7 @@ public class CommonController {
         Map<String, String> params = new HashMap<>();
         Map<String, String[]> parameterMap = request.getParameterMap();
         for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
-            if (Objects.isNull(entry.getValue()) || entry.getValue().length == 0 || StringUtils.isBlank(entry.getValue()[0])) {
+            if (Objects.isNull(entry.getValue()) || entry.getValue().length == 0 || StrUtil.isBlank(entry.getValue()[0])) {
                 continue;
             }
             params.put(entry.getKey(), entry.getValue()[0]);

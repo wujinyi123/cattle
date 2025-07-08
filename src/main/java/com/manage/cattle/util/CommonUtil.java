@@ -1,11 +1,11 @@
 package com.manage.cattle.util;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.manage.cattle.dto.common.FileByteInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -43,9 +43,9 @@ public class CommonUtil {
     public static boolean checkRequire(String[] requireFieldArr, Object obj) {
         String json = JSONUtil.toJsonStr(obj);
         JSONObject jsonObject = JSONUtil.parseObj(json);
-        for (String field:requireFieldArr) {
+        for (String field : requireFieldArr) {
             Object value = jsonObject.get(field);
-            if (value==null || "".equals(value)) {
+            if (value == null || "".equals(value)) {
                 return false;
             }
         }
@@ -58,14 +58,14 @@ public class CommonUtil {
     }
 
     public static List<String> stringToList(String str) {
-        if (StringUtils.isBlank(str)) {
+        if (StrUtil.isBlank(str)) {
             return new ArrayList<>();
         }
         return new ArrayList<>(Arrays.asList(str.split(",")));
     }
 
     public static String encode(String str) {
-        if (StringUtils.isBlank(str)) {
+        if (StrUtil.isBlank(str)) {
             return str;
         }
         try {
