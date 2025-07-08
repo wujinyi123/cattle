@@ -1,8 +1,8 @@
 package com.manage.cattle.dto;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public class NodeDTO {
     private List<String> nameList;
 
     public static List<NodeDTO> getTree(List<NodeDTO> list) {
-        if (CollectionUtils.isEmpty(list)) {
+        if (CollUtil.isEmpty(list)) {
             return new ArrayList<>();
         }
         for (NodeDTO dto : list) {
@@ -34,7 +34,7 @@ public class NodeDTO {
     }
 
     private static void path(List<NodeDTO> list, List<String> ids, List<String> nameList) {
-        if (CollectionUtils.isEmpty(list)) {
+        if (CollUtil.isEmpty(list)) {
             return;
         }
         for (NodeDTO dto:list) {

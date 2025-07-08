@@ -1,5 +1,6 @@
 package com.manage.cattle.service.common.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
@@ -29,7 +30,6 @@ import org.dom4j.io.SAXReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
@@ -145,7 +145,7 @@ public class CommonServiceImpl implements CommonService {
         } catch (Exception e) {
             throw new BusinessException("读取xlsx数据失败");
         }
-        if (CollectionUtils.isEmpty(list)) {
+        if (CollUtil.isEmpty(list)) {
             throw new BusinessException("数据为空");
         }
         List<BaseDTO> importList = new ArrayList<>();

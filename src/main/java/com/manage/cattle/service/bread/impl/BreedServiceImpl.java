@@ -1,5 +1,6 @@
 package com.manage.cattle.service.bread.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.IdUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -23,7 +24,6 @@ import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -170,13 +170,13 @@ public class BreedServiceImpl implements BreedService {
         BreedRegisterDTO breedRegisterDTO = breedDao.getBreedRegister(dto.getRegisterId());
         PermissionUtil.breedPregnancyAddPermission(breedRegisterDTO);
         String username = JWTUtil.getUsername();
-        if ("birth".equals(dto.getResult()) && CollectionUtils.isEmpty(dto.getChildren())) {
+        if ("birth".equals(dto.getResult()) && CollUtil.isEmpty(dto.getChildren())) {
             throw new BusinessException("生育时，后代不能为空");
         }
-        if ("abortion".equals(dto.getResult()) && !CollectionUtils.isEmpty(dto.getChildren())) {
+        if ("abortion".equals(dto.getResult()) && CollUtil.isNotEmpty(dto.getChildren())) {
             throw new BusinessException("流产时，后代应为空");
         }
-        if (!CollectionUtils.isEmpty(dto.getChildren())) {
+        if (CollUtil.isNotEmpty(dto.getChildren())) {
             List<String> cattleCodeList = dto.getChildren().stream().map(CattleDTO::getCattleCode).toList();
             CattleQO qo = new CattleQO();
             qo.setCattleCodeList(cattleCodeList);
