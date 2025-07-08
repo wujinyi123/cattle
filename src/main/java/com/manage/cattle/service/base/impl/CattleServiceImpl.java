@@ -15,7 +15,7 @@ import com.manage.cattle.qo.base.CattleQO;
 import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.base.CattleService;
 import com.manage.cattle.util.CommonUtil;
-import com.manage.cattle.util.JWTUtil;
+import com.manage.cattle.util.UserUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,8 +59,8 @@ public class CattleServiceImpl implements CattleService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public List<String> importCattle(String requireFields, List<CattleDTO> list) {
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
-        String username = JWTUtil.getUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
+        String username = UserUtil.getUsername();
         String[] requireFieldArr = requireFields.split(",");
         SysConfigQO qo = new SysConfigQO();
         qo.setCodeList(Arrays.asList("cattleBreed", "cattleSex"));
@@ -152,8 +152,8 @@ public class CattleServiceImpl implements CattleService {
             throw new BusinessException("牧场不存在");
         }
         List<String> adminList = CommonUtil.stringToList(farmDTO.getAdmin());
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
-        String username = JWTUtil.getUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
+        String username = UserUtil.getUsername();
         if (!"Y".equals(isSysAdmin) && !username.equals(farmDTO.getOwner()) && !adminList.contains(username)) {
             throw new BusinessException("权限不足");
         }
@@ -179,14 +179,14 @@ public class CattleServiceImpl implements CattleService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int delCattle(List<String> cattleCodeList) {
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
         if ("Y".equals(isSysAdmin)) {
             return cattleDao.delCattle(cattleCodeList);
         }
         CattleQO qo = new CattleQO();
         qo.setCattleCodeList(cattleCodeList);
         List<CattleDTO> cattleList = cattleDao.listCattle(qo);
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         if (cattleList.stream().anyMatch(item -> !username.equals(item.getFarmAdmin()) && !CommonUtil.stringToList(item.getFarmAdmin()).contains(username))) {
             throw new BusinessException("权限不足");
         }

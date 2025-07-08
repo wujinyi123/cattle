@@ -20,7 +20,7 @@ import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.qo.PageQO;
 import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.common.CommonService;
-import com.manage.cattle.util.JWTUtil;
+import com.manage.cattle.util.UserUtil;
 import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +67,7 @@ public class CommonServiceImpl implements CommonService {
     @Override
     public int addSysConfig(SysConfigDTO dto) {
         PermissionUtil.onlySysAdmin();
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         return commonDao.addSysConfig(dto);

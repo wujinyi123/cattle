@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class PermissionUtil {
     public static void onlySysAdmin() {
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
         if (!"Y".equals(isSysAdmin)) {
             throw new BusinessException("仅系统管理员操作");
         }
@@ -25,19 +25,19 @@ public class PermissionUtil {
         userSet.addAll(CommonUtil.stringToList(breedRegisterDTO.getFarmOwner()));
         userSet.addAll(CommonUtil.stringToList(breedRegisterDTO.getFarmEmployee()));
         userSet.addAll(CommonUtil.stringToList(breedRegisterDTO.getFarmAdmin()));
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
-        String username = JWTUtil.getUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
+        String username = UserUtil.getUsername();
         if (!"Y".equals(isSysAdmin) && !userSet.contains(username)) {
             throw new BusinessException("权限不足");
         }
     }
 
     public static void breedPregnancyDelPermission(List<? extends BreedBaseDTO> list) {
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
         if ("Y".equals(isSysAdmin)) {
             return;
         }
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         long count = list.stream().filter(item -> {
             Set<String> userSet = new HashSet<>();
             userSet.addAll(CommonUtil.stringToList(item.getFarmOwner()));

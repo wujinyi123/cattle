@@ -1,10 +1,8 @@
 package com.manage.cattle.interceptor;
 
 import cn.hutool.core.util.StrUtil;
-import com.auth0.jwt.exceptions.AlgorithmMismatchException;
-import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.manage.cattle.util.JWTUtil;
+import com.manage.cattle.util.UserUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -21,29 +19,21 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class JWTInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        ResponseEntity<Object> responseEntity = null;
         //获取令牌token
-        String token = JWTUtil.getToken(request);
-        ResponseEntity<Object> responseEntity;
-        try {
-            if (StrUtil.isNotBlank(token)) {
-                //验证令牌
-                JWTUtil.verify(token);
-                return true;
-            } else {
-                responseEntity = new ResponseEntity<>("token为空", HttpStatus.UNAUTHORIZED);
-            }
-        } catch (SignatureVerificationException | AlgorithmMismatchException e) {
-            log.error("无效token", e);
-            responseEntity = new ResponseEntity<>("无效token", HttpStatus.UNAUTHORIZED);
-        } catch (Exception e) {
-            log.error("token已过期", e);
+        String token = UserUtil.getToken(request);
+        if (StrUtil.isBlank(token)) {
+            responseEntity = new ResponseEntity<>("token为空", HttpStatus.UNAUTHORIZED);
+        } else if (!UserUtil.verify(token)) {
             responseEntity = new ResponseEntity<>("token已过期", HttpStatus.UNAUTHORIZED);
         }
-        //将map转为json，返回给前端
-        String json = new ObjectMapper().writeValueAsString(responseEntity);
-        response.setContentType("application/json;charset=utf-8");
-        response.setStatus(responseEntity.getStatusCode().value());
-        response.getWriter().write(json);
-        return false;
+        if (responseEntity != null) {
+            //将map转为json，返回给前端
+            String json = new ObjectMapper().writeValueAsString(responseEntity);
+            response.setContentType("application/json;charset=utf-8");
+            response.setStatus(responseEntity.getStatusCode().value());
+            response.getWriter().write(json);
+        }
+        return responseEntity == null;
     }
 }

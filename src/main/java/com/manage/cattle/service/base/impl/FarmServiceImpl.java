@@ -18,7 +18,7 @@ import com.manage.cattle.qo.base.FarmZoneQO;
 import com.manage.cattle.qo.base.UserQO;
 import com.manage.cattle.service.base.FarmService;
 import com.manage.cattle.util.CommonUtil;
-import com.manage.cattle.util.JWTUtil;
+import com.manage.cattle.util.UserUtil;
 import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -56,7 +56,7 @@ public class FarmServiceImpl implements FarmService {
     @Override
     public List<String> importFarm(String requireFields, List<FarmDTO> list) {
         PermissionUtil.onlySysAdmin();
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         String[] requireFieldArr = requireFields.split(",");
         List<String> errList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
@@ -109,7 +109,7 @@ public class FarmServiceImpl implements FarmService {
             throw new BusinessException("负责人账号不正确");
         }
         checkAdminEmployee(userList, dto);
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         if ("add".equals(type)) {
@@ -130,8 +130,8 @@ public class FarmServiceImpl implements FarmService {
         if (Objects.isNull(farmDTO)) {
             throw new BusinessException("牧场不存在");
         }
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
-        String username = JWTUtil.getUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
+        String username = UserUtil.getUsername();
         if (!"Y".equals(isSysAdmin) && !username.equals(farmDTO.getOwner())) {
             throw new BusinessException("权限不足");
         }
@@ -190,8 +190,8 @@ public class FarmServiceImpl implements FarmService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public List<String> importFarmZone(String requireFields, List<FarmZoneDTO> list) {
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
-        String username = JWTUtil.getUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
+        String username = UserUtil.getUsername();
         String[] requireFieldArr = requireFields.split(",");
         List<String> errList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
@@ -248,8 +248,8 @@ public class FarmServiceImpl implements FarmService {
         if (Objects.isNull(farmDTO)) {
             throw new BusinessException("牧场不存在");
         }
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
-        String username = JWTUtil.getUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
+        String username = UserUtil.getUsername();
         List<String> adminList = CommonUtil.stringToList(farmDTO.getAdmin());
         if (!"Y".equals(isSysAdmin) && !username.equals(farmDTO.getOwner()) && !adminList.contains(username)) {
             throw new BusinessException("权限不足");
@@ -269,8 +269,8 @@ public class FarmServiceImpl implements FarmService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int delFarmZone(List<String> farmZoneCodeList) {
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
-        String username = JWTUtil.getUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
+        String username = UserUtil.getUsername();
         FarmZoneQO qo = new FarmZoneQO();
         qo.setFarmZoneCodeList(farmZoneCodeList);
         List<FarmZoneDTO> farmZoneList = farmDao.listFarmZone(qo);

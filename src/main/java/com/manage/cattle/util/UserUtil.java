@@ -1,22 +1,21 @@
 package com.manage.cattle.util;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.StrUtil;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTCreator;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.Claim;
-import com.auth0.jwt.interfaces.DecodedJWT;
+import cn.hutool.jwt.JWT;
+import cn.hutool.jwt.JWTPayload;
+import cn.hutool.jwt.JWTUtil;
+import com.manage.cattle.exception.LoginException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.Calendar;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class JWTUtil {
+public class UserUtil {
     //秘钥
-    private static final String SIGNATURE = "com.manage.cattle";
-    //过期时间为1小时
-    public static final Integer EXPIRATION_TIME = 60 * 60;
+    private static final String SECRET_KEY = "com.manage.cattle";
 
     /**
      * 生成token
@@ -24,15 +23,12 @@ public class JWTUtil {
      * @param payload token需要携带的信息
      * @return token字符串
      */
-    public static String createToken(Map<String, String> payload) {
-        // 指定token过期时间为1小时
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, EXPIRATION_TIME);
-        JWTCreator.Builder builder = JWT.create();
-        // 构建payload
-        payload.forEach(builder::withClaim);
-        // 指定过期时间和签名算法
-        return builder.withExpiresAt(calendar.getTime()).sign(Algorithm.HMAC256(SIGNATURE));
+    public static String createToken(Map<String, Object> payload) {
+        DateTime now = DateTime.now();
+        payload.put(JWTPayload.ISSUED_AT, now);
+        payload.put(JWTPayload.EXPIRES_AT, now.offsetNew(DateField.HOUR, 1));
+        payload.put(JWTPayload.NOT_BEFORE, now);
+        return JWTUtil.createToken(payload, SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -77,18 +73,9 @@ public class JWTUtil {
      *
      * @param token token
      */
-    public static void verify(String token) {
-        JWT.require(Algorithm.HMAC256(SIGNATURE)).build().verify(token);
-    }
-
-    /**
-     * 获取token中payload
-     *
-     * @param token token
-     * @return DecodedJWT
-     */
-    public static DecodedJWT getPayload(String token) {
-        return JWT.require(Algorithm.HMAC256(SIGNATURE)).build().verify(token);
+    public static boolean verify(String token) {
+        JWT jwt = getJwt(token);
+        return jwt.verify();
     }
 
     /**
@@ -97,10 +84,8 @@ public class JWTUtil {
      * @return String
      */
     public static String getUsername() {
-        String token = getToken();
-        DecodedJWT jwt = getPayload(token);
-        Map<String, Claim> claims = jwt.getClaims();
-        return claims.get("username").asString();
+        JWT jwt = getJwt();
+        return jwt.getPayload("username").toString();
     }
 
     /**
@@ -109,9 +94,20 @@ public class JWTUtil {
      * @return String
      */
     public static String getIsSysAdmin() {
+        JWT jwt = getJwt();
+        return jwt.getPayload("isSysAdmin").toString();
+    }
+
+    private static JWT getJwt() {
         String token = getToken();
-        DecodedJWT jwt = getPayload(token);
-        Map<String, Claim> claims = jwt.getClaims();
-        return claims.get("isSysAdmin").asString();
+        return getJwt(token);
+    }
+
+    private static JWT getJwt(String token) {
+        try {
+            return JWTUtil.parseToken(token).setKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new LoginException("无效token");
+        }
     }
 }

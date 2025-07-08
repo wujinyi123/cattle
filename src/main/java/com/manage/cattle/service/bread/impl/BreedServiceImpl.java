@@ -19,7 +19,7 @@ import com.manage.cattle.qo.breed.BreedPregnancyResultQO;
 import com.manage.cattle.qo.breed.BreedRegisterQO;
 import com.manage.cattle.service.bread.BreedService;
 import com.manage.cattle.util.CommonUtil;
-import com.manage.cattle.util.JWTUtil;
+import com.manage.cattle.util.UserUtil;
 import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -68,8 +68,8 @@ public class BreedServiceImpl implements BreedService {
         userSet.addAll(CommonUtil.stringToList(cattleDTO.getFarmOwner()));
         userSet.addAll(CommonUtil.stringToList(cattleDTO.getFarmAdmin()));
         userSet.addAll(CommonUtil.stringToList(cattleDTO.getFarmEmployee()));
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
-        String username = JWTUtil.getUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
+        String username = UserUtil.getUsername();
         if (!"Y".equals(isSysAdmin) && !userSet.contains(username)) {
             throw new BusinessException("权限不足");
         }
@@ -87,14 +87,14 @@ public class BreedServiceImpl implements BreedService {
             throw new BusinessException("查无数据");
         }
         List<String> registerIds = breedRegisterList.stream().map(BreedRegisterDTO::getRegisterId).toList();
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
         if ("Y".equals(isSysAdmin)) {
             int result = breedDao.delBreedRegister(ids);
             breedDao.delBreedPregnancyCheckByRegisterId(registerIds);
             breedDao.delBreedPregnancyResultByRegisterId(registerIds);
             return result;
         }
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         if (breedRegisterList.stream().anyMatch(item -> {
             Set<String> userSet = new HashSet<>();
             userSet.addAll(CommonUtil.stringToList(item.getFarmAdmin()));
@@ -126,7 +126,7 @@ public class BreedServiceImpl implements BreedService {
     public int addBreedPregnancyCheck(BreedPregnancyCheckDTO dto) {
         BreedRegisterDTO breedRegisterDTO = breedDao.getBreedRegister(dto.getRegisterId());
         PermissionUtil.breedPregnancyAddPermission(breedRegisterDTO);
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         return breedDao.addBreedPregnancyCheck(dto);
@@ -169,7 +169,7 @@ public class BreedServiceImpl implements BreedService {
     public int addBreedPregnancyResult(BreedPregnancyResultDTO dto) {
         BreedRegisterDTO breedRegisterDTO = breedDao.getBreedRegister(dto.getRegisterId());
         PermissionUtil.breedPregnancyAddPermission(breedRegisterDTO);
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         if ("birth".equals(dto.getResult()) && CollUtil.isEmpty(dto.getChildren())) {
             throw new BusinessException("生育时，后代不能为空");
         }

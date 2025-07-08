@@ -18,7 +18,7 @@ import com.manage.cattle.qo.base.UserQO;
 import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.base.UserService;
 import com.manage.cattle.util.CommonUtil;
-import com.manage.cattle.util.JWTUtil;
+import com.manage.cattle.util.UserUtil;
 import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,15 +56,18 @@ public class UserServiceImpl implements UserService {
         if (Objects.isNull(dto)) {
             throw new LoginException("密码错误");
         }
-        Map<String, String> payload = Map.of("username", dto.getUsername(), "name", dto.getName(), "isSysAdmin", dto.getIsSysAdmin());
-        String token = JWTUtil.createToken(payload);
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("username", dto.getUsername());
+        payload.put("name", dto.getName());
+        payload.put("isSysAdmin", dto.getIsSysAdmin());
+        String token = UserUtil.createToken(payload);
         dto.setToken(token);
         return dto;
     }
 
     @Override
     public UserDTO getCurrentUser() {
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         UserDTO userDTO = userDao.getUser(username);
         List<FarmDTO> farmList = farmDao.listFarm(new FarmQO());
         userDTO.setFarmList(farmList.stream().filter(dto -> username.equals(dto.getOwner())
@@ -88,7 +92,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<String> importUser(String requireFields, List<UserDTO> list) {
         PermissionUtil.onlySysAdmin();
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         String[] requireFieldArr = requireFields.split(",");
         SysConfigQO qo = new SysConfigQO();
         qo.setCodeList(Arrays.asList("isSysAdmin", "userStatus"));
@@ -131,7 +135,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public int saveUser(String type, UserDTO dto) {
         PermissionUtil.onlySysAdmin();
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         if ("add".equals(type)) {
@@ -149,7 +153,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public int setUserStatus(String status, List<String> usernameList) {
         PermissionUtil.onlySysAdmin();
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         return userDao.setUserStatus(username, status, usernameList);
     }
 
@@ -157,14 +161,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public int resetPassword(List<String> usernameList) {
         PermissionUtil.onlySysAdmin();
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         return userDao.resetPassword(username, defaultPassword, usernameList);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int updatePassword(JSONObject jsonObject) {
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         String password = jsonObject.get("password", String.class);
         String newPassword = jsonObject.get("newPassword", String.class);
         String confirmPassword = jsonObject.get("confirmPassword", String.class);
@@ -184,7 +188,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int updatePhone(JSONObject jsonObject) {
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         String phone = jsonObject.get("phone", String.class);
         if (StrUtil.isBlank(phone)) {
             throw new BusinessException("联系方式不能为空");

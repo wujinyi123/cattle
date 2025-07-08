@@ -17,7 +17,7 @@ import com.manage.cattle.qo.inventory.InventoryBuyQO;
 import com.manage.cattle.qo.inventory.InventoryDeathQO;
 import com.manage.cattle.qo.inventory.InventorySellQO;
 import com.manage.cattle.service.inventory.inventoryService;
-import com.manage.cattle.util.JWTUtil;
+import com.manage.cattle.util.UserUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,8 +49,8 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addInventoryBuy(InventoryBuyDTO dto) {
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
-        String username = JWTUtil.getUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
+        String username = UserUtil.getUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         FarmDTO farmDTO = farmDao.getFarmById(dto.getFarmId());
@@ -84,11 +84,11 @@ public class inventoryServiceImpl implements inventoryService {
         InventoryBuyQO qo = new InventoryBuyQO();
         qo.setIds(ids);
         List<InventoryBuyDTO> list = inventoryDao.listInventoryBuy(qo);
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
         if (!"Y".equals(isSysAdmin)) {
             return inventoryDao.delInventoryBuy(ids);
         }
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         if (list.stream().anyMatch(item -> !username.equals(item.getFarmOwner()))) {
             throw new BusinessException("部分权限不足");
         }
@@ -109,14 +109,14 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addInventorySell(InventorySellDTO dto) {
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         CattleDTO cattleDTO = cattleDao.getCattle(dto.getCattleCode());
         if (cattleDTO == null) {
             throw new BusinessException("耳牌号不存在");
         }
         dto.setFarmId(cattleDTO.getFarmId());
         dto.setCattleInfo(JSONUtil.toJsonStr(cattleDTO));
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
         if (!"Y".equals(isSysAdmin) && !username.equals(cattleDTO.getFarmOwner())) {
             throw new BusinessException("权限不足");
         }
@@ -138,11 +138,11 @@ public class inventoryServiceImpl implements inventoryService {
         InventorySellQO qo = new InventorySellQO();
         qo.setIds(ids);
         List<InventorySellDTO> list = inventoryDao.listInventorySell(qo);
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
         if (!"Y".equals(isSysAdmin)) {
             return inventoryDao.delInventorySell(ids);
         }
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         if (list.stream().anyMatch(item -> !username.equals(item.getFarmOwner()))) {
             throw new BusinessException("部分权限不足");
         }
@@ -163,7 +163,7 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addInventoryDeath(InventoryDeathDTO dto) {
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         CattleDTO cattleDTO = cattleDao.getCattle(dto.getCattleCode());
@@ -172,7 +172,7 @@ public class inventoryServiceImpl implements inventoryService {
         }
         dto.setFarmId(cattleDTO.getFarmId());
         dto.setCattleInfo(JSONUtil.toJsonStr(cattleDTO));
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
         if (!"Y".equals(isSysAdmin) && !username.equals(cattleDTO.getFarmOwner())) {
             throw new BusinessException("权限不足");
         }
@@ -192,11 +192,11 @@ public class inventoryServiceImpl implements inventoryService {
         InventoryDeathQO qo = new InventoryDeathQO();
         qo.setIds(ids);
         List<InventoryDeathDTO> list = inventoryDao.listInventoryDeath(qo);
-        String isSysAdmin = JWTUtil.getIsSysAdmin();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
         if (!"Y".equals(isSysAdmin)) {
             return inventoryDao.delInventoryDeath(ids);
         }
-        String username = JWTUtil.getUsername();
+        String username = UserUtil.getUsername();
         if (list.stream().anyMatch(item -> !username.equals(item.getFarmOwner()))) {
             throw new BusinessException("部分权限不足");
         }
