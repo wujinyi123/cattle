@@ -71,8 +71,7 @@ public class UserServiceImpl implements UserService {
         UserDTO userDTO = userDao.getUser(username);
         List<FarmDTO> farmList = farmDao.listFarm(new FarmQO());
         userDTO.setFarmList(farmList.stream().filter(dto -> username.equals(dto.getOwner())
-                        || CommonUtil.stringToList(dto.getAdmin()).contains(username)
-                        || CommonUtil.stringToList(dto.getEmployee()).contains(username))
+                        || CommonUtil.stringToList(dto.getAdmin()).contains(username))
                 .toList());
         return userDTO;
     }

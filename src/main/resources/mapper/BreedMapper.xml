@@ -5,7 +5,7 @@
     <select id="listBreedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
+            t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
             tz.farmZoneCode,tc.cattleCode,
             t.frozenSemenCode,t.frozenSemenBreed,sf.value frozenSemenBreedValue,
             t.breedingDay,t.breedingMethod,sb.value breedingMethodValue,t.operateUser,
@@ -52,7 +52,7 @@
     <select id="listBreedRegisterByIds" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
         select
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-        t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
+        t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
         tz.farmZoneCode,tc.cattleCode,
         t.frozenSemenCode,t.frozenSemenBreed,t.breedingDay,t.breedingMethod,t.operateUser
         from t_breed_register t
@@ -69,7 +69,7 @@
     <select id="getBreedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
+            t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
             tz.farmZoneCode,tc.cattleCode,
             t.frozenSemenCode,t.frozenSemenBreed,t.breedingDay,t.breedingMethod,t.operateUser
         from t_breed_register t
@@ -115,7 +115,7 @@
     <select id="listBreedPregnancyCheck" resultType="com.manage.cattle.dto.breed.BreedPregnancyCheckDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
+            t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
             tz.farmZoneCode,tc.cattleCode,
             t.checkDay,t.checkUser,t.result
         from t_breed_pregnancy_check t
@@ -154,7 +154,7 @@
     <select id="listBreedPregnancyCheckByIds" resultType="com.manage.cattle.dto.breed.BreedPregnancyCheckDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
+            t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
             tz.farmZoneCode,tc.cattleCode,
             t.checkDay,t.checkUser,t.result
         from t_breed_pregnancy_check t
@@ -187,7 +187,7 @@
     <select id="listBreedPregnancyResult" resultType="com.manage.cattle.dto.breed.BreedPregnancyResultDTO">
         select
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-        t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
+        t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
         tz.farmZoneCode,tc.cattleCode,
         t.resultDay,t.operaUser,t.result,sr.value resultValue,t.remark,t.childrenCodeList
         from t_breed_pregnancy_result t
@@ -230,7 +230,7 @@
     <select id="listBreedPregnancyResultByIds" resultType="com.manage.cattle.dto.breed.BreedPregnancyResultDTO">
         select
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-        t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,tf.employee farmEmployee,
+        t.registerId,tz.farmId,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
         tz.farmZoneCode,tc.cattleCode,
         t.resultDay,t.operaUser,t.result,t.remark,t.childrenCodeList
         from t_breed_pregnancy_result t

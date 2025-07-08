@@ -19,7 +19,7 @@ public interface FarmDao {
 
     int updateFarm(FarmDTO dto);
 
-    int saveAdminEmployee(FarmDTO dto);
+    int saveAdmin(FarmDTO dto);
 
     int delFarm(List<String> list);
 

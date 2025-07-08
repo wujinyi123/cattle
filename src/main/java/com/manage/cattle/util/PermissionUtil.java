@@ -23,7 +23,6 @@ public class PermissionUtil {
         }
         Set<String> userSet = new HashSet<>();
         userSet.addAll(CommonUtil.stringToList(breedRegisterDTO.getFarmOwner()));
-        userSet.addAll(CommonUtil.stringToList(breedRegisterDTO.getFarmEmployee()));
         userSet.addAll(CommonUtil.stringToList(breedRegisterDTO.getFarmAdmin()));
         String isSysAdmin = UserUtil.getIsSysAdmin();
         String username = UserUtil.getUsername();
@@ -42,7 +41,6 @@ public class PermissionUtil {
             Set<String> userSet = new HashSet<>();
             userSet.addAll(CommonUtil.stringToList(item.getFarmOwner()));
             userSet.addAll(CommonUtil.stringToList(item.getFarmAdmin()));
-            userSet.addAll(CommonUtil.stringToList(item.getFarmEmployee()));
             return !userSet.contains(username);
         }).count();
         if (count > 0L) {

@@ -69,7 +69,6 @@ public class FarmServiceImpl implements FarmService {
             Set<String> usernameSet = new HashSet<>();
             usernameSet.add(dto.getOwner());
             usernameSet.addAll(CommonUtil.stringToList(dto.getAdmin()));
-            usernameSet.addAll(CommonUtil.stringToList(dto.getEmployee()));
             UserQO qo = new UserQO();
             qo.setUsernameList(new ArrayList<>(usernameSet));
             List<UserDTO> userList = userDao.listUser(qo);
@@ -108,7 +107,7 @@ public class FarmServiceImpl implements FarmService {
         if (!userList.contains(dto.getOwner())) {
             throw new BusinessException("负责人账号不正确");
         }
-        checkAdminEmployee(userList, dto);
+        checkAdmin(userList, dto);
         String username = UserUtil.getUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
@@ -125,7 +124,7 @@ public class FarmServiceImpl implements FarmService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public int saveAdminEmployee(FarmDTO dto) {
+    public int saveAdmin(FarmDTO dto) {
         FarmDTO farmDTO = farmDao.getFarmById(dto.getFarmId());
         if (Objects.isNull(farmDTO)) {
             throw new BusinessException("牧场不存在");
@@ -138,13 +137,13 @@ public class FarmServiceImpl implements FarmService {
         UserQO qo = new UserQO();
         qo.setStatus("incumbent");
         List<String> userList = userDao.listUser(qo).stream().map(UserDTO::getUsername).toList();
-        checkAdminEmployee(userList, dto);
+        checkAdmin(userList, dto);
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
-        return farmDao.saveAdminEmployee(dto);
+        return farmDao.saveAdmin(dto);
     }
 
-    private void checkAdminEmployee(List<String> userList, FarmDTO dto) {
+    private void checkAdmin(List<String> userList, FarmDTO dto) {
         if (StrUtil.isNotBlank(dto.getAdmin())) {
             List<String> adminList = CommonUtil.stringToList(dto.getAdmin());
             adminList.sort(String::compareTo);
@@ -153,15 +152,6 @@ public class FarmServiceImpl implements FarmService {
                 throw new BusinessException("管理员(" + String.join(",", errUser) + ")账号不正确");
             }
             dto.setAdmin(String.join(",", adminList));
-        }
-        if (StrUtil.isNotBlank(dto.getEmployee())) {
-            List<String> employeeList = CommonUtil.stringToList(dto.getEmployee());
-            employeeList.sort(String::compareTo);
-            List<String> errUser = employeeList.stream().filter(item -> !userList.contains(item)).toList();
-            if (errUser.size() > 0) {
-                throw new BusinessException("员工(" + String.join(",", errUser) + ")账号不正确");
-            }
-            dto.setAdmin(String.join(",", employeeList));
         }
     }
 

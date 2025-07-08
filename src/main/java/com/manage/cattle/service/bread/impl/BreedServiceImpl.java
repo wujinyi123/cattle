@@ -67,7 +67,6 @@ public class BreedServiceImpl implements BreedService {
         Set<String> userSet = new HashSet<>();
         userSet.addAll(CommonUtil.stringToList(cattleDTO.getFarmOwner()));
         userSet.addAll(CommonUtil.stringToList(cattleDTO.getFarmAdmin()));
-        userSet.addAll(CommonUtil.stringToList(cattleDTO.getFarmEmployee()));
         String isSysAdmin = UserUtil.getIsSysAdmin();
         String username = UserUtil.getUsername();
         if (!"Y".equals(isSysAdmin) && !userSet.contains(username)) {
@@ -99,7 +98,6 @@ public class BreedServiceImpl implements BreedService {
             Set<String> userSet = new HashSet<>();
             userSet.addAll(CommonUtil.stringToList(item.getFarmAdmin()));
             userSet.addAll(CommonUtil.stringToList(item.getFarmOwner()));
-            userSet.addAll(CommonUtil.stringToList(item.getFarmEmployee()));
             return !userSet.contains(username);
         })) {
             throw new BusinessException("部分权限不足");

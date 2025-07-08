@@ -19,7 +19,6 @@
         <field name="farmName" title="牧场名称" require="true"/>
         <field name="owner" title="负责人账号" require="true"/>
         <field name="admin" title="管理员账号"/>
-        <field name="employee" title="员工账号"/>
         <field name="address" title="地址" require="true"/>
         <field name="area" title="面积" require="true"/>
         <field name="scale" title="养殖规模" require="true"/>

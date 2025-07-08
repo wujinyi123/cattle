@@ -19,7 +19,7 @@ public interface FarmService {
 
     int saveFarm(String type, FarmDTO dto);
 
-    int saveAdminEmployee(FarmDTO dto);
+    int saveAdmin(FarmDTO dto);
 
     int delFarm(List<String> farmIds);
 

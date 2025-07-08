@@ -12,7 +12,6 @@ public class BreedBaseDTO extends BaseDTO {
     private String farmName;
     private String farmOwner;
     private String farmAdmin;
-    private String farmEmployee;
     private String farmZoneCode;
     private String cattleCode;
 }

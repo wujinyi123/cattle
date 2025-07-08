@@ -11,7 +11,6 @@ public class FarmDTO extends BaseDTO {
     private String farmName;
     private String owner;
     private String admin;
-    private String employee;
     private String address;
     private String area;
     private String scale;

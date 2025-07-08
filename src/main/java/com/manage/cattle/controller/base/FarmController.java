@@ -47,9 +47,9 @@ public class FarmController {
         return farmService.saveFarm(type, dto);
     }
 
-    @PostMapping("/saveAdminEmployee")
-    public int saveAdminEmployee(@RequestBody FarmDTO dto) {
-        return farmService.saveAdminEmployee(dto);
+    @PostMapping("/saveAdmin")
+    public int saveAdmin(@RequestBody FarmDTO dto) {
+        return farmService.saveAdmin(dto);
     }
 
     @PostMapping("/delFarm")
