@@ -9,13 +9,15 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class CattleQO extends PageQO {
-    private String farmName;
+    private String farmCode;
     private String farmZoneCode;
     private String cattleCode;
     private String cattleName;
     private String breed;
     private String sex;
-    private String birthday;
+    private String color;
+    private String birthdayStart;
+    private String birthdayEnd;
     private String remark;
     private List<String> cattleCodeList;
     private List<String> farmZoneCodeList;

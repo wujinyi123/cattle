@@ -18,10 +18,6 @@ public interface UserDao {
 
     int updateUser(UserDTO dto);
 
-    int setUserStatus(@Param("updateUser") String updateUser, @Param("status") String status, @Param("usernameList") List<String> usernameList);
-
-    int resetPassword(@Param("updateUser") String updateUser, @Param("password") String password, @Param("usernameList") List<String> usernameList);
-
     int updatePassword(@Param("username") String username, @Param("password") String password);
 
     int updatePhone(@Param("username") String username, @Param("phone") String phone);

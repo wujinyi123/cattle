@@ -60,17 +60,6 @@ public class UserController {
         return userService.saveUser(type, dto);
     }
 
-    @PostMapping("/setUserStatus")
-    public int setUserStatus(@RequestParam String status,
-                             @RequestBody List<String> usernameList) {
-        return userService.setUserStatus(status, usernameList);
-    }
-
-    @PostMapping("/resetPassword")
-    public int resetPassword(@RequestBody List<String> usernameList) {
-        return userService.resetPassword(usernameList);
-    }
-
     @PostMapping("/updatePassword")
     public int updatePassword(@RequestBody JSONObject jsonObject) {
         return userService.updatePassword(jsonObject);

@@ -53,13 +53,7 @@ public class inventoryServiceImpl implements inventoryService {
         String username = UserUtil.getUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
-        FarmDTO farmDTO = farmDao.getFarmById(dto.getFarmId());
-        if (farmDTO == null) {
-            throw new BusinessException("牧场不存在");
-        }
-        if (!"Y".equals(isSysAdmin) && !username.equals(farmDTO.getOwner())) {
-            throw new BusinessException("权限不足");
-        }
+
         FarmZoneDTO farmZoneDTO = farmDao.getFarmZone(dto.getFarmZoneCode());
         if (farmZoneDTO == null) {
             throw new BusinessException("圈舍编号不存在");
@@ -88,10 +82,6 @@ public class inventoryServiceImpl implements inventoryService {
         if (!"Y".equals(isSysAdmin)) {
             return inventoryDao.delInventoryBuy(ids);
         }
-        String username = UserUtil.getUsername();
-        if (list.stream().anyMatch(item -> !username.equals(item.getFarmOwner()))) {
-            throw new BusinessException("部分权限不足");
-        }
         return inventoryDao.delInventoryBuy(ids);
     }
 
@@ -114,12 +104,8 @@ public class inventoryServiceImpl implements inventoryService {
         if (cattleDTO == null) {
             throw new BusinessException("耳牌号不存在");
         }
-        dto.setFarmId(cattleDTO.getFarmId());
         dto.setCattleInfo(JSONUtil.toJsonStr(cattleDTO));
-        String isSysAdmin = UserUtil.getIsSysAdmin();
-        if (!"Y".equals(isSysAdmin) && !username.equals(cattleDTO.getFarmOwner())) {
-            throw new BusinessException("权限不足");
-        }
+
         if (cattleDao.delCattle(List.of(dto.getCattleCode())) == 0) {
             throw new BusinessException("删除牛只失败");
         }
@@ -170,12 +156,8 @@ public class inventoryServiceImpl implements inventoryService {
         if (cattleDTO == null) {
             throw new BusinessException("耳牌号不存在");
         }
-        dto.setFarmId(cattleDTO.getFarmId());
         dto.setCattleInfo(JSONUtil.toJsonStr(cattleDTO));
-        String isSysAdmin = UserUtil.getIsSysAdmin();
-        if (!"Y".equals(isSysAdmin) && !username.equals(cattleDTO.getFarmOwner())) {
-            throw new BusinessException("权限不足");
-        }
+
         if (cattleDao.delCattle(List.of(dto.getCattleCode())) == 0) {
             throw new BusinessException("删除牛只失败");
         }

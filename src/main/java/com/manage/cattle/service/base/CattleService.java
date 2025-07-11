@@ -11,8 +11,6 @@ public interface CattleService {
 
     List<CattleDTO> listCattle(CattleQO qo);
 
-    List<String> importCattle(String requireFields, List<CattleDTO> list);
-
     CattleDTO getCattle(String cattleCode);
 
     int saveCattle(String type, CattleDTO dto);

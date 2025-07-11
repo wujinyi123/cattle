@@ -13,21 +13,15 @@ public interface FarmService {
 
     List<FarmDTO> listFarm(FarmQO qo);
 
-    List<String> importFarm(String requireFields, List<FarmDTO> list);
-
-    FarmDTO getFarm(String farmId);
+    FarmDTO getFarm(String farmCode);
 
     int saveFarm(String type, FarmDTO dto);
 
-    int saveAdmin(FarmDTO dto);
-
-    int delFarm(List<String> farmIds);
+    int delFarm(List<String> farmCodeList);
 
     PageInfo<FarmZoneDTO> pageFarmZone(FarmZoneQO qo);
 
     List<FarmZoneDTO> listFarmZone(FarmZoneQO qo);
-
-    List<String> importFarmZone(String requireFields, List<FarmZoneDTO> list);
 
     FarmZoneDTO getFarmZone(String farmZoneCode);
 

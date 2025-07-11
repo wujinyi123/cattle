@@ -76,24 +76,6 @@
         where username=#{username}
     </update>
 
-    <update id="setUserStatus">
-        update t_user
-        set updateUser=#{updateUser},updateTime=now(),status=#{status}
-        where username in
-        <foreach collection="usernameList" item="item" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-    </update>
-
-    <update id="resetPassword">
-        update t_user
-        set updateUser=#{updateUser},updateTime=now(),password=#{password}
-        where username in
-        <foreach collection="usernameList" item="item" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-    </update>
-
     <update id="updatePassword">
         update t_user
         set updateUser=#{username},updateTime=now(),password=#{password}

@@ -65,8 +65,6 @@ public class BreedServiceImpl implements BreedService {
             throw new BusinessException("牛只不是雌性");
         }
         Set<String> userSet = new HashSet<>();
-        userSet.addAll(CommonUtil.stringToList(cattleDTO.getFarmOwner()));
-        userSet.addAll(CommonUtil.stringToList(cattleDTO.getFarmAdmin()));
         String isSysAdmin = UserUtil.getIsSysAdmin();
         String username = UserUtil.getUsername();
         if (!"Y".equals(isSysAdmin) && !userSet.contains(username)) {

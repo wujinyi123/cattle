@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 public class BreedBaseDTO extends BaseDTO {
     private String registerId;
-    private String farmId;
+    private String farmCode;
     private String farmName;
     private String farmOwner;
     private String farmAdmin;

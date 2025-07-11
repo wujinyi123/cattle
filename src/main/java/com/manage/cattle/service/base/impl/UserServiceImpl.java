@@ -4,15 +4,12 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.base.UserDao;
 import com.manage.cattle.dao.common.CommonDao;
-import com.manage.cattle.dto.base.FarmDTO;
 import com.manage.cattle.dto.base.UserDTO;
 import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.exception.LoginException;
-import com.manage.cattle.qo.base.FarmQO;
 import com.manage.cattle.qo.base.LoginQO;
 import com.manage.cattle.qo.base.UserQO;
 import com.manage.cattle.qo.common.SysConfigQO;
@@ -35,14 +32,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
-    @Value("${default.password}")
+    @Value("${default.password:123456}")
     private String defaultPassword;
 
     @Resource
     private UserDao userDao;
-
-    @Resource
-    private FarmDao farmDao;
 
     @Resource
     private CommonDao commonDao;
@@ -68,12 +62,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getCurrentUser() {
         String username = UserUtil.getUsername();
-        UserDTO userDTO = userDao.getUser(username);
-        List<FarmDTO> farmList = farmDao.listFarm(new FarmQO());
-        userDTO.setFarmList(farmList.stream().filter(dto -> username.equals(dto.getOwner())
-                        || CommonUtil.stringToList(dto.getAdmin()).contains(username))
-                .toList());
-        return userDTO;
+        return userDao.getUser(username);
     }
 
     @Override
@@ -146,22 +135,6 @@ public class UserServiceImpl implements UserService {
         } else {
             return userDao.updateUser(dto);
         }
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public int setUserStatus(String status, List<String> usernameList) {
-        PermissionUtil.onlySysAdmin();
-        String username = UserUtil.getUsername();
-        return userDao.setUserStatus(username, status, usernameList);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public int resetPassword(List<String> usernameList) {
-        PermissionUtil.onlySysAdmin();
-        String username = UserUtil.getUsername();
-        return userDao.resetPassword(username, defaultPassword, usernameList);
     }
 
     @Transactional(rollbackFor = Exception.class)

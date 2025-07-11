@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class InventorySellDTO extends BaseDTO {
-    private String farmId;
+    private String farmCode;
     private String farmName;
     private String farmOwner;
     private String cattleCode;

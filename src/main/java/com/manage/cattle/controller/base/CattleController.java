@@ -25,9 +25,9 @@ public class CattleController {
         return cattleService.pageCattle(qo);
     }
 
-    @PostMapping("/importCattle")
-    public List<String> importCattle(@RequestParam String requireFields, @RequestBody List<CattleDTO> list) {
-        return cattleService.importCattle(requireFields, list);
+    @GetMapping("/listCattle")
+    public List<CattleDTO> listCattle(CattleQO qo) {
+        return cattleService.listCattle(qo);
     }
 
     @GetMapping("/getCattle")

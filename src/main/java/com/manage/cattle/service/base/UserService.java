@@ -24,10 +24,6 @@ public interface UserService {
 
     int saveUser(String type, UserDTO dto);
 
-    int setUserStatus(String status, List<String> usernameList);
-
-    int resetPassword(List<String> usernameList);
-
     int updatePassword(JSONObject jsonObject);
 
     int updatePhone(JSONObject jsonObject);

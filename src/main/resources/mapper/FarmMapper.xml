@@ -5,55 +5,53 @@
     <select id="listFarm" resultType="com.manage.cattle.dto.base.FarmDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            farmId,farmName,owner,admin,address,area,scale
+            farmCode,farmName,address,area,scale
         from t_farm
         where 1=1
+        <if test="farmCode!=null and farmCode!=''">
+            and farmCode like concat('%',#{farmCode},'%')
+        </if>
         <if test="farmName!=null and farmName!=''">
             and farmName like concat('%',#{farmName},'%')
         </if>
+        <if test="address!=null and address!=''">
+            and address like concat('%',#{address},'%')
+        </if>
+        <if test="area!=null and area!=''">
+            and area like concat('%',#{area},'%')
+        </if>
+        <if test="scale!=null and scale!=''">
+            and scale like concat('%',#{scale},'%')
+        </if>
         order by farmName
-    </select>
-
-    <select id="getFarmById" resultType="com.manage.cattle.dto.base.FarmDTO">
-        select
-            id,createUser,createTime,updateUser,updateTime,
-            farmId,farmName,owner,admin,address,area,scale
-        from t_farm
-        where farmId=#{farmId}
     </select>
 
     <select id="getFarm" resultType="com.manage.cattle.dto.base.FarmDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            farmId,farmName,owner,admin,address,area,scale
+            farmCode,farmName,address,area,scale
         from t_farm
-        where farmName=#{farmName}
+        where farmCode=#{farmCode}
     </select>
 
     <insert id="addFarm">
         insert into t_farm(createUser,createTime,updateUser,updateTime,
-                           farmId,farmName,owner,admin,address,area,scale)
+                           farmCode,farmName,address,area,scale)
         values (#{createUser},now(),#{updateUser},now(),
-                #{farmId},#{farmName},#{owner},#{admin},#{address},#{area},#{scale})
+                #{farmCode},#{farmName},#{address},#{area},#{scale})
     </insert>
 
     <update id="updateFarm">
         update t_farm
         set updateUser=#{updateUser},updateTime=now(),
-            farmName=#{farmName},owner=#{owner},admin=#{admin},
-            address=#{address},area=#{area},scale=#{scale}
-        where farmId=#{farmId}
-    </update>
-
-    <update id="saveAdmin">
-        update t_farm
-        set updateUser=#{updateUser},updateTime=now(),admin=#{admin}
-        where farmId=#{farmId}
+            farmName=#{farmName},address=#{address},
+            area=#{area},scale=#{scale}
+        where farmCode=#{farmCode}
     </update>
 
     <delete id="delFarm">
         delete from t_farm
-        where farmId in
+        where farmCode in
         <foreach collection="list" item="item" open="(" separator="," close=")">
             #{item}
         </foreach>
@@ -62,19 +60,27 @@
     <select id="listFarmZone" resultType="com.manage.cattle.dto.base.FarmZoneDTO">
         select
             fz.id,fz.createUser,fz.createTime,fz.updateUser,fz.updateTime,
-            f.farmId,f.farmName,f.owner farmOwner,f.admin farmAdmin,
-            fz.farmZoneCode,fz.farmZoneRemark,fz.size
+            f.farmCode,f.farmName,fz.farmZoneCode,fz.farmZoneName,fz.farmZoneRemark,fz.size
         from t_farm_zone fz
-        left join t_farm f on fz.farmId=f.farmId
+        left join t_farm f on fz.farmCode=f.farmCode
         where 1=1
-        <if test="farmId!=null and farmId!=''">
-            and fz.farmId=#{farmId}
+        <if test="farmCode!=null and farmCode!=''">
+            and f.farmCode=#{farmCode}
         </if>
         <if test="farmZoneCode!=null and farmZoneCode!=''">
             and fz.farmZoneCode like concat('%',#{farmZoneCode},'%')
         </if>
+        <if test="farmZoneName!=null and farmZoneName!=''">
+            and fz.farmZoneName like concat('%',#{farmZoneName},'%')
+        </if>
         <if test="farmZoneRemark!=null and farmZoneRemark!=''">
             and fz.farmZoneRemark like concat('%',#{farmZoneRemark},'%')
+        </if>
+        <if test="farmCodeList!=null and farmCodeList.size()>0">
+            and fz.farmCode in
+            <foreach collection="farmCodeList" item="fCode" open="(" separator="," close=")">
+                #{fCode}
+            </foreach>
         </if>
         <if test="farmZoneCodeList!=null and farmZoneCodeList.size()>0">
             and fz.farmZoneCode in
@@ -88,22 +94,22 @@
     <select id="getFarmZone" resultType="com.manage.cattle.dto.base.FarmZoneDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            farmId,farmZoneCode,farmZoneRemark,size
+            farmCode,farmZoneCode,farmZoneName,farmZoneRemark,size
         from t_farm_zone
         where farmZoneCode=#{farmZoneCode}
     </select>
 
     <insert id="addFarmZone">
         insert into t_farm_zone(createUser,createTime,updateUser,updateTime,
-                                farmId,farmZoneCode,farmZoneRemark,size)
+                                farmCode,farmZoneCode,farmZoneName,farmZoneRemark,size)
         values (#{createUser},now(),#{updateUser},now(),
-                #{farmId},#{farmZoneCode},#{farmZoneRemark},#{size})
+                #{farmCode},#{farmZoneCode},#{farmZoneName},#{farmZoneRemark},#{size})
     </insert>
 
     <update id="updateFarmZone">
         update t_farm_zone
         set updateUser=#{updateUser},updateTime=now(),
-            farmId=#{farmId},farmZoneRemark=#{farmZoneRemark},size=#{size}
+            farmZoneName=#{farmZoneName},farmZoneRemark=#{farmZoneRemark},size=#{size}
         where farmZoneCode=#{farmZoneCode}
     </update>
 

@@ -11,15 +11,11 @@ import java.util.List;
 public interface FarmDao {
     List<FarmDTO> listFarm(FarmQO qo);
 
-    FarmDTO getFarmById(@Param("farmId") String farmId);
-
-    FarmDTO getFarm(@Param("farmName") String farmName);
+    FarmDTO getFarm(@Param("farmCode") String farmCode);
 
     int addFarm(FarmDTO dto);
 
     int updateFarm(FarmDTO dto);
-
-    int saveAdmin(FarmDTO dto);
 
     int delFarm(List<String> list);
 
