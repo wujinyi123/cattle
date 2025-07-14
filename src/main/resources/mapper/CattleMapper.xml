@@ -5,7 +5,7 @@
     <select id="listCattle" resultType="com.manage.cattle.dto.base.CattleDTO">
         select
             c.id,c.createUser,c.createTime,c.updateUser,c.updateTime,
-            f.farmCode,f.farmName,fz.farmZoneCode,fz.farmZoneName,
+            f.farmCode,f.farmName,f.farmOwner,fz.farmZoneCode,fz.farmZoneName,
             c.cattleCode,c.cattleName,c.breed,sb.value breedValue,
             c.sex,c.color,c.birthday,c.remark
         from t_cattle c
