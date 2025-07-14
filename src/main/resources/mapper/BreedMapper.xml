@@ -5,22 +5,19 @@
     <select id="listBreedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmCode,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
+            t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
             tz.farmZoneCode,tc.cattleCode,
             t.frozenSemenCode,t.frozenSemenBreed,sf.value frozenSemenBreedValue,
-            t.breedingDay,t.breedingMethod,sb.value breedingMethodValue,t.operateUser,
-            pr.result pregnancyResult,spr.value pregnancyResultValue
+            t.breedingDay,t.breedingMethod,sb.value breedingMethodValue,t.operateUser
         from t_breed_register t
-        left join t_breed_pregnancy_result pr on t.registerId=pr.registerId
-        left join t_sys_config spr on spr.code='pregnancyResult' and pr.result=spr.key
         left join t_cattle tc on t.cattleCode=tc.cattleCode
         left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
         left join t_farm tf on tz.farmCode=tf.farmCode
         left join t_sys_config sf on sf.code='cattleBreed' and t.frozenSemenBreed=sf.key
         left join t_sys_config sb on sb.code='breedingMethod' and t.breedingMethod=sb.key
         where 1=1
-        <if test="farmName!=null and farmName!=''">
-            and tf.farmName like concat('%',#{farmName},'%')
+        <if test="farmCode!=null and farmCode!=''">
+            and tf.farmCode=#{farmCode}
         </if>
         <if test="farmZoneCode!=null and farmZoneCode!=''">
             and tz.farmZoneCode like concat('%',#{farmZoneCode},'%')
@@ -52,7 +49,7 @@
     <select id="listBreedRegisterByIds" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
         select
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-        t.registerId,tz.farmCode,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
+        t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
         tz.farmZoneCode,tc.cattleCode,
         t.frozenSemenCode,t.frozenSemenBreed,t.breedingDay,t.breedingMethod,t.operateUser
         from t_breed_register t
@@ -69,7 +66,7 @@
     <select id="getBreedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmCode,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
+            t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
             tz.farmZoneCode,tc.cattleCode,
             t.frozenSemenCode,t.frozenSemenBreed,t.breedingDay,t.breedingMethod,t.operateUser
         from t_breed_register t
@@ -115,7 +112,7 @@
     <select id="listBreedPregnancyCheck" resultType="com.manage.cattle.dto.breed.BreedPregnancyCheckDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmCode,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
+            t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
             tz.farmZoneCode,tc.cattleCode,
             t.checkDay,t.checkUser,t.result
         from t_breed_pregnancy_check t
@@ -127,8 +124,8 @@
         <if test="registerId!=null and registerId!=''">
             and t.registerId like concat('%',#{registerId},'%')
         </if>
-        <if test="farmName!=null and farmName!=''">
-            and tf.farmName like concat('%',#{farmName},'%')
+        <if test="farmCode!=null and farmCode!=''">
+            and tf.farmCode=#{farmCode}
         </if>
         <if test="farmZoneCode!=null and farmZoneCode!=''">
             and tz.farmZoneCode like concat('%',#{farmZoneCode},'%')
@@ -154,7 +151,7 @@
     <select id="listBreedPregnancyCheckByIds" resultType="com.manage.cattle.dto.breed.BreedPregnancyCheckDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmCode,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
+            t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
             tz.farmZoneCode,tc.cattleCode,
             t.checkDay,t.checkUser,t.result
         from t_breed_pregnancy_check t
@@ -186,22 +183,24 @@
 
     <select id="listBreedPregnancyResult" resultType="com.manage.cattle.dto.breed.BreedPregnancyResultDTO">
         select
-        t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-        t.registerId,tz.farmCode,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
-        tz.farmZoneCode,tc.cattleCode,
-        t.resultDay,t.operaUser,t.result,sr.value resultValue,t.remark,t.childrenCodeList
+            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+            t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
+            tz.farmZoneCode,tc.cattleCode,
+            t.resultDay,t.operaUser,t.result,t.remark,
+            t.childFarmZoneCode,t.childCattleCode,t.breed,sb.value breedValue,
+            t.sex,t.color,t.weight
         from t_breed_pregnancy_result t
         left join t_breed_register tr on t.registerId=tr.registerId
         left join t_cattle tc on tr.cattleCode=tc.cattleCode
         left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
         left join t_farm tf on tz.farmCode=tf.farmCode
-        left join t_sys_config sr on sr.code='pregnancyResult' and t.result=sr.key
+        left join t_sys_config sb on sb.code='cattleBreed' and t.breed=sb.key
         where 1=1
         <if test="registerId!=null and registerId!=''">
             and t.registerId like concat('%',#{registerId},'%')
         </if>
-        <if test="farmName!=null and farmName!=''">
-            and tf.farmName like concat('%',#{farmName},'%')
+        <if test="farmCode!=null and farmCode!=''">
+            and tf.farmCode=#{farmCode}
         </if>
         <if test="farmZoneCode!=null and farmZoneCode!=''">
             and tz.farmZoneCode like concat('%',#{farmZoneCode},'%')
@@ -230,14 +229,17 @@
     <select id="listBreedPregnancyResultByIds" resultType="com.manage.cattle.dto.breed.BreedPregnancyResultDTO">
         select
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-        t.registerId,tz.farmCode,tf.farmName,tf.owner farmOwner,tf.admin farmAdmin,
+        t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
         tz.farmZoneCode,tc.cattleCode,
-        t.resultDay,t.operaUser,t.result,t.remark,t.childrenCodeList
+        t.resultDay,t.operaUser,t.result,t.remark,
+        t.childFarmZoneCode,t.childCattleCode,t.breed,sb.value breedValue,
+        t.sex,t.color,t.weight
         from t_breed_pregnancy_result t
         left join t_breed_register tr on t.registerId=tr.registerId
         left join t_cattle tc on tr.cattleCode=tc.cattleCode
         left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
         left join t_farm tf on tz.farmCode=tf.farmCode
+        left join t_sys_config sb on sb.code='cattleBreed' and t.breed=sb.key
         where t.id in
         <foreach collection="list" item="item" open="(" separator="," close=")">
             #{item}
@@ -247,9 +249,11 @@
 
     <insert id="addBreedPregnancyResult">
         insert into t_breed_pregnancy_result(createUser,createTime,updateUser,updateTime,
-                                             registerId,resultDay,operaUser,result,remark,childrenCodeList)
+                                             registerId,resultDay,operaUser,result,remark,
+                                             childFarmZoneCode,childCattleCode,breed,sex,color,weight)
         values (#{createUser},now(),#{updateUser},now(),
-                #{registerId},#{resultDay},#{operaUser},#{result},#{remark},#{childrenCodeList})
+                #{registerId},#{resultDay},#{operaUser},#{result},#{remark},
+                #{childFarmZoneCode},#{childCattleCode},#{breed},#{sex},#{color},#{weight})
     </insert>
 
     <delete id="delBreedPregnancyResult">

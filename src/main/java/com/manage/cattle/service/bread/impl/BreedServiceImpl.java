@@ -1,7 +1,7 @@
 package com.manage.cattle.service.bread.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.CattleDao;
@@ -20,12 +20,13 @@ import com.manage.cattle.qo.breed.BreedRegisterQO;
 import com.manage.cattle.service.bread.BreedService;
 import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.UserUtil;
-import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -61,18 +62,16 @@ public class BreedServiceImpl implements BreedService {
         if (Objects.isNull(cattleDTO)) {
             throw new BusinessException("牛只不存在");
         }
-        if (!"female".equals(cattleDTO.getSex())) {
+        if (!"母".equals(cattleDTO.getSex())) {
             throw new BusinessException("牛只不是雌性");
         }
-        Set<String> userSet = new HashSet<>();
-        String isSysAdmin = UserUtil.getIsSysAdmin();
-        String username = UserUtil.getUsername();
-        if (!"Y".equals(isSysAdmin) && !userSet.contains(username)) {
-            throw new BusinessException("权限不足");
+        if (!StrUtil.equals(dto.getFarmCode(), cattleDTO.getFarmCode())) {
+            throw new BusinessException("请输入当前牧场牛只耳牌号");
         }
+        String username = UserUtil.getUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
-        dto.setRegisterId(IdUtil.getSnowflakeNextIdStr());
+        dto.setRegisterId(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
         return breedDao.addBreedRegister(dto);
     }
 
@@ -84,22 +83,6 @@ public class BreedServiceImpl implements BreedService {
             throw new BusinessException("查无数据");
         }
         List<String> registerIds = breedRegisterList.stream().map(BreedRegisterDTO::getRegisterId).toList();
-        String isSysAdmin = UserUtil.getIsSysAdmin();
-        if ("Y".equals(isSysAdmin)) {
-            int result = breedDao.delBreedRegister(ids);
-            breedDao.delBreedPregnancyCheckByRegisterId(registerIds);
-            breedDao.delBreedPregnancyResultByRegisterId(registerIds);
-            return result;
-        }
-        String username = UserUtil.getUsername();
-        if (breedRegisterList.stream().anyMatch(item -> {
-            Set<String> userSet = new HashSet<>();
-            userSet.addAll(CommonUtil.stringToList(item.getFarmAdmin()));
-            userSet.addAll(CommonUtil.stringToList(item.getFarmOwner()));
-            return !userSet.contains(username);
-        })) {
-            throw new BusinessException("部分权限不足");
-        }
         int result = breedDao.delBreedRegister(ids);
         breedDao.delBreedPregnancyCheckByRegisterId(registerIds);
         breedDao.delBreedPregnancyResultByRegisterId(registerIds);
@@ -121,7 +104,9 @@ public class BreedServiceImpl implements BreedService {
     @Override
     public int addBreedPregnancyCheck(BreedPregnancyCheckDTO dto) {
         BreedRegisterDTO breedRegisterDTO = breedDao.getBreedRegister(dto.getRegisterId());
-        PermissionUtil.breedPregnancyAddPermission(breedRegisterDTO);
+        if (!StrUtil.equals(dto.getFarmCode(), breedRegisterDTO.getFarmCode())) {
+            throw new BusinessException("请输入当前牧场的登记号");
+        }
         String username = UserUtil.getUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
@@ -131,28 +116,13 @@ public class BreedServiceImpl implements BreedService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int delBreedPregnancyCheck(List<Integer> ids) {
-        List<BreedPregnancyCheckDTO> breedPregnancyCheckList = breedDao.listBreedPregnancyCheckByIds(ids);
-        PermissionUtil.breedPregnancyDelPermission(breedPregnancyCheckList);
         return breedDao.delBreedPregnancyCheck(ids);
     }
 
     @Override
     public PageInfo<BreedPregnancyResultDTO> pageBreedPregnancyResult(BreedPregnancyResultQO qo) {
         PageHelper.startPage(qo);
-        PageInfo<BreedPregnancyResultDTO> pageInfo = new PageInfo<>(breedDao.listBreedPregnancyResult(qo));
-        Set<String> childrenCodeList = new HashSet<>();
-        pageInfo.getList().forEach(dto -> childrenCodeList.addAll(CommonUtil.stringToList(dto.getChildrenCodeList())));
-        List<CattleDTO> cattleList = new ArrayList<>();
-        if (childrenCodeList.size() > 0) {
-            CattleQO cattleQO = new CattleQO();
-            cattleQO.setCattleCodeList(new ArrayList<>(childrenCodeList));
-            cattleList = cattleDao.listCattle(cattleQO);
-        }
-        for (BreedPregnancyResultDTO dto : pageInfo.getList()) {
-            List<String> cattleCodeList = CommonUtil.stringToList(dto.getChildrenCodeList());
-            dto.setChildren(cattleList.stream().filter(item -> cattleCodeList.contains(item.getCattleCode())).toList());
-        }
-        return pageInfo;
+        return new PageInfo<>(breedDao.listBreedPregnancyResult(qo));
     }
 
     @Override
@@ -164,52 +134,37 @@ public class BreedServiceImpl implements BreedService {
     @Override
     public int addBreedPregnancyResult(BreedPregnancyResultDTO dto) {
         BreedRegisterDTO breedRegisterDTO = breedDao.getBreedRegister(dto.getRegisterId());
-        PermissionUtil.breedPregnancyAddPermission(breedRegisterDTO);
+        if (!StrUtil.equals(dto.getFarmCode(), breedRegisterDTO.getFarmCode())) {
+            throw new BusinessException("请输入当前牧场的登记号");
+        }
+        if (StrUtil.isNotBlank(dto.getChildCattleCode()) && cattleDao.getCattle(dto.getChildCattleCode()) != null) {
+            throw new BusinessException("牛犊子耳牌号已存在");
+        }
         String username = UserUtil.getUsername();
-        if ("birth".equals(dto.getResult()) && CollUtil.isEmpty(dto.getChildren())) {
-            throw new BusinessException("生育时，后代不能为空");
-        }
-        if ("abortion".equals(dto.getResult()) && CollUtil.isNotEmpty(dto.getChildren())) {
-            throw new BusinessException("流产时，后代应为空");
-        }
-        if (CollUtil.isNotEmpty(dto.getChildren())) {
-            List<String> cattleCodeList = dto.getChildren().stream().map(CattleDTO::getCattleCode).toList();
-            CattleQO qo = new CattleQO();
-            qo.setCattleCodeList(cattleCodeList);
-            List<CattleDTO> cattleList = cattleDao.listCattle(qo);
-            if (cattleList.size() > 0) {
-                throw new BusinessException("牛只耳牌号("
-                        + cattleList.stream()
-                        .map(CattleDTO::getCattleCode)
-                        .collect(Collectors.joining(","))
-                        + ")已存在");
-            }
-            for (CattleDTO cattleDTO : dto.getChildren()) {
-                CattleQO cattleQO = new CattleQO();
-                cattleQO.setFarmZoneCode(cattleDTO.getFarmZoneCode());
-                FarmZoneDTO farmZoneDTO = farmDao.getFarmZone(dto.getFarmZoneCode());
-                List<CattleDTO> existCattleList = cattleDao.listCattle(cattleQO);
-                if (farmZoneDTO.getSize() <= existCattleList.size()) {
-                    throw new BusinessException("圈舍" + farmZoneDTO.getFarmZoneCode() + "牛只已满");
-                }
-                cattleDTO.setCreateUser(username);
-                cattleDTO.setUpdateUser(username);
-                if (cattleDao.addCattle(cattleDTO) == 0) {
-                    throw new BusinessException("添加牛只失败：" + cattleDTO.getCattleCode());
-                }
-            }
-            dto.setChildrenCodeList(dto.getChildren().stream().map(CattleDTO::getCattleCode).collect(Collectors.joining(",")));
+        CattleDTO cattleDTO = new CattleDTO();
+        dto.setCreateUser(username);
+        dto.setUpdateUser(username);
+        cattleDTO.setFarmZoneCode(dto.getChildFarmZoneCode());
+        cattleDTO.setCattleCode(dto.getChildCattleCode());
+        cattleDTO.setBreed(dto.getBreed());
+        cattleDTO.setSex(dto.getSex());
+        cattleDTO.setColor(dto.getColor());
+        cattleDTO.setBirthday(dto.getResultDay());
+        if (cattleDao.addCattle(cattleDTO) == 0) {
+            throw new BusinessException("添加牛犊子失败");
         }
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
-        return breedDao.addBreedPregnancyResult(dto);
+        int res = breedDao.addBreedPregnancyResult(dto);
+        if (res == 0) {
+            throw new BusinessException("添加失败");
+        }
+        return res;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int delBreedPregnancyResult(List<Integer> ids) {
-        List<BreedPregnancyResultDTO> breedPregnancyResultList = breedDao.listBreedPregnancyResultByIds(ids);
-        PermissionUtil.breedPregnancyDelPermission(breedPregnancyResultList);
         return breedDao.delBreedPregnancyResult(ids);
     }
 }

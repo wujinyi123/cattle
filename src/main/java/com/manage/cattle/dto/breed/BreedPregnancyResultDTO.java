@@ -12,8 +12,12 @@ public class BreedPregnancyResultDTO extends BreedBaseDTO {
     private String resultDay;
     private String operaUser;
     private String result;
-    private String resultValue;
     private String remark;
-    private String childrenCodeList;
-    private List<CattleDTO> children;
+    private String childFarmZoneCode;
+    private String childCattleCode;
+    private String breed;
+    private String breedValue;
+    private String sex;
+    private String color;
+    private String weight;
 }

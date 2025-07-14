@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 public class BreedPregnancyResultQO extends PageQO {
     private String registerId;
-    private String farmName;
+    private String farmCode;
     private String farmZoneCode;
     private String cattleCode;
     private String resultDayStart;
