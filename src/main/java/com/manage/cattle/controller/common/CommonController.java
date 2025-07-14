@@ -1,10 +1,7 @@
 package com.manage.cattle.controller.common;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dto.common.ImportInfo;
-import com.manage.cattle.dto.common.SysConfigDTO;
-import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.common.CommonService;
 import com.manage.cattle.util.CommonUtil;
 import jakarta.annotation.Resource;
@@ -12,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,26 +24,6 @@ import java.util.Objects;
 public class CommonController {
     @Resource
     private CommonService commonService;
-
-    @GetMapping("/pageSysConfig")
-    public PageInfo<SysConfigDTO> pageSysConfig(SysConfigQO qo) {
-        return commonService.pageSysConfig(qo);
-    }
-
-    @GetMapping("/listSysConfig")
-    public List<SysConfigDTO> listSysConfig(SysConfigQO qo) {
-        return commonService.listSysConfig(qo);
-    }
-
-    @PostMapping("/addSysConfig")
-    public int addSysConfig(@RequestBody SysConfigDTO dto) {
-        return commonService.addSysConfig(dto);
-    }
-
-    @PostMapping("/delSysConfig")
-    public int delSysConfig(@RequestBody List<Integer> ids) {
-        return commonService.delSysConfig(ids);
-    }
 
     @GetMapping("/export")
     public ResponseEntity<byte[]> export(HttpServletRequest request, @RequestParam String templateCode) {

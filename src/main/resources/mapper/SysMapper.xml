@@ -34,4 +34,37 @@
     <delete id="delSysJob">
         delete from t_sys_job where jobCode=#{jobCode}
     </delete>
+
+    <select id="listSysConfig" resultType="com.manage.cattle.dto.common.SysConfigDTO">
+        select
+        id,createUser,createTime,updateUser,updateTime,
+        `code`,`key`,`value`,`sort`
+        from t_sys_config
+        where 1=1
+        <if test="code!=null and code!=''">
+            and `code`=#{code}
+        </if>
+        <if test="codeList!=null and codeList.size()>0">
+            and `code` in
+            <foreach collection="codeList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        order by `code`,`sort`
+    </select>
+
+    <insert id="addSysConfig">
+        insert into t_sys_config(createUser,createTime,updateUser,updateTime,
+                                 `code`,`key`,`value`,`sort`)
+        values (#{createUser},now(),#{updateUser},now(),
+                #{code},#{key},#{value},#{sort})
+    </insert>
+
+    <delete id="delSysConfig">
+        delete from t_sys_config
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
 </mapper>

@@ -1,11 +1,15 @@
 package com.manage.cattle.service.base.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.SysDao;
 import com.manage.cattle.dao.base.UserDao;
 import com.manage.cattle.dto.base.SysJobDTO;
 import com.manage.cattle.dto.base.UserDTO;
+import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.qo.base.UserQO;
+import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.base.SysService;
 import com.manage.cattle.util.PermissionUtil;
 import com.manage.cattle.util.UserUtil;
@@ -65,5 +69,33 @@ public class SysServiceImpl implements SysService {
             throw new BusinessException("用户(" + String.join(",", usernameList) + ")属于该岗位，请先处理用户信息");
         }
         return sysDao.delSysJob(jobCode);
+    }
+
+    @Override
+    public PageInfo<SysConfigDTO> pageSysConfig(SysConfigQO qo) {
+        PageHelper.startPage(qo);
+        return new PageInfo<>(sysDao.listSysConfig(qo));
+    }
+
+    @Override
+    public List<SysConfigDTO> listSysConfig(SysConfigQO qo) {
+        return sysDao.listSysConfig(qo);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int addSysConfig(SysConfigDTO dto) {
+        PermissionUtil.onlySysAdmin();
+        String username = UserUtil.getUsername();
+        dto.setCreateUser(username);
+        dto.setUpdateUser(username);
+        return sysDao.addSysConfig(dto);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int delSysConfig(List<Integer> ids) {
+        PermissionUtil.onlySysAdmin();
+        return sysDao.delSysConfig(ids);
     }
 }

@@ -8,20 +8,13 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.support.ExcelTypeEnum;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import com.manage.cattle.dao.common.CommonDao;
 import com.manage.cattle.dto.BaseDTO;
 import com.manage.cattle.dto.common.FileByteInfo;
 import com.manage.cattle.dto.common.ImportInfo;
-import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.dto.common.TemplateInfo;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.qo.PageQO;
-import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.common.CommonService;
-import com.manage.cattle.util.UserUtil;
-import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
@@ -29,7 +22,6 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
@@ -47,38 +39,7 @@ import java.util.stream.Collectors;
 @Service
 public class CommonServiceImpl implements CommonService {
     @Resource
-    private CommonDao commonDao;
-
-    @Resource
     private ApplicationContext applicationContext;
-
-    @Override
-    public PageInfo<SysConfigDTO> pageSysConfig(SysConfigQO qo) {
-        PageHelper.startPage(qo);
-        return new PageInfo<>(commonDao.listSysConfig(qo));
-    }
-
-    @Override
-    public List<SysConfigDTO> listSysConfig(SysConfigQO qo) {
-        return commonDao.listSysConfig(qo);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public int addSysConfig(SysConfigDTO dto) {
-        PermissionUtil.onlySysAdmin();
-        String username = UserUtil.getUsername();
-        dto.setCreateUser(username);
-        dto.setUpdateUser(username);
-        return commonDao.addSysConfig(dto);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public int delSysConfig(List<Integer> ids) {
-        PermissionUtil.onlySysAdmin();
-        return commonDao.delSysConfig(ids);
-    }
 
     @Override
     public FileByteInfo exportFile(Map<String, String> params, String templateCode) {
