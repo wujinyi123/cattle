@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.manage.cattle.dao.base.SysDao">
+    <select id="listSysJob" resultType="com.manage.cattle.dto.base.SysJobDTO">
+        select
+            id,createUser,createTime,updateUser,updateTime,
+            jobCode,jobName,jobDesc,jobPower
+        from t_sys_job
+        order by jobCode
+    </select>
+
+    <select id="getSysJob" resultType="com.manage.cattle.dto.base.SysJobDTO">
+        select
+            id,createUser,createTime,updateUser,updateTime,
+            jobCode,jobName,jobDesc,jobPower
+        from t_sys_job
+        where jobCode=#{jobCode}
+    </select>
+
+    <insert id="addSysJob">
+        insert into t_sys_job(createUser,createTime,updateUser,updateTime,
+                              jobCode,jobName,jobDesc,jobPower)
+        values (#{createUser},now(),#{updateUser},now(),
+                #{jobCode},#{jobName},#{jobDesc},#{jobPower})
+    </insert>
+
+    <update id="updateSysJob">
+        update t_sys_job set updateUser=#{updateUser},updateTime=now(),
+                             jobName=#{jobName},jobDesc=#{jobDesc},jobPower=#{jobPower}
+        where jobCode=#{jobCode}
+    </update>
+
+    <delete id="delSysJob">
+        delete from t_sys_job where jobCode=#{jobCode}
+    </delete>
+</mapper>

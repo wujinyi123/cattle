@@ -5,7 +5,7 @@
     <select id="listFarm" resultType="com.manage.cattle.dto.base.FarmDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            farmCode,farmName,address,area,scale
+            farmCode,farmName,farmOwner,address,area,scale
         from t_farm
         where 1=1
         <if test="farmCode!=null and farmCode!=''">
@@ -13,6 +13,9 @@
         </if>
         <if test="farmName!=null and farmName!=''">
             and farmName like concat('%',#{farmName},'%')
+        </if>
+        <if test="farmOwner!=null and farmOwner!=''">
+            and farmOwner like concat('%',#{farmOwner},'%')
         </if>
         <if test="address!=null and address!=''">
             and address like concat('%',#{address},'%')
@@ -23,29 +26,35 @@
         <if test="scale!=null and scale!=''">
             and scale like concat('%',#{scale},'%')
         </if>
+        <if test="farmCodeList!=null and farmCodeList.size()>0">
+            and farmCode in
+            <foreach collection="farmCodeList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
         order by farmName
     </select>
 
     <select id="getFarm" resultType="com.manage.cattle.dto.base.FarmDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            farmCode,farmName,address,area,scale
+            farmCode,farmName,farmOwner,address,area,scale
         from t_farm
         where farmCode=#{farmCode}
     </select>
 
     <insert id="addFarm">
         insert into t_farm(createUser,createTime,updateUser,updateTime,
-                           farmCode,farmName,address,area,scale)
+                           farmCode,farmName,farmOwner,address,area,scale)
         values (#{createUser},now(),#{updateUser},now(),
-                #{farmCode},#{farmName},#{address},#{area},#{scale})
+                #{farmCode},#{farmName},#{farmOwner},#{address},#{area},#{scale})
     </insert>
 
     <update id="updateFarm">
         update t_farm
         set updateUser=#{updateUser},updateTime=now(),
-            farmName=#{farmName},address=#{address},
-            area=#{area},scale=#{scale}
+            farmName=#{farmName},farmOwner=#{farmOwner},
+            address=#{address},area=#{area},scale=#{scale}
         where farmCode=#{farmCode}
     </update>
 

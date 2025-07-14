@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 public class FarmDTO extends BaseDTO {
     private String farmCode;
     private String farmName;
+    private String farmOwner;
     private String address;
     private String area;
     private String scale;

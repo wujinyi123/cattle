@@ -11,9 +11,12 @@ import java.util.List;
 public class UserQO extends PageQO {
     private String username;
     private String name;
-    private String job;
-    private String phone;
     private String isSysAdmin;
-    private String status;
+    private String jobCode;
+    private String farmCode;
+    private String phone;
+    private String expireDateStart;
+    private String expireDateEnd;
+    private String noExpire;
     private List<String> usernameList;
 }

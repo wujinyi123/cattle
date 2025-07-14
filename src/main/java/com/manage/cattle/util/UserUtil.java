@@ -89,6 +89,26 @@ public class UserUtil {
     }
 
     /**
+     * token过期时间
+     *
+     * @return String
+     */
+    public static String getTokenCreateTime() {
+        JWT jwt = getJwt();
+        return jwt.getPayload(JWTPayload.ISSUED_AT).toString();
+    }
+
+    /**
+     * token过期时间
+     *
+     * @return String
+     */
+    public static String getTokenExpireTime() {
+        JWT jwt = getJwt();
+        return jwt.getPayload(JWTPayload.EXPIRES_AT).toString();
+    }
+
+    /**
      * getIsSysAdmin
      *
      * @return String

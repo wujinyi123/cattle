@@ -4,12 +4,17 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.manage.cattle.dao.base.FarmDao;
+import com.manage.cattle.dao.base.SysDao;
 import com.manage.cattle.dao.base.UserDao;
 import com.manage.cattle.dao.common.CommonDao;
+import com.manage.cattle.dto.base.FarmDTO;
+import com.manage.cattle.dto.base.SysJobDTO;
 import com.manage.cattle.dto.base.UserDTO;
 import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.exception.LoginException;
+import com.manage.cattle.qo.base.FarmQO;
 import com.manage.cattle.qo.base.LoginQO;
 import com.manage.cattle.qo.base.UserQO;
 import com.manage.cattle.qo.common.SysConfigQO;
@@ -25,18 +30,23 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
-    @Value("${default.password:123456}")
-    private String defaultPassword;
-
     @Resource
     private UserDao userDao;
+
+    @Resource
+    private SysDao sysDao;
+
+    @Resource
+    private FarmDao farmDao;
 
     @Resource
     private CommonDao commonDao;
@@ -50,10 +60,12 @@ public class UserServiceImpl implements UserService {
         if (Objects.isNull(dto)) {
             throw new LoginException("密码错误");
         }
+        dto.setJobObj(sysDao.getSysJob(dto.getJobCode()));
         Map<String, Object> payload = new HashMap<>();
         payload.put("username", dto.getUsername());
         payload.put("name", dto.getName());
         payload.put("isSysAdmin", dto.getIsSysAdmin());
+        payload.put("jobDTO", dto.getJobObj());
         String token = UserUtil.createToken(payload);
         dto.setToken(token);
         return dto;
@@ -62,56 +74,54 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getCurrentUser() {
         String username = UserUtil.getUsername();
-        return userDao.getUser(username);
+        UserDTO dto = userDao.getUser(username);
+        dto.setTokenCreateTime(UserUtil.getTokenCreateTime());
+        dto.setTokenExpireTime(UserUtil.getTokenExpireTime());
+        dto.setJobObj(sysDao.getSysJob(dto.getJobCode()));
+        List<FarmDTO> farmList = farmDao.listFarm(new FarmQO());
+        setFarmInfo(dto, farmList);
+        return dto;
     }
 
     @Override
     public PageInfo<UserDTO> pageUser(UserQO qo) {
         PageHelper.startPage(qo);
-        return new PageInfo<>(userDao.listUser(qo));
+        PageInfo<UserDTO> pageInfo = new PageInfo<>(userDao.listUser(qo));
+        List<FarmDTO> farmList = farmDao.listFarm(new FarmQO());
+        for (UserDTO dto : pageInfo.getList()) {
+            setFarmInfo(dto, farmList);
+        }
+        return pageInfo;
     }
 
     @Override
     public List<UserDTO> listUser(UserQO qo) {
-        return userDao.listUser(qo);
+        List<UserDTO> list = userDao.listUser(qo);
+        List<FarmDTO> farmList = farmDao.listFarm(new FarmQO());
+        for (UserDTO dto : list) {
+            setFarmInfo(dto, farmList);
+        }
+        return list;
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public List<String> importUser(String requireFields, List<UserDTO> list) {
-        PermissionUtil.onlySysAdmin();
-        String username = UserUtil.getUsername();
-        String[] requireFieldArr = requireFields.split(",");
-        SysConfigQO qo = new SysConfigQO();
-        qo.setCodeList(Arrays.asList("isSysAdmin", "userStatus"));
-        Map<String, String> codeMap = commonDao.listSysConfig(qo).stream().collect(Collectors.toMap(dto -> dto.getCode() + "#" + dto.getValue(),
-                SysConfigDTO::getKey, (key1, key2) -> key2));
-        List<String> errList = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            UserDTO dto = list.get(i);
-            String address = "第" + (i + 2) + "行：";
-            if (!CommonUtil.checkRequire(requireFieldArr, dto)) {
-                errList.add(address + "必填项不能为空");
-                continue;
-            }
-            dto.setIsSysAdmin(codeMap.get("isSysAdmin#" + dto.getIsSysAdminValue()));
-            dto.setStatus(codeMap.get("userStatus#" + dto.getStatusValue()));
-            if (StrUtil.isBlank(dto.getIsSysAdmin()) || StrUtil.isBlank(dto.getStatus())) {
-                errList.add(address + "是否系统管理员或状态错误");
-                continue;
-            }
-            if (userDao.getUser(dto.getUsername()) != null) {
-                errList.add(address + "账号已存在");
-                continue;
-            }
-            dto.setCreateUser(username);
-            dto.setUpdateUser(username);
-            dto.setPassword(defaultPassword);
-            if (userDao.addUser(dto) == 0) {
-                errList.add(address + "添加失败");
-            }
+    private void setFarmInfo(UserDTO dto, List<FarmDTO> farmList) {
+        dto.setFarmObj(farmList.stream()
+                .filter(item -> item.getFarmCode().equals(dto.getFarmCode()))
+                .findFirst()
+                .orElse(null));
+        if ("Y".equals(dto.getIsSysAdmin())) {
+            dto.setFarmPowerList(farmList);
+        } else {
+            Set<String> farmCodeTemp = new HashSet<>();
+            farmCodeTemp.addAll(CommonUtil.stringToList(dto.getFarmCode()));
+            farmCodeTemp.addAll(CommonUtil.stringToList(dto.getFarmPower()));
+            dto.setFarmPowerList(farmList.stream()
+                    .filter(item -> farmCodeTemp.contains(item.getFarmCode()))
+                    .toList());
         }
-        return errList;
+        dto.setFarmPowerName(dto.getFarmPowerList().stream()
+                .map(FarmDTO::getFarmName)
+                .collect(Collectors.joining(",")));
     }
 
     @Override
@@ -130,7 +140,6 @@ public class UserServiceImpl implements UserService {
             if (Objects.nonNull(userDao.getUser(dto.getUsername()))) {
                 throw new BusinessException("账号已存在");
             }
-            dto.setPassword(defaultPassword);
             return userDao.addUser(dto);
         } else {
             return userDao.updateUser(dto);

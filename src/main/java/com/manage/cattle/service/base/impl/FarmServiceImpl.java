@@ -57,7 +57,7 @@ public class FarmServiceImpl implements FarmService {
                 existFarmList.stream().filter(item -> item.getFarmCode().equals(dto.getFarmCode()) || item.getFarmName().equals(dto.getFarmName())).toList() :
                 existFarmList.stream().filter(item -> !item.getFarmCode().equals(dto.getFarmCode()) && item.getFarmName().equals(dto.getFarmName())).toList();
         if (farmList.size() > 0) {
-            throw new BusinessException("牧场代码或牧场名称已存在");
+            throw new BusinessException("牧场代码或名称已存在");
         }
         int result = "add".equals(type) ? farmDao.addFarm(dto) : farmDao.updateFarm(dto);
         if (result == 0) {

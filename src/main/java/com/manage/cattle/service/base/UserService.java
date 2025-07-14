@@ -18,8 +18,6 @@ public interface UserService {
 
     List<UserDTO> listUser(UserQO qo);
 
-    List<String> importUser(String requireFields, List<UserDTO> list);
-
     UserDTO getUser(String username);
 
     int saveUser(String type, UserDTO dto);
