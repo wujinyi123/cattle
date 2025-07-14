@@ -27,4 +27,6 @@ public interface UserService {
     int updatePhone(JSONObject jsonObject);
 
     int delUser(List<String> usernameList);
+
+    int reloadPassword(String username);
 }

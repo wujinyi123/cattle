@@ -13,6 +13,7 @@ public class UserDTO extends BaseDTO {
     private String username;
     private String password;
     private String name;
+    private String sex;
     private String isSysAdmin;
     private String jobCode;
     private String jobName;

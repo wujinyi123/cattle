@@ -7,28 +7,21 @@ import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.base.SysDao;
 import com.manage.cattle.dao.base.UserDao;
-import com.manage.cattle.dao.common.CommonDao;
 import com.manage.cattle.dto.base.FarmDTO;
-import com.manage.cattle.dto.base.SysJobDTO;
 import com.manage.cattle.dto.base.UserDTO;
-import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.exception.LoginException;
 import com.manage.cattle.qo.base.FarmQO;
 import com.manage.cattle.qo.base.LoginQO;
 import com.manage.cattle.qo.base.UserQO;
-import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.base.UserService;
 import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.UserUtil;
 import com.manage.cattle.util.PermissionUtil;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,9 +40,6 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private FarmDao farmDao;
-
-    @Resource
-    private CommonDao commonDao;
 
     @Override
     public UserDTO login(LoginQO qo) {
@@ -182,5 +172,12 @@ public class UserServiceImpl implements UserService {
     public int delUser(List<String> usernameList) {
         PermissionUtil.onlySysAdmin();
         return userDao.delUser(usernameList);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int reloadPassword(String username) {
+        PermissionUtil.onlySysAdmin();
+        return userDao.updatePassword(username, "123456");
     }
 }

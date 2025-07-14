@@ -5,7 +5,7 @@
     <select id="login" resultType="com.manage.cattle.dto.base.UserDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            username,name,isSysAdmin,jobCode,
+            username,name,sex,isSysAdmin,jobCode,
             farmCode,farmPower,phone,expireDate
         from t_user
         where username=#{username} and password=#{password} and expireDate &gt;= now()
@@ -13,17 +13,19 @@
 
     <select id="getUser" resultType="com.manage.cattle.dto.base.UserDTO">
         select
-            id,createUser,createTime,updateUser,updateTime,
-            username,name,isSysAdmin,jobCode,
-            farmCode,farmPower,phone,expireDate
-        from t_user
-        where username=#{username}
+            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+            t.username,t.name,t.sex,t.isSysAdmin,t.jobCode,tj.jobName,
+            tf.farmCode,tf.farmName,t.farmPower,t.phone,t.expireDate
+        from t_user t
+        left join t_sys_job tj on t.jobCode=tj.jobCode
+        left join t_farm tf on t.farmCode=tf.farmCode
+        where t.username=#{username}
     </select>
 
     <select id="listUser" resultType="com.manage.cattle.dto.base.UserDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.username,t.name,t.isSysAdmin,t.jobCode,tj.jobName,
+            t.username,t.name,t.sex,t.isSysAdmin,t.jobCode,tj.jobName,
             tf.farmCode,tf.farmName,t.farmPower,t.phone,t.expireDate,
             concat(t.username,'(',tf.farmName,'_',tj.jobName,'_',t.name,')') title
         from t_user t
@@ -35,6 +37,9 @@
         </if>
         <if test="name!=null and name!=''">
             and t.name like concat('%',#{name},'%')
+        </if>
+        <if test="sex!=null and sex!=''">
+            and t.sex=#{sex}
         </if>
         <if test="isSysAdmin!=null and isSysAdmin!=''">
             and t.isSysAdmin=#{isSysAdmin}
@@ -68,11 +73,11 @@
 
     <insert id="addUser">
         insert into t_user(createUser,createTime,updateUser,updateTime,
-                           username,password,name,isSysAdmin,
+                           username,password,name,sex,isSysAdmin,
                            jobCode,farmCode,farmPower,
                            phone,expireDate)
         values (#{createUser},now(),#{updateUser},now(),
-                #{username},#{password},#{name},#{isSysAdmin},
+                #{username},#{password},#{name},#{sex},#{isSysAdmin},
                 #{jobCode},#{farmCode},#{farmPower},
                 #{phone},#{expireDate})
     </insert>
@@ -80,7 +85,7 @@
     <update id="updateUser">
         update t_user
         set updateUser=#{updateUser},updateTime=now(),
-            name=#{name},isSysAdmin=#{isSysAdmin},
+            name=#{name},sex=#{sex},isSysAdmin=#{isSysAdmin},
             jobCode=#{jobCode},farmCode=#{farmCode},farmPower=#{farmPower},
             phone=#{phone},expireDate=#{expireDate}
         where username=#{username}

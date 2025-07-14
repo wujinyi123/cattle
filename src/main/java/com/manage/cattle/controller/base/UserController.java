@@ -68,4 +68,9 @@ public class UserController {
     public int delUser(@RequestBody List<String> usernameList) {
         return userService.delUser(usernameList);
     }
+
+    @PostMapping("/reloadPassword")
+    public int reloadPassword(@RequestParam String username) {
+        return userService.reloadPassword(username);
+    }
 }

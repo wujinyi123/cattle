@@ -11,6 +11,7 @@ import java.util.List;
 public class UserQO extends PageQO {
     private String username;
     private String name;
+    private String sex;
     private String isSysAdmin;
     private String jobCode;
     private String farmCode;
