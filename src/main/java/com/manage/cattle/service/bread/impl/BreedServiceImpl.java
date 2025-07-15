@@ -141,17 +141,19 @@ public class BreedServiceImpl implements BreedService {
             throw new BusinessException("牛犊子耳牌号已存在");
         }
         String username = UserUtil.getUsername();
-        CattleDTO cattleDTO = new CattleDTO();
-        dto.setCreateUser(username);
-        dto.setUpdateUser(username);
-        cattleDTO.setFarmZoneCode(dto.getChildFarmZoneCode());
-        cattleDTO.setCattleCode(dto.getChildCattleCode());
-        cattleDTO.setBreed(dto.getBreed());
-        cattleDTO.setSex(dto.getSex());
-        cattleDTO.setColor(dto.getColor());
-        cattleDTO.setBirthday(dto.getResultDay());
-        if (cattleDao.addCattle(cattleDTO) == 0) {
-            throw new BusinessException("添加牛犊子失败");
+        if (!"死胎".equals(dto.getResult())) {
+            CattleDTO cattleDTO = new CattleDTO();
+            dto.setCreateUser(username);
+            dto.setUpdateUser(username);
+            cattleDTO.setFarmZoneCode(dto.getChildFarmZoneCode());
+            cattleDTO.setCattleCode(dto.getChildCattleCode());
+            cattleDTO.setBreed(dto.getBreed());
+            cattleDTO.setSex(dto.getSex());
+            cattleDTO.setColor(dto.getColor());
+            cattleDTO.setBirthday(dto.getResultDay());
+            if (cattleDao.addCattle(cattleDTO) == 0) {
+                throw new BusinessException("添加牛犊子失败");
+            }
         }
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
