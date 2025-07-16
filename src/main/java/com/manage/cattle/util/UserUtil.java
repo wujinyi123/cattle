@@ -4,9 +4,8 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.jwt.JWT;
-import cn.hutool.jwt.JWTPayload;
+import cn.hutool.jwt.JWTHeader;
 import cn.hutool.jwt.JWTUtil;
-import com.manage.cattle.exception.LoginException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -25,9 +24,8 @@ public class UserUtil {
      */
     public static String createToken(Map<String, Object> payload) {
         DateTime now = DateTime.now();
-        payload.put(JWTPayload.ISSUED_AT, now);
-        payload.put(JWTPayload.EXPIRES_AT, now.offsetNew(DateField.HOUR, 1));
-        payload.put(JWTPayload.NOT_BEFORE, now);
+        payload.put("create_time", now.toString());
+        payload.put("expire_time", now.offsetNew(DateField.HOUR, 1).toString());
         return JWTUtil.createToken(payload, SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -74,8 +72,21 @@ public class UserUtil {
      * @param token token
      */
     public static boolean verify(String token) {
-        JWT jwt = getJwt(token);
-        return jwt.verify();
+        DateTime now = DateTime.now();
+        String expireTime = (String) getPayloadVal(token, "expire_time");
+        return expireTime.compareTo(now.toString()) > 0;
+    }
+
+
+    public static Object getPayloadVal(String key) {
+        String token = getToken();
+        return getPayloadVal(token, key);
+    }
+
+    public static Object getPayloadVal(String token, String key) {
+        JWT jwt = JWTUtil.parseToken(token).setKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        jwt.getHeader(JWTHeader.TYPE);
+        return jwt.getPayload(key);
     }
 
     /**
@@ -84,28 +95,7 @@ public class UserUtil {
      * @return String
      */
     public static String getUsername() {
-        JWT jwt = getJwt();
-        return jwt.getPayload("username").toString();
-    }
-
-    /**
-     * token过期时间
-     *
-     * @return String
-     */
-    public static String getTokenCreateTime() {
-        JWT jwt = getJwt();
-        return jwt.getPayload(JWTPayload.ISSUED_AT).toString();
-    }
-
-    /**
-     * token过期时间
-     *
-     * @return String
-     */
-    public static String getTokenExpireTime() {
-        JWT jwt = getJwt();
-        return jwt.getPayload(JWTPayload.EXPIRES_AT).toString();
+        return getPayloadVal("username").toString();
     }
 
     /**
@@ -114,20 +104,6 @@ public class UserUtil {
      * @return String
      */
     public static String getIsSysAdmin() {
-        JWT jwt = getJwt();
-        return jwt.getPayload("isSysAdmin").toString();
-    }
-
-    private static JWT getJwt() {
-        String token = getToken();
-        return getJwt(token);
-    }
-
-    private static JWT getJwt(String token) {
-        try {
-            return JWTUtil.parseToken(token).setKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new LoginException("无效token");
-        }
+        return getPayloadVal("isSysAdmin").toString();
     }
 }

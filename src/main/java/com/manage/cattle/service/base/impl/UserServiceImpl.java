@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
         payload.put("username", dto.getUsername());
         payload.put("name", dto.getName());
         payload.put("isSysAdmin", dto.getIsSysAdmin());
-        payload.put("jobDTO", dto.getJobObj());
+        payload.put("job", dto.getJobObj());
         String token = UserUtil.createToken(payload);
         dto.setToken(token);
         return dto;
@@ -65,8 +65,8 @@ public class UserServiceImpl implements UserService {
     public UserDTO getCurrentUser() {
         String username = UserUtil.getUsername();
         UserDTO dto = userDao.getUser(username);
-        dto.setTokenCreateTime(UserUtil.getTokenCreateTime());
-        dto.setTokenExpireTime(UserUtil.getTokenExpireTime());
+        dto.setTokenCreateTime((String) UserUtil.getPayloadVal("create_time"));
+        dto.setTokenExpireTime((String) UserUtil.getPayloadVal("expire_time"));
         dto.setJobObj(sysDao.getSysJob(dto.getJobCode()));
         List<FarmDTO> farmList = farmDao.listFarm(new FarmQO());
         setFarmInfo(dto, farmList);
@@ -101,6 +101,7 @@ public class UserServiceImpl implements UserService {
                 .orElse(null));
         if ("Y".equals(dto.getIsSysAdmin())) {
             dto.setFarmPowerList(farmList);
+            dto.setFarmPowerName("全部");
         } else {
             Set<String> farmCodeTemp = new HashSet<>();
             farmCodeTemp.addAll(CommonUtil.stringToList(dto.getFarmCode()));
@@ -108,10 +109,10 @@ public class UserServiceImpl implements UserService {
             dto.setFarmPowerList(farmList.stream()
                     .filter(item -> farmCodeTemp.contains(item.getFarmCode()))
                     .toList());
+            dto.setFarmPowerName(dto.getFarmPowerList().stream()
+                    .map(FarmDTO::getFarmName)
+                    .collect(Collectors.joining(",")));
         }
-        dto.setFarmPowerName(dto.getFarmPowerList().stream()
-                .map(FarmDTO::getFarmName)
-                .collect(Collectors.joining(",")));
     }
 
     @Override
