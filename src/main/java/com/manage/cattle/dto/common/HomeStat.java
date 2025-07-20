@@ -7,6 +7,7 @@ import java.util.List;
 @Data
 public class HomeStat {
     private List<Node> farmCattleList;
+    private List<Node> farmZoneCattleList;
 
     @Data
     public static class Node {

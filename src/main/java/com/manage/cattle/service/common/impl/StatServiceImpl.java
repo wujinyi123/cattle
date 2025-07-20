@@ -9,7 +9,6 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,19 +19,26 @@ public class StatServiceImpl implements StatService {
     private CattleDao cattleDao;
 
     @Override
-    public HomeStat homeStat() {
+    public HomeStat homeStat(String farmCode) {
         List<CattleDTO> cattleList = cattleDao.listCattle(new CattleQO());
         Map<String, List<CattleDTO>> groupByFarm = cattleList.stream().collect(Collectors.groupingBy(CattleDTO::getFarmName));
-        List<HomeStat.Node> farmCattle = new ArrayList<>();
-        for (Map.Entry<String, List<CattleDTO>> entry : groupByFarm.entrySet()) {
+        HomeStat homeStat = new HomeStat();
+        homeStat.setFarmCattleList(statCattle(groupByFarm));
+        List<CattleDTO> currentFarmCattleList = cattleList.stream().filter(item -> item.getFarmCode().equals(farmCode)).toList();
+        Map<String, List<CattleDTO>> groupByFarmZone = currentFarmCattleList.stream().collect(Collectors.groupingBy(CattleDTO::getFarmZoneCode));
+        homeStat.setFarmZoneCattleList(statCattle(groupByFarmZone));
+        return homeStat;
+    }
+
+    private List<HomeStat.Node> statCattle(Map<String, List<CattleDTO>> groupBy) {
+        List<HomeStat.Node> statCattle = new ArrayList<>();
+        for (Map.Entry<String, List<CattleDTO>> entry : groupBy.entrySet()) {
             HomeStat.Node node = new HomeStat.Node();
             node.setLabel(entry.getKey());
             node.setIntValue(entry.getValue().size());
-            farmCattle.add(node);
+            statCattle.add(node);
         }
-        farmCattle.sort((a,b)->b.getIntValue()-a.getIntValue());
-        HomeStat homeStat = new HomeStat();
-        homeStat.setFarmCattleList(farmCattle.size() > 10 ? farmCattle.subList(0, 10) : farmCattle);
-        return homeStat;
+        statCattle.sort((a, b) -> b.getIntValue() - a.getIntValue());
+        return statCattle.size() > 10 ? statCattle.subList(0, 10) : statCattle;
     }
 }
