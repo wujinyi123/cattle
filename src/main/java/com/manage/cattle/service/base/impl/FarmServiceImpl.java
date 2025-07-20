@@ -49,7 +49,7 @@ public class FarmServiceImpl implements FarmService {
     @Override
     public int saveFarm(String type, FarmDTO dto) {
         PermissionUtil.onlySysAdmin();
-        String username = UserUtil.getUsername();
+        String username = UserUtil.getPayloadVal("username");
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         List<FarmDTO> existFarmList = farmDao.listFarm(new FarmQO());
@@ -115,7 +115,7 @@ public class FarmServiceImpl implements FarmService {
     @Override
     public int saveFarmZone(String type, FarmZoneDTO dto) {
         PermissionUtil.onlySysAdmin();
-        String username = UserUtil.getUsername();
+        String username = UserUtil.getPayloadVal("username");
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         FarmDTO farmDTO = farmDao.getFarm(dto.getFarmCode());

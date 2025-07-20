@@ -8,6 +8,7 @@ import cn.hutool.jwt.JWTHeader;
 import cn.hutool.jwt.JWTUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.poi.ss.formula.functions.T;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -78,32 +79,14 @@ public class UserUtil {
     }
 
 
-    public static Object getPayloadVal(String key) {
+    public static <T> T getPayloadVal(String key) {
         String token = getToken();
         return getPayloadVal(token, key);
     }
 
-    public static Object getPayloadVal(String token, String key) {
+    public static <T> T getPayloadVal(String token, String key) {
         JWT jwt = JWTUtil.parseToken(token).setKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
         jwt.getHeader(JWTHeader.TYPE);
-        return jwt.getPayload(key);
-    }
-
-    /**
-     * 当前用户账号
-     *
-     * @return String
-     */
-    public static String getUsername() {
-        return getPayloadVal("username").toString();
-    }
-
-    /**
-     * getIsSysAdmin
-     *
-     * @return String
-     */
-    public static String getIsSysAdmin() {
-        return getPayloadVal("isSysAdmin").toString();
+        return (T) jwt.getPayload(key);
     }
 }

@@ -9,7 +9,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class InventoryBuyQO extends PageQO {
-    private String farmName;
+    private String farmCode;
     private String cattleCode;
     private String source;
     private String buyDayStart;

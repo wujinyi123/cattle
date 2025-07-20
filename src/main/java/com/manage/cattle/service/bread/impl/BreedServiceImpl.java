@@ -68,7 +68,7 @@ public class BreedServiceImpl implements BreedService {
         if (!StrUtil.equals(dto.getFarmCode(), cattleDTO.getFarmCode())) {
             throw new BusinessException("请输入当前牧场牛只耳牌号");
         }
-        String username = UserUtil.getUsername();
+        String username = UserUtil.getPayloadVal("username");
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         dto.setRegisterId(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
@@ -107,7 +107,7 @@ public class BreedServiceImpl implements BreedService {
         if (!StrUtil.equals(dto.getFarmCode(), breedRegisterDTO.getFarmCode())) {
             throw new BusinessException("请输入当前牧场的登记号");
         }
-        String username = UserUtil.getUsername();
+        String username = UserUtil.getPayloadVal("username");
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         return breedDao.addBreedPregnancyCheck(dto);
@@ -140,7 +140,7 @@ public class BreedServiceImpl implements BreedService {
         if (StrUtil.isNotBlank(dto.getChildCattleCode()) && cattleDao.getCattle(dto.getChildCattleCode()) != null) {
             throw new BusinessException("牛犊子耳牌号已存在");
         }
-        String username = UserUtil.getUsername();
+        String username = UserUtil.getPayloadVal("username");
         if (!"死胎".equals(dto.getResult())) {
             CattleDTO cattleDTO = new CattleDTO();
             dto.setCreateUser(username);

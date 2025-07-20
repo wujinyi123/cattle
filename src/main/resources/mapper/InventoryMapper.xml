@@ -5,13 +5,13 @@
     <select id="listInventoryBuy" resultType="com.manage.cattle.dto.inventory.InventoryBuyDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.farmCode,f.farmName,f.owner farmOwner,t.cattleCode,
+            t.farmCode,f.farmName,f.farmOwner,t.cattleCode,
             t.source,t.quarantineCertificate,t.buyDay
         from t_inventory_buy t
         left join t_farm f on t.farmCode=f.farmCode
         where 1=1
-        <if test="farmName!=null and farmName!=''">
-            and f.farmName like concat('%',#{farmName},'%')
+        <if test="farmCode!=null and farmCode!=''">
+            and f.farmCode=#{farmCode}
         </if>
         <if test="cattleCode!=null and cattleCode!=''">
             and t.cattleCode like concat('%',#{cattleCode},'%')
@@ -52,13 +52,13 @@
     <select id="listInventorySell" resultType="com.manage.cattle.dto.inventory.InventorySellDTO">
         select
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-        t.farmCode,f.farmName,f.owner farmOwner,t.cattleCode,t.cattleInfo,
+        t.farmCode,f.farmName,f.farmOwner,t.cattleCode,t.cattleInfo,
         t.buyerInfo,t.price,t.quarantineCertificate,t.sellDay
         from t_inventory_sell t
         left join t_farm f on t.farmCode=f.farmCode
         where 1=1
-        <if test="farmName!=null and farmName!=''">
-            and f.farmName like concat('%',#{farmName},'%')
+        <if test="farmCode!=null and farmCode!=''">
+            and f.farmCode=#{farmCode}
         </if>
         <if test="cattleCode!=null and cattleCode!=''">
             and t.cattleCode like concat('%',#{cattleCode},'%')
@@ -102,13 +102,13 @@
     <select id="listInventoryDeath" resultType="com.manage.cattle.dto.inventory.InventoryDeathDTO">
         select
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-        t.farmCode,f.farmName,f.owner farmOwner,t.cattleCode,t.cattleInfo,
+        t.farmCode,f.farmName,f.farmOwner,t.cattleCode,t.cattleInfo,
         t.reason,t.handleMethod,t.deathDay
         from t_inventory_death t
         left join t_farm f on t.farmCode=f.farmCode
         where 1=1
-        <if test="farmName!=null and farmName!=''">
-            and f.farmName like concat('%',#{farmName},'%')
+        <if test="farmCode!=null and farmCode!=''">
+            and f.farmCode=#{farmCode}
         </if>
         <if test="cattleCode!=null and cattleCode!=''">
             and t.cattleCode like concat('%',#{cattleCode},'%')

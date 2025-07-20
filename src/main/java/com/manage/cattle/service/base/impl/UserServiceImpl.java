@@ -63,10 +63,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO getCurrentUser() {
-        String username = UserUtil.getUsername();
+        String username = UserUtil.getPayloadVal("username");
         UserDTO dto = userDao.getUser(username);
-        dto.setTokenCreateTime((String) UserUtil.getPayloadVal("create_time"));
-        dto.setTokenExpireTime((String) UserUtil.getPayloadVal("expire_time"));
+        dto.setTokenCreateTime(UserUtil.getPayloadVal("create_time"));
+        dto.setTokenExpireTime(UserUtil.getPayloadVal("expire_time"));
         dto.setJobObj(sysDao.getSysJob(dto.getJobCode()));
         List<FarmDTO> farmList = farmDao.listFarm(new FarmQO());
         setFarmInfo(dto, farmList);
@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public int saveUser(String type, UserDTO dto) {
         PermissionUtil.onlySysAdmin();
-        String username = UserUtil.getUsername();
+        String username = UserUtil.getPayloadVal("username");
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         if ("add".equals(type)) {
@@ -140,7 +140,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int updatePassword(JSONObject jsonObject) {
-        String username = UserUtil.getUsername();
+        String username = UserUtil.getPayloadVal("username");
         String password = jsonObject.get("password", String.class);
         String newPassword = jsonObject.get("newPassword", String.class);
         String confirmPassword = jsonObject.get("confirmPassword", String.class);
@@ -160,7 +160,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int updatePhone(JSONObject jsonObject) {
-        String username = UserUtil.getUsername();
+        String username = UserUtil.getPayloadVal("username");
         String phone = jsonObject.get("phone", String.class);
         if (StrUtil.isBlank(phone)) {
             throw new BusinessException("联系方式不能为空");

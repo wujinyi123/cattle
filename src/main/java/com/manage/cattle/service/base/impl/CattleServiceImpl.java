@@ -49,11 +49,17 @@ public class CattleServiceImpl implements CattleService {
     @Override
     public CattleDTO getCattle(String cattleCode) {
         CattleDTO dto = cattleDao.getCattle(cattleCode);
+        if (dto == null) {
+            throw new BusinessException("牛只不存在");
+        }
         setAge(dto);
         return dto;
     }
 
     private void setAge(CattleDTO dto) {
+        if (dto == null) {
+            return;
+        }
         String start = dto.getBirthday();
         String end = CommonUtil.dateToStr(new Date());
         if (StrUtil.equals(start, end)) {
@@ -85,7 +91,7 @@ public class CattleServiceImpl implements CattleService {
     @Override
     public int saveCattle(String type, CattleDTO dto) {
         PermissionUtil.onlySysAdmin();
-        String username = UserUtil.getUsername();
+        String username = UserUtil.getPayloadVal("username");
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         FarmZoneDTO farmZoneDTO = farmDao.getFarmZone(dto.getFarmZoneCode());

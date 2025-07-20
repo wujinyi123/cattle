@@ -1,5 +1,6 @@
 package com.manage.cattle.service.inventory.impl;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -7,7 +8,6 @@ import com.manage.cattle.dao.base.CattleDao;
 import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.inventory.InventoryDao;
 import com.manage.cattle.dto.base.CattleDTO;
-import com.manage.cattle.dto.base.FarmDTO;
 import com.manage.cattle.dto.base.FarmZoneDTO;
 import com.manage.cattle.dto.inventory.InventoryBuyDTO;
 import com.manage.cattle.dto.inventory.InventoryDeathDTO;
@@ -49,18 +49,15 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addInventoryBuy(InventoryBuyDTO dto) {
-        String isSysAdmin = UserUtil.getIsSysAdmin();
-        String username = UserUtil.getUsername();
+        if (cattleDao.getCattle(dto.getCattleCode()) != null) {
+            throw new BusinessException("耳牌号已存在");
+        }
+        String username = UserUtil.getPayloadVal("username");
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
-
         FarmZoneDTO farmZoneDTO = farmDao.getFarmZone(dto.getFarmZoneCode());
         if (farmZoneDTO == null) {
             throw new BusinessException("圈舍编号不存在");
-        }
-        CattleDTO cattleDTO = cattleDao.getCattle(dto.getCattleCode());
-        if (cattleDTO != null) {
-            throw new BusinessException("耳牌号已存在");
         }
         if (cattleDao.addCattle(dto) == 0) {
             throw new BusinessException("添加牛只失败");
@@ -75,13 +72,6 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int delInventoryBuy(List<Integer> ids) {
-        InventoryBuyQO qo = new InventoryBuyQO();
-        qo.setIds(ids);
-        List<InventoryBuyDTO> list = inventoryDao.listInventoryBuy(qo);
-        String isSysAdmin = UserUtil.getIsSysAdmin();
-        if (!"Y".equals(isSysAdmin)) {
-            return inventoryDao.delInventoryBuy(ids);
-        }
         return inventoryDao.delInventoryBuy(ids);
     }
 
@@ -99,13 +89,15 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addInventorySell(InventorySellDTO dto) {
-        String username = UserUtil.getUsername();
+        String username = UserUtil.getPayloadVal("username");
         CattleDTO cattleDTO = cattleDao.getCattle(dto.getCattleCode());
         if (cattleDTO == null) {
             throw new BusinessException("耳牌号不存在");
         }
+        if (!StrUtil.equals(dto.getFarmCode(), cattleDTO.getFarmCode())) {
+            throw new BusinessException("请输入当前牛场的牛只耳牌号");
+        }
         dto.setCattleInfo(JSONUtil.toJsonStr(cattleDTO));
-
         if (cattleDao.delCattle(List.of(dto.getCattleCode())) == 0) {
             throw new BusinessException("删除牛只失败");
         }
@@ -121,17 +113,6 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int delInventorySell(List<Integer> ids) {
-        InventorySellQO qo = new InventorySellQO();
-        qo.setIds(ids);
-        List<InventorySellDTO> list = inventoryDao.listInventorySell(qo);
-        String isSysAdmin = UserUtil.getIsSysAdmin();
-        if (!"Y".equals(isSysAdmin)) {
-            return inventoryDao.delInventorySell(ids);
-        }
-        String username = UserUtil.getUsername();
-        if (list.stream().anyMatch(item -> !username.equals(item.getFarmOwner()))) {
-            throw new BusinessException("部分权限不足");
-        }
         return inventoryDao.delInventorySell(ids);
     }
 
@@ -149,18 +130,20 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addInventoryDeath(InventoryDeathDTO dto) {
-        String username = UserUtil.getUsername();
-        dto.setCreateUser(username);
-        dto.setUpdateUser(username);
+        String username = UserUtil.getPayloadVal("username");
         CattleDTO cattleDTO = cattleDao.getCattle(dto.getCattleCode());
         if (cattleDTO == null) {
             throw new BusinessException("耳牌号不存在");
         }
+        if (!StrUtil.equals(dto.getFarmCode(), cattleDTO.getFarmCode())) {
+            throw new BusinessException("请输入当前牛场的牛只耳牌号");
+        }
         dto.setCattleInfo(JSONUtil.toJsonStr(cattleDTO));
-
         if (cattleDao.delCattle(List.of(dto.getCattleCode())) == 0) {
             throw new BusinessException("删除牛只失败");
         }
+        dto.setCreateUser(username);
+        dto.setUpdateUser(username);
         int result = inventoryDao.addInventoryDeath(dto);
         if (result == 0) {
             throw new BusinessException("添加失败");
@@ -171,17 +154,6 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int delInventoryDeath(List<Integer> ids) {
-        InventoryDeathQO qo = new InventoryDeathQO();
-        qo.setIds(ids);
-        List<InventoryDeathDTO> list = inventoryDao.listInventoryDeath(qo);
-        String isSysAdmin = UserUtil.getIsSysAdmin();
-        if (!"Y".equals(isSysAdmin)) {
-            return inventoryDao.delInventoryDeath(ids);
-        }
-        String username = UserUtil.getUsername();
-        if (list.stream().anyMatch(item -> !username.equals(item.getFarmOwner()))) {
-            throw new BusinessException("部分权限不足");
-        }
         return inventoryDao.delInventoryDeath(ids);
     }
 

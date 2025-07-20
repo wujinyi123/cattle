@@ -12,6 +12,8 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.util.Objects;
+
 @ControllerAdvice
 public class ResponseAdvice implements ResponseBodyAdvice<Object> {
     @Resource
@@ -26,6 +28,9 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType,
                                   ServerHttpRequest request, ServerHttpResponse response) {
+        if (Objects.isNull(body)) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
         if (body instanceof ExceptionAdvice.ErrorResponseEntity entity) {
             response.setStatusCode(entity.getCode());
             return objectMapper.writeValueAsString(new ResponseEntity<>(entity.getMessage(), entity.getCode()));
