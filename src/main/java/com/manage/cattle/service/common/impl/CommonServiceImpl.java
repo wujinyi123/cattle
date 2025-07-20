@@ -15,19 +15,24 @@ import com.manage.cattle.dto.common.TemplateInfo;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.qo.PageQO;
 import com.manage.cattle.service.common.CommonService;
+import com.manage.cattle.util.CommonUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +45,9 @@ import java.util.stream.Collectors;
 public class CommonServiceImpl implements CommonService {
     @Resource
     private ApplicationContext applicationContext;
+
+    @Value("${cattle.help}")
+    private String cattleHelp;
 
     @Override
     public FileByteInfo exportFile(Map<String, String> params, String templateCode) {
@@ -211,5 +219,25 @@ public class CommonServiceImpl implements CommonService {
             info.getFields().add(field);
         }
         return info;
+    }
+
+    @Override
+    public boolean hasHelpFile() {
+        if (StrUtil.isBlank(cattleHelp)) {
+            return false;
+        }
+        File file = new File(cattleHelp);
+        return file.exists();
+    }
+
+    @Override
+    public ResponseEntity<byte[]> downloadHelpFile() {
+        File file = new File(cattleHelp);
+        try {
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            return CommonUtil.responseByteArr(bytes, file.getName());
+        } catch (Exception e) {
+            throw new BusinessException("获取文件失败");
+        }
     }
 }

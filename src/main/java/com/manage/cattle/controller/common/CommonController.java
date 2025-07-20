@@ -52,4 +52,14 @@ public class CommonController {
     public ImportInfo importFile(@RequestParam MultipartFile file, @RequestParam String templateCode) {
         return commonService.importFile(file, templateCode);
     }
+
+    @GetMapping("/hasHelpFile")
+    public boolean hasHelpFile() {
+        return commonService.hasHelpFile();
+    }
+
+    @GetMapping("/downloadHelpFile")
+    public ResponseEntity<byte[]> downloadHelpFile() {
+        return commonService.downloadHelpFile();
+    }
 }
