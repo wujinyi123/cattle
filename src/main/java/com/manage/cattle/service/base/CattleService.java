@@ -16,4 +16,6 @@ public interface CattleService {
     int saveCattle(String type, CattleDTO dto);
 
     int delCattle(List<String> cattleCodeList);
+
+    List<String> importCattle(List<CattleDTO> importList);
 }

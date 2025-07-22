@@ -21,5 +21,7 @@ public class TemplateInfo {
         private String name;
         private String title;
         private String require;
+        private String enumVal;
+        private String regex;
     }
 }

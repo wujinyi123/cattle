@@ -16,6 +16,7 @@ import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.qo.PageQO;
 import com.manage.cattle.service.common.CommonService;
 import com.manage.cattle.util.CommonUtil;
+import com.manage.cattle.util.UserUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
@@ -38,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -106,7 +108,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public ImportInfo importFile(MultipartFile file, String templateCode) {
+    public ImportInfo importFile(MultipartFile file, String templateCode, String farmCode) {
         TemplateInfo info = getTemplateInfo(new HashMap<>(), templateCode, true);
         List<Object> list;
         try (InputStream is = file.getInputStream()) {
@@ -117,6 +119,7 @@ public class CommonServiceImpl implements CommonService {
         if (CollUtil.isEmpty(list)) {
             throw new BusinessException("数据为空");
         }
+        String username = UserUtil.getPayloadVal("username");
         List<BaseDTO> importList = new ArrayList<>();
         for (Object obj : list) {
             BaseDTO dto = new BaseDTO();
@@ -124,6 +127,9 @@ public class CommonServiceImpl implements CommonService {
                 Class<? extends BaseDTO> dtoClass = (Class<? extends BaseDTO>) Class.forName(info.getDtoClass());
                 Map<?, ?> objMap = (Map<?, ?>) obj;
                 Map<String, String> map = new HashMap<>();
+                map.put("createUser", username);
+                map.put("updateUser", username);
+                map.put("farmCode", farmCode);
                 for (int i = 0; i < info.getFields().size(); i++) {
                     Object value = objMap.get(i);
                     if (value == null || "".equals(value.toString())) {
@@ -132,6 +138,7 @@ public class CommonServiceImpl implements CommonService {
                     TemplateInfo.Field fieldObj = info.getFields().get(i);
                     map.put(fieldObj.getName(), value.toString());
                 }
+                importBaseCheck(info, map);
                 String json = JSONUtil.toJsonStr(map);
                 dto = JSONUtil.toBean(json, dtoClass);
             } catch (Exception e) {
@@ -142,21 +149,55 @@ public class CommonServiceImpl implements CommonService {
         String[] classMethod = info.getImportMethed().split("#");
         try {
             Class<?> clazz = Class.forName(classMethod[0]);
-            Method method = clazz.getDeclaredMethod(classMethod[1], String.class, List.class);
+            Method method = clazz.getDeclaredMethod(classMethod[1], List.class);
             Object bean = applicationContext.getBean(clazz);
-            String requireFields = info.getFields().stream()
-                    .filter(item -> "true".equals(item.getRequire()))
-                    .map(TemplateInfo.Field::getName)
-                    .collect(Collectors.joining(","));
-            List<String> errorList = (List<String>) method.invoke(bean, requireFields, importList);
+            List<String> errorMessage = (List<String>) method.invoke(bean, importList);
+            List<String> errorList = new ArrayList<>();
+            for (int index = 0; index < errorMessage.size(); index++) {
+                errorList.add("第" + (index + 2) + "行：" + errorMessage.get(index));
+            }
             ImportInfo importInfo = new ImportInfo();
-            importInfo.setSuccess(importList.size()-errorList.size());
+            importInfo.setSuccess(importList.size() - errorList.size());
             importInfo.setFail(errorList.size());
             importInfo.setErrorList(errorList);
             return importInfo;
         } catch (Exception e) {
             log.error("导入方法导入失败", e);
             throw new BusinessException("导入方法导入失败");
+        }
+    }
+
+    private void importBaseCheck(TemplateInfo info, Map<String, String> map) {
+        // 非空校验
+        String importError = info.getFields().stream()
+                .filter(item -> "true".equals(item.getRequire()) && StrUtil.isBlank(map.get(item.getName())))
+                .map(TemplateInfo.Field::getTitle)
+                .collect(Collectors.joining(","));
+        if (StrUtil.isNotBlank(importError)) {
+            map.put("importError", "必填项(" + importError + ")不能为空");
+            return;
+        }
+        // 枚举校验
+        importError = info.getFields().stream()
+                .filter(item -> StrUtil.isNotBlank(map.get(item.getName()))
+                        && StrUtil.isNotBlank(item.getEnumVal())
+                        && !CommonUtil.stringToList(item.getEnumVal()).contains(map.get(item.getName())))
+                .map(item -> item.getTitle() + "(" + item.getEnumVal() + ")")
+                .collect(Collectors.joining(","));
+        if (StrUtil.isNotBlank(importError)) {
+            map.put("importError", "赋值不正确，正确为：" + importError);
+            return;
+        }
+        // 正则校验
+        importError = info.getFields().stream()
+                .filter(item -> StrUtil.isNotBlank(map.get(item.getName()))
+                        && StrUtil.isNotBlank(item.getRegex())
+                        && !Pattern.matches(item.getRegex(), map.get(item.getName())))
+                .map(TemplateInfo.Field::getTitle)
+                .collect(Collectors.joining(","));
+        if (StrUtil.isNotBlank(importError)) {
+            map.put("importError", "格式不正确：" + importError);
+            return;
         }
     }
 
@@ -212,10 +253,14 @@ public class CommonServiceImpl implements CommonService {
             String name = fieldElement.attributeValue("name");
             String title = fieldElement.attributeValue("title");
             String require = fieldElement.attributeValue("require");
+            String enumVal = fieldElement.attributeValue("enumVal");
+            String regex = fieldElement.attributeValue("regex");
             TemplateInfo.Field field = new TemplateInfo.Field();
             field.setName(name);
             field.setTitle(title);
             field.setRequire(require);
+            field.setEnumVal(enumVal);
+            field.setRegex(regex);
             info.getFields().add(field);
         }
         return info;

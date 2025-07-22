@@ -31,8 +31,11 @@
         <if test="frozenSemenBreed!=null and frozenSemenBreed!=''">
             and t.frozenSemenBreed=#{frozenSemenBreed}
         </if>
-        <if test="breedingDay!=null and breedingDay!=''">
-            and t.breedingDay=#{breedingDay}
+        <if test="breedingDayStart!=null and breedingDayStart!=''">
+            and t.breedingDay &gt;= #{breedingDayStart}
+        </if>
+        <if test="breedingDayEnd!=null and breedingDayEnd!=''">
+            and t.breedingDay &lt;= #{breedingDayEnd}
         </if>
         <if test="breedingMethod!=null and breedingMethod!=''">
             and t.breedingMethod=#{breedingMethod}

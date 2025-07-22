@@ -69,7 +69,8 @@
     <select id="listFarmZone" resultType="com.manage.cattle.dto.base.FarmZoneDTO">
         select
             fz.id,fz.createUser,fz.createTime,fz.updateUser,fz.updateTime,
-            f.farmCode,f.farmName,fz.farmZoneCode,fz.farmZoneName,fz.farmZoneRemark,fz.size
+            f.farmCode,f.farmName,f.farmOwner,
+            fz.farmZoneCode,fz.farmZoneName,fz.farmZoneRemark,fz.size
         from t_farm_zone fz
         left join t_farm f on fz.farmCode=f.farmCode
         where 1=1

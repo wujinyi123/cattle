@@ -4,37 +4,39 @@
               importMethed="com.manage.cattle.service.base.UserService#importUser"
               qo="com.manage.cattle.qo.base.UserQO"
               dto="com.manage.cattle.dto.base.UserDTO">
-        <field name="username" title="账号" require="true"/>
-        <field name="name" title="姓名" require="true"/>
-        <field name="job" title="工种" require="true"/>
-        <field name="phone" title="联系方式" require="true"/>
-        <field name="isSysAdminValue" title="是否系统管理员" require="true" code="isSysAdmin" refKey="isSysAdmin"/>
-        <field name="statusValue" title="状态" require="true" code="userStatus" refKey="status"/>
+        <field name="username" title="账号"/>
+        <field name="name" title="姓名"/>
+        <field name="sex" title="性别"/>
+        <field name="isSysAdmin" title="是否系统管理员"/>
+        <field name="jobName" title="岗位"/>
+        <field name="farmName" title="所在牧场"/>
+        <field name="farmPowerName" title="数据权限"/>
+        <field name="phone" title="联系方式"/>
+        <field name="expireDate" title="过期时间"/>
     </template>
     <template code="farm"
               exportMethed="com.manage.cattle.service.base.FarmService#listFarm"
               importMethed="com.manage.cattle.service.base.FarmService#importFarm"
               qo="com.manage.cattle.qo.base.FarmQO"
               dto="com.manage.cattle.dto.base.FarmDTO">
-        <field name="farmName" title="牧场名称" require="true"/>
-        <field name="owner" title="负责人账号" require="true"/>
-        <field name="admin" title="管理员账号"/>
-        <field name="address" title="地址" require="true"/>
-        <field name="area" title="面积" require="true"/>
-        <field name="scale" title="养殖规模" require="true"/>
+        <field name="farmName" title="牧场名称"/>
+        <field name="farmOwner" title="牧场负责人"/>
+        <field name="address" title="地址"/>
+        <field name="area" title="面积"/>
+        <field name="scale" title="养殖规模"/>
     </template>
     <template code="farmZone"
               exportMethed="com.manage.cattle.service.base.FarmService#listFarmZone"
               importMethed="com.manage.cattle.service.base.FarmService#importFarmZone"
               qo="com.manage.cattle.qo.base.FarmZoneQO"
               dto="com.manage.cattle.dto.base.FarmZoneDTO">
-        <field name="farmName" title="牧场名称" require="true"/>
-        <field name="farmOwner" title="负责人账号" noImport="true"/>
-        <field name="farmAdmin" title="管理员账号" noImport="true"/>
-        <field name="farmZoneCode" title="圈舍编号" require="true"/>
+        <field name="farmName" title="牧场名称"/>
+        <field name="farmOwner" title="牧场负责人"/>
+        <field name="farmZoneCode" title="圈舍编号"/>
+        <field name="farmZoneName" title="圈舍名称"/>
         <field name="farmZoneRemark" title="圈舍备注"/>
-        <field name="size" title="容量" require="true"/>
-        <field name="currentSize" title="当前容量" noImport="true"/>
+        <field name="size" title="容量"/>
+        <field name="currentSize" title="当前容量"/>
     </template>
     <template code="cattle"
               exportMethed="com.manage.cattle.service.base.CattleService#listCattle"
@@ -42,14 +44,14 @@
               qo="com.manage.cattle.qo.base.CattleQO"
               dto="com.manage.cattle.dto.base.CattleDTO">
         <field name="farmName" title="牧场名称" noImport="true"/>
-        <field name="farmOwner" title="负责人账号" noImport="true"/>
-        <field name="farmAdmin" title="管理员账号" noImport="true"/>
+        <field name="farmOwner" title="牧场负责人" noImport="true"/>
         <field name="farmZoneCode" title="圈舍编号" require="true"/>
         <field name="cattleCode" title="耳牌号" require="true"/>
         <field name="cattleName" title="牛只名称"/>
         <field name="breedValue" title="品种" require="true"/>
-        <field name="sexValue" title="性别" require="true"/>
-        <field name="birthday" title="出生日期" require="true"/>
+        <field name="sex" title="性别" require="true" enumVal="公,母"/>
+        <field name="color" title="颜色"/>
+        <field name="birthday" title="出生日期" require="true" regex="^\d{4}-\d{2}-\d{2}$"/>
         <field name="age" title="年龄" noImport="true"/>
         <field name="remark" title="备注"/>
     </template>

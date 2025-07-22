@@ -12,7 +12,8 @@ public class BreedRegisterQO extends PageQO {
     private String cattleCode;
     private String frozenSemenCode;
     private String frozenSemenBreed;
-    private String breedingDay;
+    private String breedingDayStart;
+    private String breedingDayEnd;
     private String breedingMethod;
     private String operateUser;
     private String registerId;

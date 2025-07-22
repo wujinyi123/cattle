@@ -172,6 +172,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public int delUser(List<String> usernameList) {
         PermissionUtil.onlySysAdmin();
+        if (usernameList.contains("admin")) {
+            throw new BusinessException("admin(系统管理员)不允许删除");
+        }
         return userDao.delUser(usernameList);
     }
 

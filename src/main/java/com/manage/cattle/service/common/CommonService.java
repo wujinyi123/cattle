@@ -15,7 +15,7 @@ public interface CommonService {
 
     List<String> importRequireField(String templateCode);
 
-    ImportInfo importFile(MultipartFile file, String templateCode);
+    ImportInfo importFile(MultipartFile file, String templateCode, String farmCode);
 
     boolean hasHelpFile();
 

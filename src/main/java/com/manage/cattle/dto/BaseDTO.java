@@ -9,4 +9,5 @@ public class BaseDTO {
     private String createTime;
     private String updateUser;
     private String updateTime;
+    private String importError;
 }

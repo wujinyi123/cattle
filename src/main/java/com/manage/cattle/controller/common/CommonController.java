@@ -49,8 +49,8 @@ public class CommonController {
     }
 
     @PostMapping("/importFile")
-    public ImportInfo importFile(@RequestParam MultipartFile file, @RequestParam String templateCode) {
-        return commonService.importFile(file, templateCode);
+    public ImportInfo importFile(@RequestParam MultipartFile file, @RequestParam String templateCode, @RequestParam String farmCode) {
+        return commonService.importFile(file, templateCode, farmCode);
     }
 
     @GetMapping("/hasHelpFile")

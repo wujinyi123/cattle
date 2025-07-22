@@ -5,10 +5,14 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.CattleDao;
 import com.manage.cattle.dao.base.FarmDao;
+import com.manage.cattle.dao.base.SysDao;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.FarmZoneDTO;
+import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.qo.base.CattleQO;
+import com.manage.cattle.qo.base.FarmZoneQO;
+import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.base.CattleService;
 import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.PermissionUtil;
@@ -19,9 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class CattleServiceImpl implements CattleService {
@@ -30,6 +37,9 @@ public class CattleServiceImpl implements CattleService {
 
     @Resource
     private FarmDao farmDao;
+
+    @Resource
+    private SysDao sysDao;
 
     @Override
     public PageInfo<CattleDTO> pageCattle(CattleQO qo) {
@@ -122,5 +132,42 @@ public class CattleServiceImpl implements CattleService {
     public int delCattle(List<String> cattleCodeList) {
         PermissionUtil.onlySysAdmin();
         return cattleDao.delCattle(cattleCodeList);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public List<String> importCattle(List<CattleDTO> importList) {
+        FarmZoneQO farmZoneQO = new FarmZoneQO();
+        farmZoneQO.setFarmCode(importList.get(0).getFarmCode());
+        List<String> farmZoneCodeList = farmDao.listFarmZone(farmZoneQO).stream().map(FarmZoneDTO::getFarmZoneCode).toList();
+        SysConfigQO sysConfigQO = new SysConfigQO();
+        sysConfigQO.setCode("cattleBreed");
+        Map<String, String> breedMap = sysDao.listSysConfig(sysConfigQO).stream().collect(Collectors.toMap(SysConfigDTO::getValue,
+                SysConfigDTO::getKey));
+        List<String> errorList = new ArrayList<>();
+        for (CattleDTO dto : importList) {
+            if (StrUtil.isNotBlank(dto.getImportError())) {
+                errorList.add(dto.getImportError());
+                continue;
+            }
+            if (!farmZoneCodeList.contains(dto.getFarmZoneCode())) {
+                errorList.add("圈舍编号不正确");
+                continue;
+            }
+            if (cattleDao.getCattle(dto.getCattleCode()) != null) {
+                errorList.add("耳牌号已存在");
+                continue;
+            }
+            dto.setBreed(breedMap.get(dto.getBreedValue()));
+            if (StrUtil.isBlank(dto.getBreed())) {
+                errorList.add("品种不正确");
+                continue;
+            }
+            int res = cattleDao.addCattle(dto);
+            if (res == 0) {
+                errorList.add("添加失败");
+            }
+        }
+        return errorList;
     }
 }
