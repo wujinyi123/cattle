@@ -1,7 +1,9 @@
 package com.manage.cattle.dao.base;
 
 import com.manage.cattle.dto.base.CattleDTO;
+import com.manage.cattle.dto.base.CattleTransferDTO;
 import com.manage.cattle.qo.base.CattleQO;
+import com.manage.cattle.qo.base.CattleTransferQO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -16,4 +18,18 @@ public interface CattleDao {
     int updateCattle(CattleDTO dto);
 
     int delCattle(List<String> list);
+
+    int transferCattle(CattleDTO dto);
+
+    List<CattleTransferDTO> listCattleTransfer(CattleTransferQO qo);
+
+    int countCattleTransferWork(@Param("oldCattleCode") String oldCattleCode);
+
+    CattleTransferDTO getCattleTransfer(@Param("reviewId") String reviewId);
+
+    int addCattleTransfer(CattleTransferDTO dto);
+
+    int updateCattleTransferApprover(CattleTransferDTO dto);
+
+    int updateCattleTransferStatus(CattleTransferDTO dto);
 }

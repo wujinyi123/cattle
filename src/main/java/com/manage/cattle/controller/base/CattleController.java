@@ -2,7 +2,9 @@ package com.manage.cattle.controller.base;
 
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dto.base.CattleDTO;
+import com.manage.cattle.dto.base.CattleTransferDTO;
 import com.manage.cattle.qo.base.CattleQO;
+import com.manage.cattle.qo.base.CattleTransferQO;
 import com.manage.cattle.service.base.CattleService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/cattle")
@@ -43,5 +46,30 @@ public class CattleController {
     @PostMapping("/delCattle")
     public int delCattle(@RequestBody List<String> cattleCodeList) {
         return cattleService.delCattle(cattleCodeList);
+    }
+
+    @GetMapping("/pageCattleTransfer")
+    public PageInfo<CattleTransferDTO> pageCattleTransfer(CattleTransferQO qo) {
+        return cattleService.pageCattleTransfer(qo);
+    }
+
+    @PostMapping("/addCattleTransfer")
+    public int addCattleTransfer(@RequestBody CattleTransferDTO dto) {
+        return cattleService.addCattleTransfer(dto);
+    }
+
+    @PostMapping("/updateCattleTransferApprover")
+    public int updateCattleTransferApprover(@RequestBody CattleTransferDTO dto) {
+        return cattleService.updateCattleTransferApprover(dto);
+    }
+
+    @PostMapping("/updateCattleTransferStatus")
+    public int updateCattleTransferStatus(@RequestBody CattleTransferDTO dto) {
+        return cattleService.updateCattleTransferStatus(dto);
+    }
+
+    @GetMapping("/getCattleTransferNum")
+    public Map<?,?> getCattleTransferNum(@RequestParam("currentFarmCode") String currentFarmCode) {
+        return cattleService.getCattleTransferNum(currentFarmCode);
     }
 }

@@ -93,4 +93,108 @@
             #{item}
         </foreach>
     </delete>
+
+    <update id="transferCattle">
+        update t_cattle
+        set updateUser=#{updateUser},updateTime=now(),
+            farmZoneCode=#{farmZoneCode},cattleCode=#{cattleCode}
+        where id=#{id}
+    </update>
+
+    <select id="listCattleTransfer" resultType="com.manage.cattle.dto.base.CattleTransferDTO">
+        select
+            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,t.reviewId,
+            t.oldFarmCode,otf.farmName oldFarmName,t.oldCattleCode,t.oldCattleInfo,
+            t.newFarmCode,ntf.farmName newFarmName,t.newCattleCode,t.newCattleInfo,
+            t.submitUser,t.submitTime,t.reason,
+            t.approver,t.operator,t.operateTime,t.opinion,t.status
+        from t_cattle_transfer t
+        left join t_farm otf on t.oldFarmCode=otf.farmCode
+        left join t_farm ntf on t.newFarmCode=ntf.farmCode
+        where #{currentFarmCode} in (t.oldFarmCode,t.newFarmCode)
+        <if test="reviewId!=null and reviewId!=''">
+            and t.reviewId=#{reviewId}
+        </if>
+        <if test="oldCattleCode!=null and oldCattleCode!=''">
+            and t.oldCattleCode=#{oldCattleCode}
+        </if>
+        <if test="newCattleCode!=null and newCattleCode!=''">
+            and t.newCattleCode=#{newCattleCode}
+        </if>
+        <if test="submitUser!=null and submitUser!=''">
+            and t.submitUser=#{submitUser}
+        </if>
+        <if test="submitTimeStart!=null and submitTimeStart!=''">
+            and t.submitTime &gt;= #{submitTimeStart}
+        </if>
+        <if test="submitTimeEnd!=null and submitTimeEnd!=''">
+            and t.submitTime &lt;= #{submitTimeEnd}
+        </if>
+        <if test="reason!=null and reason!=''">
+            and t.reason like concat('%',#{reason},'%')
+        </if>
+        <if test="approver!=null and approver!=''">
+            and t.approver=#{approver}
+        </if>
+        <if test="operator!=null and operator!=''">
+            and t.operator=#{operator}
+        </if>
+        <if test="operateTimeStart!=null and operateTimeStart!=''">
+            and t.operateTime &gt;= #{operateTimeStart}
+        </if>
+        <if test="operateTimeEnd!=null and operateTimeEnd!=''">
+            and t.operateTime &lt;= #{operateTimeEnd}
+        </if>
+        <if test="opinion!=null and opinion!=''">
+            and t.opinion like concat('%',#{opinion},'%')
+        </if>
+        <if test="status!=null and status!=''">
+            and t.status=#{status}
+        </if>
+        order by t.submitTime desc
+    </select>
+
+    <select id="countCattleTransferWork" resultType="int">
+        select
+            count(1)
+        from t_cattle_transfer
+        where oldCattleCode=#{oldCattleCode} and status='进行中'
+    </select>
+
+    <select id="getCattleTransfer" resultType="com.manage.cattle.dto.base.CattleTransferDTO">
+        select
+            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,t.reviewId,
+            t.oldFarmCode,otf.farmName oldFarmName,t.oldCattleCode,t.oldCattleInfo,
+            t.newFarmCode,ntf.farmName newFarmName,t.newCattleCode,t.newCattleInfo,
+            t.submitUser,t.submitTime,t.reason,
+            t.approver,t.operator,t.operateTime,t.opinion,t.status
+        from t_cattle_transfer t
+        left join t_farm otf on t.oldFarmCode=otf.farmCode
+        left join t_farm ntf on t.newFarmCode=ntf.farmCode
+        where t.reviewId=#{reviewId}
+    </select>
+
+    <insert id="addCattleTransfer">
+        insert into t_cattle_transfer(createUser,createTime,updateUser,updateTime,
+                                      reviewId,oldFarmCode,oldCattleCode,newFarmCode,
+                                      submitUser,submitTime,reason,approver,status)
+        values (#{createUser},now(),#{updateUser},now(),
+                #{reviewId},#{oldFarmCode},#{oldCattleCode},#{newFarmCode},
+                #{submitUser},now(),#{reason},#{approver},#{status})
+    </insert>
+
+    <update id="updateCattleTransferApprover">
+        update t_cattle_transfer
+        set updateUser=#{updateUser},updateTime=now(),approver=#{approver}
+        where reviewId=#{reviewId}
+    </update>
+
+    <update id="updateCattleTransferStatus">
+        update t_cattle_transfer
+        set oldCattleInfo=#{oldCattleInfo},
+            newCattleCode=#{newCattleCode},newCattleInfo=#{newCattleInfo},
+            operator=#{operator},operateTime=now(),
+            opinion=#{opinion},status=#{status}
+        where reviewId=#{reviewId}
+    </update>
 </mapper>

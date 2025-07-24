@@ -142,6 +142,13 @@ public class BreedServiceImpl implements BreedService {
         }
         String username = UserUtil.getPayloadVal("username");
         if (!"死胎".equals(dto.getResult())) {
+            FarmZoneDTO farmZoneDTO = farmDao.getFarmZone(dto.getChildFarmZoneCode());
+            CattleQO cattleQO = new CattleQO();
+            cattleQO.setFarmZoneCode(dto.getFarmZoneCode());
+            List<CattleDTO> cattleList = cattleDao.listCattle(cattleQO);
+            if (farmZoneDTO.getSize() <= cattleList.size()) {
+                throw new BusinessException("圈舍" + farmZoneDTO.getFarmZoneCode() + "牛只已满");
+            }
             CattleDTO cattleDTO = new CattleDTO();
             dto.setCreateUser(username);
             dto.setUpdateUser(username);

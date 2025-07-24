@@ -13,6 +13,7 @@ import com.manage.cattle.dto.inventory.InventoryBuyDTO;
 import com.manage.cattle.dto.inventory.InventoryDeathDTO;
 import com.manage.cattle.dto.inventory.InventorySellDTO;
 import com.manage.cattle.exception.BusinessException;
+import com.manage.cattle.qo.base.CattleQO;
 import com.manage.cattle.qo.inventory.InventoryBuyQO;
 import com.manage.cattle.qo.inventory.InventoryDeathQO;
 import com.manage.cattle.qo.inventory.InventorySellQO;
@@ -58,6 +59,12 @@ public class inventoryServiceImpl implements inventoryService {
         FarmZoneDTO farmZoneDTO = farmDao.getFarmZone(dto.getFarmZoneCode());
         if (farmZoneDTO == null) {
             throw new BusinessException("圈舍编号不存在");
+        }
+        CattleQO cattleQO = new CattleQO();
+        cattleQO.setFarmZoneCode(dto.getFarmZoneCode());
+        List<CattleDTO> cattleList = cattleDao.listCattle(cattleQO);
+        if (farmZoneDTO.getSize() <= cattleList.size()) {
+            throw new BusinessException("圈舍" + farmZoneDTO.getFarmZoneCode() + "牛只已满");
         }
         if (cattleDao.addCattle(dto) == 0) {
             throw new BusinessException("添加牛只失败");
