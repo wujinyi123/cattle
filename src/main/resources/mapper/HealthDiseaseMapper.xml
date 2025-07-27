@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.manage.cattle.dao.healthDisease.HealthDiseaseDao">
+    <select id="listQuarantineRegister" resultType="com.manage.cattle.dto.healthDisease.QuarantineRegisterDTO">
+        select
+            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+            tf.farmCode,tf.farmName,tf.farmOwner,tz.farmZoneCode,
+            tc.cattleCode,t.registerDay,
+            t.quarantineType,qt.value quarantineTypeValue,
+            t.quarantineMethod,qm.value quarantineMethodValue,
+            t.quarantineResult,t.veterinarian,t.remark
+        from t_quarantine_register t
+        left join t_cattle tc on t.cattleCode=tc.cattleCode
+        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
+        left join t_farm tf on tz.farmCode=tf.farmCode
+        left join t_sys_config qt on qt.code='quarantineType' and t.quarantineType=qt.key
+        left join t_sys_config qm on qm.code='quarantineMethod' and t.quarantineMethod=qm.key
+        where tz.farmCode=#{farmCode}
+        <if test="farmZoneCode!=null and farmZoneCode!=''">
+            and tz.farmZoneCode=#{farmZoneCode}
+        </if>
+        <if test="cattleCode!=null and cattleCode!=''">
+            and tc.cattleCode=#{cattleCode}
+        </if>
+        <if test="registerDayStart!=null and registerDayStart!=''">
+            and t.registerDay &gt;= #{registerDayStart}
+        </if>
+        <if test="registerDayEnd!=null and registerDayEnd!=''">
+            and t.registerDay &lt;= #{registerDayEnd}
+        </if>
+        <if test="quarantineType!=null and quarantineType!=''">
+            and t.quarantineType=#{quarantineType}
+        </if>
+        <if test="quarantineMethod!=null and quarantineMethod!=''">
+            and t.quarantineMethod=#{quarantineMethod}
+        </if>
+        <if test="quarantineResult!=null and quarantineResult!=''">
+            and t.quarantineResult=#{quarantineResult}
+        </if>
+        <if test="veterinarian!=null and veterinarian!=''">
+            and t.veterinarian=#{veterinarian}
+        </if>
+        <if test="remark!=null and remark!=''">
+            and t.remark like concat('%',#{remark},'%')
+        </if>
+        order by t.registerDay desc,t.cattleCode
+    </select>
+
+    <insert id="addQuarantineRegister">
+        insert into t_quarantine_register(createUser,createTime,updateUser,updateTime,
+                                          cattleCode,registerDay,quarantineType,quarantineMethod,
+                                          quarantineResult,veterinarian,remark)
+        values
+        <foreach collection="cattleCodeList" item="item" separator=",">
+            (#{createUser},now(),#{updateUser},now(),
+            #{item},#{registerDay},#{quarantineType},#{quarantineMethod},
+            #{quarantineResult},#{veterinarian},#{remark})
+        </foreach>
+    </insert>
+
+    <delete id="delQuarantineRegister">
+        delete from t_quarantine_register
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="listImmunityRegister" resultType="com.manage.cattle.dto.healthDisease.ImmunityRegisterDTO">
+        select
+            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+            tf.farmCode,tf.farmName,tf.farmOwner,tz.farmZoneCode,
+            tc.cattleCode,t.registerDay,
+            t.immunityName,ina.value immunityNameValue,
+            t.immunityMethod,im.value immunityMethodValue,
+            t.drugName,t.dose,t.veterinarian,t.remark
+        from t_immunity_register t
+        left join t_cattle tc on t.cattleCode=tc.cattleCode
+        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
+        left join t_farm tf on tz.farmCode=tf.farmCode
+        left join t_sys_config ina on ina.code='immunityName' and t.immunityName=ina.key
+        left join t_sys_config im on im.code='immunityMethod' and t.immunityMethod=im.key
+        where tz.farmCode=#{farmCode}
+        <if test="farmZoneCode!=null and farmZoneCode!=''">
+            and tz.farmZoneCode=#{farmZoneCode}
+        </if>
+        <if test="cattleCode!=null and cattleCode!=''">
+            and tc.cattleCode=#{cattleCode}
+        </if>
+        <if test="registerDayStart!=null and registerDayStart!=''">
+            and t.registerDay &gt;= #{registerDayStart}
+        </if>
+        <if test="registerDayEnd!=null and registerDayEnd!=''">
+            and t.registerDay &lt;= #{registerDayEnd}
+        </if>
+        <if test="immunityName!=null and immunityName!=''">
+            and t.immunityName=#{immunityName}
+        </if>
+        <if test="immunityMethod!=null and immunityMethod!=''">
+            and t.immunityMethod=#{immunityMethod}
+        </if>
+        <if test="drugName!=null and drugName!=''">
+            and t.drugName like concat('%',#{drugName},'%')
+        </if>
+        <if test="dose!=null and dose!=''">
+            and t.dose like concat('%',#{dose},'%')
+        </if>
+        <if test="veterinarian!=null and veterinarian!=''">
+            and t.veterinarian=#{veterinarian}
+        </if>
+        <if test="remark!=null and remark!=''">
+            and t.remark like concat('%',#{remark},'%')
+        </if>
+        order by t.registerDay desc,t.cattleCode
+    </select>
+
+    <insert id="addImmunityRegister">
+        insert into t_immunity_register(createUser,createTime,updateUser,updateTime,
+                                        cattleCode,registerDay,immunityName,immunityMethod,
+                                        drugName,dose,veterinarian,remark)
+        values
+        <foreach collection="cattleCodeList" item="item" separator=",">
+            (#{createUser},now(),#{updateUser},now(),
+            #{item},#{registerDay},#{immunityName},#{immunityMethod},
+            #{drugName},#{dose},#{veterinarian},#{remark})
+        </foreach>
+    </insert>
+
+    <delete id="delImmunityRegister">
+        delete from t_immunity_register
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+</mapper>

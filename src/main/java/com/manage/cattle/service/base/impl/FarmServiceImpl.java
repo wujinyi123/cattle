@@ -122,6 +122,22 @@ public class FarmServiceImpl implements FarmService {
         if (Objects.isNull(farmDTO)) {
             throw new BusinessException("牧场不存在");
         }
+        FarmZoneQO qo = new FarmZoneQO();
+        qo.setFarmCode(dto.getFarmCode());
+        List<FarmZoneDTO> farmZoneList = farmDao.listFarmZone(qo);
+        long count;
+        if ("add".equals(type)) {
+            count = farmZoneList.stream()
+                    .filter(item -> item.getFarmZoneName().equals(dto.getFarmZoneName()))
+                    .count();
+        } else {
+            count = farmZoneList.stream()
+                    .filter(item -> !item.getFarmZoneCode().equals(dto.getFarmZoneCode()) && item.getFarmZoneName().equals(dto.getFarmZoneName()))
+                    .count();
+        }
+        if (count > 0L) {
+            throw new BusinessException("圈舍名称已存在");
+        }
         if ("add".equals(type) && farmDao.getFarmZone(dto.getFarmZoneCode()) != null) {
             throw new BusinessException("圈舍编号已存在");
         }

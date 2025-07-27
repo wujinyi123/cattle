@@ -7,12 +7,14 @@ import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.CattleDao;
 import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.base.SysDao;
+import com.manage.cattle.dto.base.CattleChangeZoneDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.CattleTransferDTO;
 import com.manage.cattle.dto.base.FarmDTO;
 import com.manage.cattle.dto.base.FarmZoneDTO;
 import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.exception.BusinessException;
+import com.manage.cattle.qo.base.CattleChangeZoneQO;
 import com.manage.cattle.qo.base.CattleQO;
 import com.manage.cattle.qo.base.CattleTransferQO;
 import com.manage.cattle.qo.base.FarmZoneQO;
@@ -183,6 +185,24 @@ public class CattleServiceImpl implements CattleService {
             }
         }
         return errorList;
+    }
+
+    @Override
+    public PageInfo<CattleChangeZoneDTO> pageCattleChangeZone(CattleChangeZoneQO qo) {
+        PageHelper.startPage(qo);
+        return new PageInfo<>(cattleDao.listCattleChangeZone(qo));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int addCattleChangeZone(CattleChangeZoneDTO dto) {
+        String username = UserUtil.getPayloadVal("username");
+        dto.setCreateUser(username);
+        dto.setUpdateUser(username);
+        if (cattleDao.updateCattleZone(dto)==0) {
+            throw new BusinessException("转舍失败");
+        }
+        return cattleDao.addCattleChangeZone(dto);
     }
 
     @Override

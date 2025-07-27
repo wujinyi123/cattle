@@ -1,7 +1,9 @@
 package com.manage.cattle.dao.base;
 
+import com.manage.cattle.dto.base.CattleChangeZoneDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.CattleTransferDTO;
+import com.manage.cattle.qo.base.CattleChangeZoneQO;
 import com.manage.cattle.qo.base.CattleQO;
 import com.manage.cattle.qo.base.CattleTransferQO;
 import org.apache.ibatis.annotations.Param;
@@ -19,7 +21,13 @@ public interface CattleDao {
 
     int delCattle(List<String> list);
 
+    int updateCattleZone(CattleChangeZoneDTO dto);
+
     int transferCattle(CattleDTO dto);
+
+    List<CattleChangeZoneDTO> listCattleChangeZone(CattleChangeZoneQO qo);
+
+    int addCattleChangeZone(CattleChangeZoneDTO dto);
 
     List<CattleTransferDTO> listCattleTransfer(CattleTransferQO qo);
 

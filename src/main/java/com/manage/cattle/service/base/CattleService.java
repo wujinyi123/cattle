@@ -1,8 +1,10 @@
 package com.manage.cattle.service.base;
 
 import com.github.pagehelper.PageInfo;
+import com.manage.cattle.dto.base.CattleChangeZoneDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.CattleTransferDTO;
+import com.manage.cattle.qo.base.CattleChangeZoneQO;
 import com.manage.cattle.qo.base.CattleQO;
 import com.manage.cattle.qo.base.CattleTransferQO;
 
@@ -21,6 +23,10 @@ public interface CattleService {
     int delCattle(List<String> cattleCodeList);
 
     List<String> importCattle(List<CattleDTO> importList);
+
+    PageInfo<CattleChangeZoneDTO> pageCattleChangeZone(CattleChangeZoneQO qo);
+
+    int addCattleChangeZone(CattleChangeZoneDTO dto);
 
     PageInfo<CattleTransferDTO> pageCattleTransfer(CattleTransferQO qo);
 

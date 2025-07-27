@@ -1,8 +1,10 @@
 package com.manage.cattle.controller.base;
 
 import com.github.pagehelper.PageInfo;
+import com.manage.cattle.dto.base.CattleChangeZoneDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.CattleTransferDTO;
+import com.manage.cattle.qo.base.CattleChangeZoneQO;
 import com.manage.cattle.qo.base.CattleQO;
 import com.manage.cattle.qo.base.CattleTransferQO;
 import com.manage.cattle.service.base.CattleService;
@@ -46,6 +48,16 @@ public class CattleController {
     @PostMapping("/delCattle")
     public int delCattle(@RequestBody List<String> cattleCodeList) {
         return cattleService.delCattle(cattleCodeList);
+    }
+
+    @GetMapping("/pageCattleChangeZone")
+    public PageInfo<CattleChangeZoneDTO> pageCattleChangeZone(CattleChangeZoneQO qo) {
+        return cattleService.pageCattleChangeZone(qo);
+    }
+
+    @PostMapping("/addCattleChangeZone")
+    public int addCattleChangeZone(@RequestBody CattleChangeZoneDTO dto) {
+        return cattleService.addCattleChangeZone(dto);
     }
 
     @GetMapping("/pageCattleTransfer")
