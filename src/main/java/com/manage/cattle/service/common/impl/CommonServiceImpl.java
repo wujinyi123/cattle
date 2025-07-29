@@ -6,9 +6,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.support.ExcelTypeEnum;
 import com.manage.cattle.dto.BaseDTO;
 import com.manage.cattle.dto.common.FileByteInfo;
 import com.manage.cattle.dto.common.ImportInfo;
@@ -20,6 +17,20 @@ import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.UserUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -78,29 +89,79 @@ public class CommonServiceImpl implements CommonService {
     }
 
     private FileByteInfo getFileByteInfo(TemplateInfo info, JSONArray jsonArray) {
-        List<List<String>> headList = new ArrayList<>();
-        for (TemplateInfo.Field field : info.getFields()) {
-            headList.add(List.of(field.getTitle()));
-        }
-        List<List<String>> dataList = new ArrayList<>();
-        for (Object obj : jsonArray) {
-            JSONObject jsonObject = (JSONObject) obj;
-            List<String> data = new ArrayList<>();
-            for (TemplateInfo.Field field : info.getFields()) {
-                String value = jsonObject.getStr(field.getName());
-                data.add(value == null ? "" : value);
-            }
-            dataList.add(data);
-        }
         byte[] bytes;
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            EasyExcel.write(os).excelType(ExcelTypeEnum.XLSX).sheet(info.getCode()).head(headList).doWrite(dataList);
-            bytes = os.toByteArray();
+        try (Workbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("sheet");
+            // 默认行高、列宽
+            sheet.setDefaultRowHeightInPoints(20);
+            sheet.setDefaultColumnWidth(20);
+            // 默认单元格格式
+            CellStyle defaultStyle = getDefaultStyle(workbook);
+            // 标题单元格格式
+            CellStyle titleStyle = getTitleStyle(workbook);
+            // 设置默认格式及标题赋值
+            Row row = sheet.createRow(0);
+            Cell cell;
+            for (int index = 0; index < info.getFields().size(); index++) {
+                sheet.setDefaultColumnStyle(index, defaultStyle);
+                cell = row.createCell(index, CellType.STRING);
+                cell.setCellStyle(titleStyle);
+                cell.setCellValue(info.getFields().get(index).getTitle());
+            }
+            // 内容赋值
+            for (int i = 0; i < jsonArray.size(); i++) {
+                row = sheet.createRow(i + 1);
+                JSONObject jsonObject = (JSONObject) jsonArray.get(i);
+                for (int j = 0; j < info.getFields().size(); j++) {
+                    cell = row.createCell(j, CellType.STRING);
+                    String key = info.getFields().get(j).getName();
+                    String value = jsonObject.getStr(key);
+                    cell.setCellValue(value == null ? "" : value);
+                }
+            }
+            workbook.write(outputStream);
+            bytes = outputStream.toByteArray();
         } catch (Exception e) {
             log.error(CommonUtil.getExceptionDetails("生成xlsx失败", e));
             throw new BusinessException("生成xlsx失败");
         }
         return new FileByteInfo(info.getFileName(), bytes);
+    }
+
+    private CellStyle getDefaultStyle(Workbook workbook) {
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setDataFormat(workbook.createDataFormat().getFormat("@"));
+        Font font = workbook.createFont();
+        font.setFontHeightInPoints((short) 11);
+        cellStyle.setFont(font);
+        cellStyle.setAlignment(HorizontalAlignment.LEFT);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        cellStyle.setWrapText(true);
+        return cellStyle;
+    }
+
+    private CellStyle getTitleStyle(Workbook workbook) {
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setDataFormat(workbook.createDataFormat().getFormat("@"));
+        Font font = workbook.createFont();
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        cellStyle.setFont(font);
+        cellStyle.setAlignment(HorizontalAlignment.CENTER);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        cellStyle.setWrapText(true);
+        // 边框
+        cellStyle.setBorderTop(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
+        // 背景颜色
+        XSSFColor color = new XSSFColor();
+        color.setARGBHex("CCCCCC");
+        ((XSSFCellStyle) cellStyle).setFillForegroundColor(color);
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        return cellStyle;
     }
 
     @Override
@@ -112,9 +173,38 @@ public class CommonServiceImpl implements CommonService {
     @Override
     public ImportInfo importFile(MultipartFile file, String templateCode, String farmCode) {
         TemplateInfo info = getTemplateInfo(new HashMap<>(), templateCode, true);
-        List<Object> list;
-        try (InputStream is = file.getInputStream()) {
-            list = EasyExcel.read(is).excelType(ExcelTypeEnum.XLSX).sheet(0).doReadSync();
+        List<Map<String, String>> list = new ArrayList<>();
+        try (InputStream inputStream = file.getInputStream();
+             Workbook workbook = new XSSFWorkbook(inputStream)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            Row row = CommonUtil.getRow(sheet, 0);
+            Cell cell;
+            int cellSize = info.getFields().size();
+            Map<String, String> titleMap = info.getFields().stream()
+                    .collect(Collectors.toMap(TemplateInfo.Field::getTitle, TemplateInfo.Field::getName));
+            List<String> fields = new ArrayList<>();
+            for (int index = 0; index < cellSize; index++) {
+                cell = CommonUtil.getCell(row, index);
+                String title = CommonUtil.getCellString(cell);
+                fields.add(titleMap.get(title));
+            }
+            int lastRowNum = sheet.getLastRowNum();
+            for (int i = 1; i <= lastRowNum; i++) {
+                row = CommonUtil.getRow(sheet, i);
+                Map<String, String> map = new HashMap<>();
+                for (int j = 0; j < fields.size(); j++) {
+                    String key = fields.get(j);
+                    if (StrUtil.isBlank(key)) {
+                        continue;
+                    }
+                    cell = CommonUtil.getCell(row, j);
+                    String value = CommonUtil.getCellString(cell);
+                    if (StrUtil.isNotBlank(value)) {
+                        map.put(key, value);
+                    }
+                }
+                list.add(map);
+            }
         } catch (Exception e) {
             throw new BusinessException("读取xlsx数据失败");
         }
@@ -123,28 +213,18 @@ public class CommonServiceImpl implements CommonService {
         }
         String username = UserUtil.getCurrentUsername();
         List<BaseDTO> importList = new ArrayList<>();
-        for (Object obj : list) {
+        for (Map<String, String> objMap : list) {
             BaseDTO dto = new BaseDTO();
             try {
                 Class<? extends BaseDTO> dtoClass = (Class<? extends BaseDTO>) Class.forName(info.getDtoClass());
-                Map<?, ?> objMap = (Map<?, ?>) obj;
-                Map<String, String> map = new HashMap<>();
-                map.put("createUser", username);
-                map.put("updateUser", username);
-                map.put("farmCode", farmCode);
-                for (int i = 0; i < info.getFields().size(); i++) {
-                    Object value = objMap.get(i);
-                    if (value == null || "".equals(value.toString())) {
-                        continue;
-                    }
-                    TemplateInfo.Field fieldObj = info.getFields().get(i);
-                    map.put(fieldObj.getName(), value.toString());
-                }
-                importBaseCheck(info, map);
-                String json = JSONUtil.toJsonStr(map);
+                objMap.put("createUser", username);
+                objMap.put("updateUser", username);
+                objMap.put("farmCode", farmCode);
+                importBaseCheck(info, objMap);
+                String json = JSONUtil.toJsonStr(objMap);
                 dto = JSONUtil.toBean(json, dtoClass);
             } catch (Exception e) {
-                log.error("赋值失败" + JSONUtil.toJsonStr(obj));
+                log.error("赋值失败" + JSONUtil.toJsonStr(objMap));
             }
             importList.add(dto);
         }
@@ -199,7 +279,6 @@ public class CommonServiceImpl implements CommonService {
                 .collect(Collectors.joining(","));
         if (StrUtil.isNotBlank(importError)) {
             map.put("importError", "格式不正确：" + importError);
-            return;
         }
     }
 

@@ -6,6 +6,10 @@ import cn.hutool.json.JSONUtil;
 import com.manage.cattle.dto.common.FileByteInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -77,16 +81,40 @@ public class CommonUtil {
     }
 
     public static String getExceptionDetails(String error, Exception ex) {
-        return error+"：" + getExceptionDetails(ex);
+        return error + "：" + getExceptionDetails(ex);
     }
 
     public static String getExceptionDetails(Exception ex) {
         StringBuilder details = new StringBuilder();
         details.append(ex.toString()).append("\n");
         details.append(ex.getMessage()).append("\n");
-        for (StackTraceElement element:ex.getStackTrace()) {
+        for (StackTraceElement element : ex.getStackTrace()) {
             details.append(element.toString()).append("\n");
         }
         return details.toString();
+    }
+
+    public static Row getRow(Sheet sheet, int index) {
+        Row row = sheet.getRow(index);
+        return row == null ? sheet.createRow(index) : row;
+    }
+
+    public static Cell getCell(Row row, int index) {
+        Cell cell = row.getCell(index);
+        return cell == null ? row.createCell(index) : cell;
+    }
+
+    public static String getCellString(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        CellType cellType = cell.getCellType();
+        String value = switch (cellType) {
+            case STRING -> cell.getStringCellValue();
+            case BOOLEAN -> cell.getBooleanCellValue() + "";
+            case NUMERIC -> cell.getNumericCellValue() + "";
+            default -> "";
+        };
+        return value == null ? "" : value;
     }
 }
