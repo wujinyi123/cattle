@@ -7,6 +7,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.manage.cattle.dto.BaseDTO;
 import com.manage.cattle.dto.common.FileByteInfo;
@@ -96,6 +97,7 @@ public class CommonServiceImpl implements CommonService {
             EasyExcel.write(os).excelType(ExcelTypeEnum.XLSX).sheet(info.getCode()).head(headList).doWrite(dataList);
             bytes = os.toByteArray();
         } catch (Exception e) {
+            log.error(CommonUtil.getExceptionDetails("生成xlsx失败", e));
             throw new BusinessException("生成xlsx失败");
         }
         return new FileByteInfo(info.getFileName(), bytes);
@@ -119,7 +121,7 @@ public class CommonServiceImpl implements CommonService {
         if (CollUtil.isEmpty(list)) {
             throw new BusinessException("数据为空");
         }
-        String username = UserUtil.getPayloadVal("username");
+        String username = UserUtil.getCurrentUsername();
         List<BaseDTO> importList = new ArrayList<>();
         for (Object obj : list) {
             BaseDTO dto = new BaseDTO();

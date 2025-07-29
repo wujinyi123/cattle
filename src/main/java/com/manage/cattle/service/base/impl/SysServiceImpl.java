@@ -41,7 +41,7 @@ public class SysServiceImpl implements SysService {
     @Override
     public int saveSysJob(String type, SysJobDTO dto) {
         PermissionUtil.onlySysAdmin();
-        String username = UserUtil.getPayloadVal("username");
+        String username = UserUtil.getCurrentUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         List<SysJobDTO> existSysJobList = sysDao.listSysJob();
@@ -86,7 +86,7 @@ public class SysServiceImpl implements SysService {
     @Override
     public int addSysConfig(SysConfigDTO dto) {
         PermissionUtil.onlySysAdmin();
-        String username = UserUtil.getPayloadVal("username");
+        String username = UserUtil.getCurrentUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         return sysDao.addSysConfig(dto);

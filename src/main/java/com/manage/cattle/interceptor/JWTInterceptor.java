@@ -24,8 +24,11 @@ public class JWTInterceptor implements HandlerInterceptor {
         String token = UserUtil.getToken(request);
         if (StrUtil.isBlank(token)) {
             responseEntity = new ResponseEntity<>("token为空", HttpStatus.UNAUTHORIZED);
-        } else if (!UserUtil.verify(token)) {
-            responseEntity = new ResponseEntity<>("token已过期", HttpStatus.UNAUTHORIZED);
+        } else{
+            String error = UserUtil.verify(token);
+            if (StrUtil.isNotBlank(error)) {
+                responseEntity = new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+            }
         }
         if (responseEntity != null) {
             //将map转为json，返回给前端

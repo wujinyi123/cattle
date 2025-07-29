@@ -53,7 +53,7 @@ public class inventoryServiceImpl implements inventoryService {
         if (cattleDao.getCattle(dto.getCattleCode()) != null) {
             throw new BusinessException("耳牌号已存在");
         }
-        String username = UserUtil.getPayloadVal("username");
+        String username = UserUtil.getCurrentUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         FarmZoneDTO farmZoneDTO = farmDao.getFarmZone(dto.getFarmZoneCode());
@@ -96,7 +96,7 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addInventorySell(InventorySellDTO dto) {
-        String username = UserUtil.getPayloadVal("username");
+        String username = UserUtil.getCurrentUsername();
         CattleDTO cattleDTO = cattleDao.getCattle(dto.getCattleCode());
         if (cattleDTO == null) {
             throw new BusinessException("耳牌号不存在");
@@ -137,7 +137,7 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addInventoryDeath(InventoryDeathDTO dto) {
-        String username = UserUtil.getPayloadVal("username");
+        String username = UserUtil.getCurrentUsername();
         CattleDTO cattleDTO = cattleDao.getCattle(dto.getCattleCode());
         if (cattleDTO == null) {
             throw new BusinessException("耳牌号不存在");

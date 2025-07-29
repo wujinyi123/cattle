@@ -109,7 +109,7 @@ public class CattleServiceImpl implements CattleService {
     @Override
     public int saveCattle(String type, CattleDTO dto) {
         PermissionUtil.onlySysAdmin();
-        String username = UserUtil.getPayloadVal("username");
+        String username = UserUtil.getCurrentUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         FarmZoneDTO farmZoneDTO = farmDao.getFarmZone(dto.getFarmZoneCode());
@@ -196,7 +196,7 @@ public class CattleServiceImpl implements CattleService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addCattleChangeZone(CattleChangeZoneDTO dto) {
-        String username = UserUtil.getPayloadVal("username");
+        String username = UserUtil.getCurrentUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         if (cattleDao.updateCattleZone(dto)==0) {
@@ -224,8 +224,8 @@ public class CattleServiceImpl implements CattleService {
         if (!StrUtil.equals(dto.getOldFarmCode(), cattle.getFarmCode())) {
             throw new BusinessException("请输入当前牛场的牛只耳牌号");
         }
-        String username = UserUtil.getPayloadVal("username");
-        String isSysAdmin = UserUtil.getPayloadVal("isSysAdmin");
+        String username = UserUtil.getCurrentUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
         FarmDTO oldFarm = farmDao.getFarm(dto.getOldFarmCode());
         if (!"Y".equals(isSysAdmin) && !username.equals(oldFarm.getFarmOwner())) {
             throw new BusinessException("请输入当前牛场负责人(" + oldFarm.getFarmOwner() + ")提交");
@@ -251,8 +251,8 @@ public class CattleServiceImpl implements CattleService {
             throw new BusinessException("转场流程不存在");
         }
 
-        String username = UserUtil.getPayloadVal("username");
-        String isSysAdmin = UserUtil.getPayloadVal("isSysAdmin");
+        String username = UserUtil.getCurrentUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
         if (!"Y".equals(isSysAdmin) && !username.equals(cattleTransfer.getApprover())) {
             throw new BusinessException("请当前评审人(" + cattleTransfer.getApprover() + ")提交修改");
         }
@@ -273,7 +273,7 @@ public class CattleServiceImpl implements CattleService {
         if (cattleTransfer == null) {
             throw new BusinessException("转场流程不存在");
         }
-        String username = UserUtil.getPayloadVal("username");
+        String username = UserUtil.getCurrentUsername();
         dto.setOperator(username);
         if ("取消".equals(dto.getStatus()) && !username.equals(cattleTransfer.getSubmitUser())) {
             throw new BusinessException("流程提交人(" + cattleTransfer.getSubmitUser() + ")才能取消");
@@ -318,7 +318,7 @@ public class CattleServiceImpl implements CattleService {
         qo.setCurrentFarmCode(currentFarmCode);
         qo.setStatus("进行中");
         List<CattleTransferDTO> list = cattleDao.listCattleTransfer(qo);
-        String username = UserUtil.getPayloadVal("username");
+        String username = UserUtil.getCurrentUsername();
         Map<String, Long> map = new HashMap<>();
         map.put("myCreate", list.stream().filter(item -> username.equals(item.getSubmitUser())).count());
         map.put("todo", list.stream().filter(item -> username.equals(item.getApprover())).count());

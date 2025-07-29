@@ -40,18 +40,6 @@ public class CommonUtil {
         }
     }
 
-    public static boolean checkRequire(String[] requireFieldArr, Object obj) {
-        String json = JSONUtil.toJsonStr(obj);
-        JSONObject jsonObject = JSONUtil.parseObj(json);
-        for (String field : requireFieldArr) {
-            Object value = jsonObject.get(field);
-            if (value == null || "".equals(value)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public static HttpServletRequest getHttpServletRequest() {
         ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         return attrs.getRequest();
@@ -86,5 +74,19 @@ public class CommonUtil {
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         httpHeaders.setContentDispositionFormData("attachment", encode(fileName));
         return new ResponseEntity<>(bytes, httpHeaders, HttpStatus.OK);
+    }
+
+    public static String getExceptionDetails(String error, Exception ex) {
+        return error+"：" + getExceptionDetails(ex);
+    }
+
+    public static String getExceptionDetails(Exception ex) {
+        StringBuilder details = new StringBuilder();
+        details.append(ex.toString()).append("\n");
+        details.append(ex.getMessage()).append("\n");
+        for (StackTraceElement element:ex.getStackTrace()) {
+            details.append(element.toString()).append("\n");
+        }
+        return details.toString();
     }
 }

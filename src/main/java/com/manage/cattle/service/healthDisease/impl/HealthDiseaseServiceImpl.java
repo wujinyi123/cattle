@@ -45,7 +45,7 @@ public class HealthDiseaseServiceImpl implements HealthDiseaseService {
         if (errorCattleCode.size() > 0) {
             throw new BusinessException("请选择当前牧场牛只，耳牌号(" + String.join(",", errorCattleCode) + ")错误");
         }
-        String username = UserUtil.getPayloadVal("username");
+        String username = UserUtil.getCurrentUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         return healthDiseaseDao.addQuarantineRegister(dto);
@@ -74,7 +74,7 @@ public class HealthDiseaseServiceImpl implements HealthDiseaseService {
         if (errorCattleCode.size() > 0) {
             throw new BusinessException("请选择当前牧场牛只，耳牌号(" + String.join(",", errorCattleCode) + ")错误");
         }
-        String username = UserUtil.getPayloadVal("username");
+        String username = UserUtil.getCurrentUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         return healthDiseaseDao.addImmunityRegister(dto);

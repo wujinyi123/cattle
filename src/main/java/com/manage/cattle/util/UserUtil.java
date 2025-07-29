@@ -6,16 +6,30 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.jwt.JWT;
 import cn.hutool.jwt.JWTHeader;
 import cn.hutool.jwt.JWTUtil;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.poi.ss.formula.functions.T;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+@Component
 public class UserUtil {
+    // 环境
+    private static String ENV;
+
     //秘钥
     private static final String SECRET_KEY = "com.manage.cattle";
+
+    @Value("${spring.profiles.include}")
+    private String env;
+
+    @PostConstruct
+    public void init() {
+        ENV = this.env;
+    }
 
     /**
      * 生成token
@@ -25,8 +39,9 @@ public class UserUtil {
      */
     public static String createToken(Map<String, Object> payload) {
         DateTime now = DateTime.now();
-        payload.put("create_time", now.toString());
-        payload.put("expire_time", now.offsetNew(DateField.HOUR, 1).toString());
+        payload.put("tokenEnv", ENV);
+        payload.put("tokenCreateTime", now.toString());
+        payload.put("tokenExpireTime", now.offsetNew(DateField.HOUR, 1).toString());
         return JWTUtil.createToken(payload, SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -72,12 +87,26 @@ public class UserUtil {
      *
      * @param token token
      */
-    public static boolean verify(String token) {
+    public static String verify(String token) {
+        String tokenEnv = getPayloadVal(token, "tokenEnv");
+        if (!StrUtil.equals(tokenEnv, ENV)) {
+            return "token无效";
+        }
         DateTime now = DateTime.now();
-        String expireTime = (String) getPayloadVal(token, "expire_time");
-        return expireTime.compareTo(now.toString()) > 0;
+        String tokenExpireTime = getPayloadVal(token, "tokenExpireTime");
+        if (StrUtil.isBlank(tokenExpireTime) || now.toString().compareTo(tokenExpireTime) > 0) {
+            return "token已过期";
+        }
+        return "";
     }
 
+    public static String getCurrentUsername() {
+        return getPayloadVal("username");
+    }
+
+    public static String getIsSysAdmin() {
+        return getPayloadVal("isSysAdmin");
+    }
 
     public static <T> T getPayloadVal(String key) {
         String token = getToken();
