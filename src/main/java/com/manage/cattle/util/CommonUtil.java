@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.http.HttpHeaders;
@@ -112,7 +113,8 @@ public class CommonUtil {
         String value = switch (cellType) {
             case STRING -> cell.getStringCellValue();
             case BOOLEAN -> cell.getBooleanCellValue() + "";
-            case NUMERIC -> cell.getNumericCellValue() + "";
+            case NUMERIC -> DateUtil.isCellDateFormatted(cell) && cell.getDateCellValue() != null ? dateToStr(cell.getDateCellValue()).substring(0,
+                    10) : cell.getNumericCellValue() + "";
             default -> "";
         };
         return value == null ? "" : value;
