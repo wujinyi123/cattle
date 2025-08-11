@@ -1,6 +1,5 @@
 package com.manage.cattle.service.bread.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -9,6 +8,7 @@ import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.breed.BreedDao;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.FarmZoneDTO;
+import com.manage.cattle.dto.breed.BreedBaseDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyCheckDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyResultDTO;
 import com.manage.cattle.dto.breed.BreedRegisterDTO;
@@ -18,19 +18,13 @@ import com.manage.cattle.qo.breed.BreedPregnancyCheckQO;
 import com.manage.cattle.qo.breed.BreedPregnancyResultQO;
 import com.manage.cattle.qo.breed.BreedRegisterQO;
 import com.manage.cattle.service.bread.BreedService;
-import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.UserUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,21 +52,34 @@ public class BreedServiceImpl implements BreedService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addBreedRegister(BreedRegisterDTO dto) {
-        CattleDTO cattleDTO = cattleDao.getCattle(dto.getCattleCode());
-        if (Objects.isNull(cattleDTO)) {
-            throw new BusinessException("牛只不存在");
+        if (CollectionUtils.isEmpty(dto.getCattleCodeList())) {
+            throw new BusinessException("牛只耳牌号不能为空");
         }
-        if (!"母".equals(cattleDTO.getSex())) {
-            throw new BusinessException("牛只不是雌性");
+        CattleQO qo = new CattleQO();
+        qo.setCattleCodeList(dto.getCattleCodeList());
+        List<CattleDTO> cattleList = cattleDao.listCattle(qo);
+        List<String> existCattleCode = cattleList.stream().map(CattleDTO::getCattleCode).toList();
+        String notExist = dto.getCattleCodeList().stream().filter(item -> !existCattleCode.contains(item)).collect(Collectors.joining(","));
+        if (StrUtil.isNotBlank(notExist)) {
+            throw new BusinessException("牛只(" + notExist + ")不存在");
         }
-        if (!StrUtil.equals(dto.getFarmCode(), cattleDTO.getFarmCode())) {
-            throw new BusinessException("请输入当前牧场牛只耳牌号");
+        String sexErr = cattleList.stream().filter(item -> !"母".equals(item.getSex())).map(CattleDTO::getCattleCode).collect(Collectors.joining(","));
+        if (StrUtil.isNotBlank(sexErr)) {
+            throw new BusinessException("牛只(" + sexErr + ")不是母的");
+        }
+        String farmErr =
+                cattleList.stream().filter(item -> !StrUtil.equals(dto.getFarmCode(), item.getFarmCode())).map(CattleDTO::getCattleCode).collect(Collectors.joining(","));
+        if (StrUtil.isNotBlank(farmErr)) {
+            throw new BusinessException("牛只(" + farmErr + ")不是当前牧场的");
+        }
+        List<String> breedingCattle = breedDao.listBreedingCattleCode(dto.getCattleCodeList()).stream().map(BreedRegisterDTO::getCattleCode).toList();
+        if (!CollectionUtils.isEmpty(breedingCattle)) {
+            throw new BusinessException("牛只(" + String.join(",", breedingCattle) + ")正在妊娠中");
         }
         String username = UserUtil.getCurrentUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
-        dto.setRegisterId(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
-        return breedDao.addBreedRegister(dto);
+        return breedDao.batchAddBreedRegister(dto);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -111,6 +118,42 @@ public class BreedServiceImpl implements BreedService {
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         return breedDao.addBreedPregnancyCheck(dto);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int addBreedPregnancyCheckByCattle(BreedPregnancyCheckDTO dto) {
+        if (CollectionUtils.isEmpty(dto.getCattleCodeList())) {
+            throw new BusinessException("牛只耳牌号不能为空");
+        }
+        CattleQO qo = new CattleQO();
+        qo.setCattleCodeList(dto.getCattleCodeList());
+        List<CattleDTO> cattleList = cattleDao.listCattle(qo);
+        List<String> existCattleCode = cattleList.stream().map(CattleDTO::getCattleCode).toList();
+        String notExist = dto.getCattleCodeList().stream().filter(item -> !existCattleCode.contains(item)).collect(Collectors.joining(","));
+        if (StrUtil.isNotBlank(notExist)) {
+            throw new BusinessException("牛只(" + notExist + ")不存在");
+        }
+        String sexErr = cattleList.stream().filter(item -> !"母".equals(item.getSex())).map(CattleDTO::getCattleCode).collect(Collectors.joining(","));
+        if (StrUtil.isNotBlank(sexErr)) {
+            throw new BusinessException("牛只(" + sexErr + ")不是母的");
+        }
+        String farmErr =
+                cattleList.stream().filter(item -> !StrUtil.equals(dto.getFarmCode(), item.getFarmCode())).map(CattleDTO::getCattleCode).collect(Collectors.joining(","));
+        if (StrUtil.isNotBlank(farmErr)) {
+            throw new BusinessException("牛只(" + farmErr + ")不是当前牧场的");
+        }
+        List<BreedRegisterDTO> breedingCattle = breedDao.listBreedingCattleCode(dto.getCattleCodeList());
+        List<String> breedingCattleCode = breedingCattle.stream().map(BreedRegisterDTO::getCattleCode).toList();
+        List<String> noBreedingCattleCode = dto.getCattleCodeList().stream().filter(item -> !breedingCattleCode.contains(item)).toList();
+        if (!CollectionUtils.isEmpty(noBreedingCattleCode)) {
+            throw new BusinessException("牛只(" + String.join(",", noBreedingCattleCode) + ")不是正在妊娠中");
+        }
+        dto.setRegisterIds(breedingCattle.stream().filter(item -> dto.getCattleCodeList().contains(item.getCattleCode())).map(BreedBaseDTO::getRegisterId).toList());
+        String username = UserUtil.getCurrentUsername();
+        dto.setCreateUser(username);
+        dto.setUpdateUser(username);
+        return breedDao.batchAddBreedPregnancyCheck(dto);
     }
 
     @Transactional(rollbackFor = Exception.class)

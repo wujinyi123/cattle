@@ -15,9 +15,13 @@ public interface BreedDao {
 
     List<BreedRegisterDTO> listBreedRegisterByIds(List<Integer> list);
 
+    List<BreedRegisterDTO> listBreedingCattleCode(List<String> list);
+
     BreedRegisterDTO getBreedRegister(@Param("registerId") String registerId);
 
     int addBreedRegister(BreedRegisterDTO dto);
+
+    int batchAddBreedRegister(BreedRegisterDTO dto);
 
     int delBreedRegister(List<Integer> list);
 
@@ -30,6 +34,8 @@ public interface BreedDao {
     List<BreedPregnancyCheckDTO> listBreedPregnancyCheckByIds(List<Integer> list);
 
     int addBreedPregnancyCheck(BreedPregnancyCheckDTO dto);
+
+    int batchAddBreedPregnancyCheck(BreedPregnancyCheckDTO dto);
 
     int delBreedPregnancyCheck(List<Integer> list);
 

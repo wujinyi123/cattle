@@ -48,6 +48,11 @@ public class BreedController {
         return breedService.addBreedPregnancyCheck(dto);
     }
 
+    @PostMapping("/addBreedPregnancyCheckByCattle")
+    public int addBreedPregnancyCheckByCattle(@RequestBody BreedPregnancyCheckDTO dto) {
+        return breedService.addBreedPregnancyCheckByCattle(dto);
+    }
+
     @PostMapping("/delBreedPregnancyCheck")
     public int delBreedPregnancyCheck(@RequestBody List<Integer> ids) {
         return breedService.delBreedPregnancyCheck(ids);

@@ -8,7 +8,10 @@
             t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
             tz.farmZoneCode,tc.cattleCode,
             t.frozenSemenCode,t.frozenSemenBreed,sf.value frozenSemenBreedValue,
-            t.breedingDay,t.breedingMethod,sb.value breedingMethodValue,t.operateUser
+            t.breedingDay,DATE_ADD(t.breedingDay, INTERVAL 60 DAY) firstCheckDay,
+            DATE_ADD(t.breedingDay, INTERVAL 90 DAY) reCheckDay,
+            DATE_ADD(t.breedingDay, INTERVAL 270 DAY) expectedDay,
+            t.breedingMethod,sb.value breedingMethodValue,t.operateUser
         from t_breed_register t
         left join t_cattle tc on t.cattleCode=tc.cattleCode
         left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
@@ -66,6 +69,18 @@
         order by breedingDay desc,farmName,farmZoneCode,cattleCode
     </select>
 
+    <select id="listBreedingCattleCode" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
+        select
+            distinct t1.registerId, t1.cattleCode
+        from t_breed_register t1
+        left join t_breed_pregnancy_result t2 on t1.registerId=t2.registerId
+        where t2.id is null
+        and t1.cattleCode in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
     <select id="getBreedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
@@ -86,6 +101,18 @@
         values (#{createUser},now(),#{updateUser},now(),
                 #{registerId},#{cattleCode},#{frozenSemenCode},#{frozenSemenBreed},
                 #{breedingDay},#{breedingMethod},#{operateUser})
+    </insert>
+
+    <insert id="batchAddBreedRegister">
+        insert into t_breed_register(createUser,createTime,updateUser,updateTime,
+                                     registerId,cattleCode,frozenSemenCode,frozenSemenBreed,
+                                     breedingDay,breedingMethod,operateUser)
+        values
+        <foreach collection="cattleCodeList" item="item" separator=",">
+            (#{createUser},now(),#{updateUser},now(),
+            concat(date_format(now(),'%Y%m%d%H%i%s'),FLOOR(RAND() * 9000 + 1000)),#{item},#{frozenSemenCode},#{frozenSemenBreed},
+            #{breedingDay},#{breedingMethod},#{operateUser})
+        </foreach>
     </insert>
 
     <delete id="delBreedRegister">
@@ -174,6 +201,16 @@
                                             registerId,checkDay,checkUser,result)
         values (#{createUser},now(),#{updateUser},now(),
                 #{registerId},#{checkDay},#{checkUser},#{result})
+    </insert>
+
+    <insert id="batchAddBreedPregnancyCheck">
+        insert into t_breed_pregnancy_check(createUser,createTime,updateUser,updateTime,
+                                            registerId,checkDay,checkUser,result)
+        values
+        <foreach collection="registerIds" item="item" separator=",">
+            (#{createUser},now(),#{updateUser},now(),
+            #{item},#{checkDay},#{checkUser},#{result})
+        </foreach>
     </insert>
 
     <delete id="delBreedPregnancyCheck">

@@ -10,6 +10,9 @@ public class BreedRegisterDTO extends BreedBaseDTO {
     private String frozenSemenBreed;
     private String frozenSemenBreedValue;
     private String breedingDay;
+    private String firstCheckDay;
+    private String reCheckDay;
+    private String expectedDay;
     private String breedingMethod;
     private String breedingMethodValue;
     private String operateUser;

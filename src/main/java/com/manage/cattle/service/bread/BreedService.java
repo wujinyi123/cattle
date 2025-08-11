@@ -25,6 +25,8 @@ public interface BreedService {
 
     int addBreedPregnancyCheck(BreedPregnancyCheckDTO dto);
 
+    int addBreedPregnancyCheckByCattle(BreedPregnancyCheckDTO dto);
+
     int delBreedPregnancyCheck(List<Integer> ids);
 
     PageInfo<BreedPregnancyResultDTO> pageBreedPregnancyResult(BreedPregnancyResultQO qo);
