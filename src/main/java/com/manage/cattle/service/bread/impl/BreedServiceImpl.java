@@ -52,48 +52,17 @@ public class BreedServiceImpl implements BreedService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addBreedRegister(BreedRegisterDTO dto) {
-        if (CollectionUtils.isEmpty(dto.getCattleCodeList())) {
-            throw new BusinessException("牛只耳牌号不能为空");
-        }
-        CattleQO qo = new CattleQO();
-        qo.setCattleCodeList(dto.getCattleCodeList());
-        List<CattleDTO> cattleList = cattleDao.listCattle(qo);
-        List<String> existCattleCode = cattleList.stream().map(CattleDTO::getCattleCode).toList();
-        String notExist = dto.getCattleCodeList().stream().filter(item -> !existCattleCode.contains(item)).collect(Collectors.joining(","));
-        if (StrUtil.isNotBlank(notExist)) {
-            throw new BusinessException("牛只(" + notExist + ")不存在");
-        }
-        String sexErr = cattleList.stream().filter(item -> !"母".equals(item.getSex())).map(CattleDTO::getCattleCode).collect(Collectors.joining(","));
-        if (StrUtil.isNotBlank(sexErr)) {
-            throw new BusinessException("牛只(" + sexErr + ")不是母的");
-        }
-        String farmErr =
-                cattleList.stream().filter(item -> !StrUtil.equals(dto.getFarmCode(), item.getFarmCode())).map(CattleDTO::getCattleCode).collect(Collectors.joining(","));
-        if (StrUtil.isNotBlank(farmErr)) {
-            throw new BusinessException("牛只(" + farmErr + ")不是当前牧场的");
-        }
-        List<String> breedingCattle = breedDao.listBreedingCattleCode(dto.getCattleCodeList()).stream().map(BreedRegisterDTO::getCattleCode).toList();
-        if (!CollectionUtils.isEmpty(breedingCattle)) {
-            throw new BusinessException("牛只(" + String.join(",", breedingCattle) + ")正在妊娠中");
-        }
+        checkCattleCode(dto);
         String username = UserUtil.getCurrentUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
-        return breedDao.batchAddBreedRegister(dto);
+        return breedDao.addBreedRegister(dto);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int delBreedRegister(List<Integer> ids) {
-        List<BreedRegisterDTO> breedRegisterList = breedDao.listBreedRegisterByIds(ids);
-        if (breedRegisterList.size() == 0) {
-            throw new BusinessException("查无数据");
-        }
-        List<String> registerIds = breedRegisterList.stream().map(BreedRegisterDTO::getRegisterId).toList();
-        int result = breedDao.delBreedRegister(ids);
-        breedDao.delBreedPregnancyCheckByRegisterId(registerIds);
-        breedDao.delBreedPregnancyResultByRegisterId(registerIds);
-        return result;
+        return breedDao.delBreedRegister(ids);
     }
 
     @Override
@@ -110,50 +79,11 @@ public class BreedServiceImpl implements BreedService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addBreedPregnancyCheck(BreedPregnancyCheckDTO dto) {
-        BreedRegisterDTO breedRegisterDTO = breedDao.getBreedRegister(dto.getRegisterId());
-        if (!StrUtil.equals(dto.getFarmCode(), breedRegisterDTO.getFarmCode())) {
-            throw new BusinessException("请输入当前牧场的登记号");
-        }
+        checkCattleCode(dto);
         String username = UserUtil.getCurrentUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
         return breedDao.addBreedPregnancyCheck(dto);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public int addBreedPregnancyCheckByCattle(BreedPregnancyCheckDTO dto) {
-        if (CollectionUtils.isEmpty(dto.getCattleCodeList())) {
-            throw new BusinessException("牛只耳牌号不能为空");
-        }
-        CattleQO qo = new CattleQO();
-        qo.setCattleCodeList(dto.getCattleCodeList());
-        List<CattleDTO> cattleList = cattleDao.listCattle(qo);
-        List<String> existCattleCode = cattleList.stream().map(CattleDTO::getCattleCode).toList();
-        String notExist = dto.getCattleCodeList().stream().filter(item -> !existCattleCode.contains(item)).collect(Collectors.joining(","));
-        if (StrUtil.isNotBlank(notExist)) {
-            throw new BusinessException("牛只(" + notExist + ")不存在");
-        }
-        String sexErr = cattleList.stream().filter(item -> !"母".equals(item.getSex())).map(CattleDTO::getCattleCode).collect(Collectors.joining(","));
-        if (StrUtil.isNotBlank(sexErr)) {
-            throw new BusinessException("牛只(" + sexErr + ")不是母的");
-        }
-        String farmErr =
-                cattleList.stream().filter(item -> !StrUtil.equals(dto.getFarmCode(), item.getFarmCode())).map(CattleDTO::getCattleCode).collect(Collectors.joining(","));
-        if (StrUtil.isNotBlank(farmErr)) {
-            throw new BusinessException("牛只(" + farmErr + ")不是当前牧场的");
-        }
-        List<BreedRegisterDTO> breedingCattle = breedDao.listBreedingCattleCode(dto.getCattleCodeList());
-        List<String> breedingCattleCode = breedingCattle.stream().map(BreedRegisterDTO::getCattleCode).toList();
-        List<String> noBreedingCattleCode = dto.getCattleCodeList().stream().filter(item -> !breedingCattleCode.contains(item)).toList();
-        if (!CollectionUtils.isEmpty(noBreedingCattleCode)) {
-            throw new BusinessException("牛只(" + String.join(",", noBreedingCattleCode) + ")不是正在妊娠中");
-        }
-        dto.setRegisterIds(breedingCattle.stream().filter(item -> dto.getCattleCodeList().contains(item.getCattleCode())).map(BreedBaseDTO::getRegisterId).toList());
-        String username = UserUtil.getCurrentUsername();
-        dto.setCreateUser(username);
-        dto.setUpdateUser(username);
-        return breedDao.batchAddBreedPregnancyCheck(dto);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -176,13 +106,8 @@ public class BreedServiceImpl implements BreedService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addBreedPregnancyResult(BreedPregnancyResultDTO dto) {
-        BreedRegisterDTO breedRegisterDTO = breedDao.getBreedRegister(dto.getRegisterId());
-        if (breedRegisterDTO == null) {
-            throw new BusinessException("登记号不正确");
-        }
-        if (!StrUtil.equals(dto.getFarmCode(), breedRegisterDTO.getFarmCode())) {
-            throw new BusinessException("请输入当前牧场的登记号");
-        }
+        dto.setCattleCodeList(List.of(dto.getCattleCode()));
+        checkCattleCode(dto);
         if (StrUtil.isNotBlank(dto.getChildCattleCode()) && cattleDao.getCattle(dto.getChildCattleCode()) != null) {
             throw new BusinessException("牛犊子耳牌号已存在");
         }
@@ -221,5 +146,28 @@ public class BreedServiceImpl implements BreedService {
     @Override
     public int delBreedPregnancyResult(List<Integer> ids) {
         return breedDao.delBreedPregnancyResult(ids);
+    }
+
+    private void checkCattleCode(BreedBaseDTO dto) {
+        if (CollectionUtils.isEmpty(dto.getCattleCodeList())) {
+            throw new BusinessException("牛只耳牌号不能为空");
+        }
+        CattleQO qo = new CattleQO();
+        qo.setCattleCodeList(dto.getCattleCodeList());
+        List<CattleDTO> cattleList = cattleDao.listCattle(qo);
+        List<String> existCattleCode = cattleList.stream().map(CattleDTO::getCattleCode).toList();
+        String notExist = dto.getCattleCodeList().stream().filter(item -> !existCattleCode.contains(item)).collect(Collectors.joining(","));
+        if (StrUtil.isNotBlank(notExist)) {
+            throw new BusinessException("牛只(" + notExist + ")不存在");
+        }
+        String sexErr = cattleList.stream().filter(item -> !"母".equals(item.getSex())).map(CattleDTO::getCattleCode).collect(Collectors.joining(","));
+        if (StrUtil.isNotBlank(sexErr)) {
+            throw new BusinessException("牛只(" + sexErr + ")不是母的");
+        }
+        String farmErr =
+                cattleList.stream().filter(item -> !StrUtil.equals(dto.getFarmCode(), item.getFarmCode())).map(CattleDTO::getCattleCode).collect(Collectors.joining(","));
+        if (StrUtil.isNotBlank(farmErr)) {
+            throw new BusinessException("牛只(" + farmErr + ")不是当前牧场的");
+        }
     }
 }

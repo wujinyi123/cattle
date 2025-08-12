@@ -5,7 +5,7 @@
     <select id="listBreedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
+            tz.farmCode,tf.farmName,tf.farmOwner,
             tz.farmZoneCode,tc.cattleCode,
             t.frozenSemenCode,t.frozenSemenBreed,sf.value frozenSemenBreedValue,
             t.breedingDay,DATE_ADD(t.breedingDay, INTERVAL 60 DAY) firstCheckDay,
@@ -13,9 +13,9 @@
             DATE_ADD(t.breedingDay, INTERVAL 270 DAY) expectedDay,
             t.breedingMethod,sb.value breedingMethodValue,t.operateUser
         from t_breed_register t
-        left join t_cattle tc on t.cattleCode=tc.cattleCode
-        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
-        left join t_farm tf on tz.farmCode=tf.farmCode
+        join t_cattle tc on t.cattleCode=tc.cattleCode
+        join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
+        join t_farm tf on tz.farmCode=tf.farmCode
         left join t_sys_config sf on sf.code='cattleBreed' and t.frozenSemenBreed=sf.key
         left join t_sys_config sb on sb.code='breedingMethod' and t.breedingMethod=sb.key
         where 1=1
@@ -23,13 +23,13 @@
             and tf.farmCode=#{farmCode}
         </if>
         <if test="farmZoneCode!=null and farmZoneCode!=''">
-            and tz.farmZoneCode like concat('%',#{farmZoneCode},'%')
+            and tz.farmZoneCode=#{farmZoneCode}
         </if>
         <if test="cattleCode!=null and cattleCode!=''">
-            and tc.cattleCode like concat('%',#{cattleCode},'%')
+            and tc.cattleCode=#{cattleCode}
         </if>
         <if test="frozenSemenCode!=null and frozenSemenCode!=''">
-            and t.frozenSemenCode like concat('%',#{frozenSemenCode},'%')
+            and t.frozenSemenCode=#{frozenSemenCode}
         </if>
         <if test="frozenSemenBreed!=null and frozenSemenBreed!=''">
             and t.frozenSemenBreed=#{frozenSemenBreed}
@@ -44,73 +44,19 @@
             and t.breedingMethod=#{breedingMethod}
         </if>
         <if test="operateUser!=null and operateUser!=''">
-            and t.operateUser like concat('%',#{operateUser},'%')
-        </if>
-        <if test="registerId!=null and registerId!=''">
-            and t.registerId like concat('%',#{registerId},'%')
+            and t.operateUser=#{operateUser}
         </if>
         order by breedingDay desc,farmName,farmZoneCode,cattleCode
-    </select>
-
-    <select id="listBreedRegisterByIds" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
-        select
-        t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-        t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
-        tz.farmZoneCode,tc.cattleCode,
-        t.frozenSemenCode,t.frozenSemenBreed,t.breedingDay,t.breedingMethod,t.operateUser
-        from t_breed_register t
-        left join t_cattle tc on t.cattleCode=tc.cattleCode
-        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
-        left join t_farm tf on tz.farmCode=tf.farmCode
-        where t.id in
-        <foreach collection="list" item="item" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-        order by breedingDay desc,farmName,farmZoneCode,cattleCode
-    </select>
-
-    <select id="listBreedingCattleCode" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
-        select
-            distinct t1.registerId, t1.cattleCode
-        from t_breed_register t1
-        left join t_breed_pregnancy_result t2 on t1.registerId=t2.registerId
-        where t2.id is null
-        and t1.cattleCode in
-        <foreach collection="list" item="item" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-    </select>
-
-    <select id="getBreedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
-        select
-            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
-            tz.farmZoneCode,tc.cattleCode,
-            t.frozenSemenCode,t.frozenSemenBreed,t.breedingDay,t.breedingMethod,t.operateUser
-        from t_breed_register t
-        left join t_cattle tc on t.cattleCode=tc.cattleCode
-        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
-        left join t_farm tf on tz.farmCode=tf.farmCode
-        where t.registerId=#{registerId}
     </select>
 
     <insert id="addBreedRegister">
         insert into t_breed_register(createUser,createTime,updateUser,updateTime,
-                                     registerId,cattleCode,frozenSemenCode,frozenSemenBreed,
-                                     breedingDay,breedingMethod,operateUser)
-        values (#{createUser},now(),#{updateUser},now(),
-                #{registerId},#{cattleCode},#{frozenSemenCode},#{frozenSemenBreed},
-                #{breedingDay},#{breedingMethod},#{operateUser})
-    </insert>
-
-    <insert id="batchAddBreedRegister">
-        insert into t_breed_register(createUser,createTime,updateUser,updateTime,
-                                     registerId,cattleCode,frozenSemenCode,frozenSemenBreed,
+                                     cattleCode,frozenSemenCode,frozenSemenBreed,
                                      breedingDay,breedingMethod,operateUser)
         values
         <foreach collection="cattleCodeList" item="item" separator=",">
             (#{createUser},now(),#{updateUser},now(),
-            concat(date_format(now(),'%Y%m%d%H%i%s'),FLOOR(RAND() * 9000 + 1000)),#{item},#{frozenSemenCode},#{frozenSemenBreed},
+            #{item},#{frozenSemenCode},#{frozenSemenBreed},
             #{breedingDay},#{breedingMethod},#{operateUser})
         </foreach>
     </insert>
@@ -123,45 +69,25 @@
         </foreach>
     </delete>
 
-    <delete id="delBreedPregnancyCheckByRegisterId">
-        delete from t_breed_pregnancy_check
-        where registerId in
-        <foreach collection="list" item="item" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-    </delete>
-
-    <delete id="delBreedPregnancyResultByRegisterId">
-        delete from t_breed_pregnancy_result
-        where registerId in
-        <foreach collection="list" item="item" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-    </delete>
-
     <select id="listBreedPregnancyCheck" resultType="com.manage.cattle.dto.breed.BreedPregnancyCheckDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
+            tz.farmCode,tf.farmName,tf.farmOwner,
             tz.farmZoneCode,tc.cattleCode,
             t.checkDay,t.checkUser,t.result
         from t_breed_pregnancy_check t
-        left join t_breed_register tr on t.registerId=tr.registerId
-        left join t_cattle tc on tr.cattleCode=tc.cattleCode
-        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
-        left join t_farm tf on tz.farmCode=tf.farmCode
+        join t_cattle tc on t.cattleCode=tc.cattleCode
+        join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
+        join t_farm tf on tz.farmCode=tf.farmCode
         where 1=1
-        <if test="registerId!=null and registerId!=''">
-            and t.registerId like concat('%',#{registerId},'%')
-        </if>
         <if test="farmCode!=null and farmCode!=''">
             and tf.farmCode=#{farmCode}
         </if>
         <if test="farmZoneCode!=null and farmZoneCode!=''">
-            and tz.farmZoneCode like concat('%',#{farmZoneCode},'%')
+            and tz.farmZoneCode#{farmZoneCode}
         </if>
         <if test="cattleCode!=null and cattleCode!=''">
-            and tc.cattleCode like concat('%',#{cattleCode},'%')
+            and tc.cattleCode=#{cattleCode}
         </if>
         <if test="checkDayStart!=null and checkDayStart!=''">
             and t.checkDay &gt;= #{checkDayStart}
@@ -170,7 +96,7 @@
             and t.checkDay &lt;= #{checkDayEnd}
         </if>
         <if test="checkUser!=null and checkUser!=''">
-            and t.checkUser like concat('%',#{checkUser},'%')
+            and t.checkUser=#{checkUser}
         </if>
         <if test="result!=null and result!=''">
             and t.result like concat('%',#{result},'%')
@@ -178,36 +104,11 @@
         order by checkDay desc,farmName,farmZoneCode,cattleCode
     </select>
 
-    <select id="listBreedPregnancyCheckByIds" resultType="com.manage.cattle.dto.breed.BreedPregnancyCheckDTO">
-        select
-            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
-            tz.farmZoneCode,tc.cattleCode,
-            t.checkDay,t.checkUser,t.result
-        from t_breed_pregnancy_check t
-        left join t_breed_register tr on t.registerId=tr.registerId
-        left join t_cattle tc on tr.cattleCode=tc.cattleCode
-        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
-        left join t_farm tf on tz.farmCode=tf.farmCode
-        where t.id in
-        <foreach collection="list" item="item" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-        order by checkDay desc,farmName,farmZoneCode,cattleCode
-    </select>
-
     <insert id="addBreedPregnancyCheck">
         insert into t_breed_pregnancy_check(createUser,createTime,updateUser,updateTime,
-                                            registerId,checkDay,checkUser,result)
-        values (#{createUser},now(),#{updateUser},now(),
-                #{registerId},#{checkDay},#{checkUser},#{result})
-    </insert>
-
-    <insert id="batchAddBreedPregnancyCheck">
-        insert into t_breed_pregnancy_check(createUser,createTime,updateUser,updateTime,
-                                            registerId,checkDay,checkUser,result)
+        cattleCode,checkDay,checkUser,result)
         values
-        <foreach collection="registerIds" item="item" separator=",">
+        <foreach collection="cattleCodeList" item="item" separator=",">
             (#{createUser},now(),#{updateUser},now(),
             #{item},#{checkDay},#{checkUser},#{result})
         </foreach>
@@ -224,29 +125,25 @@
     <select id="listBreedPregnancyResult" resultType="com.manage.cattle.dto.breed.BreedPregnancyResultDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-            t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
+            tz.farmCode,tf.farmName,tf.farmOwner,
             tz.farmZoneCode,tc.cattleCode,
             t.resultDay,t.operaUser,t.result,t.remark,
             t.childFarmZoneCode,t.childCattleCode,t.breed,sb.value breedValue,
             t.sex,t.color,t.weight
         from t_breed_pregnancy_result t
-        left join t_breed_register tr on t.registerId=tr.registerId
-        left join t_cattle tc on tr.cattleCode=tc.cattleCode
-        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
-        left join t_farm tf on tz.farmCode=tf.farmCode
+        join t_cattle tc on t.cattleCode=tc.cattleCode
+        join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
+        join t_farm tf on tz.farmCode=tf.farmCode
         left join t_sys_config sb on sb.code='cattleBreed' and t.breed=sb.key
         where 1=1
-        <if test="registerId!=null and registerId!=''">
-            and t.registerId like concat('%',#{registerId},'%')
-        </if>
         <if test="farmCode!=null and farmCode!=''">
             and tf.farmCode=#{farmCode}
         </if>
         <if test="farmZoneCode!=null and farmZoneCode!=''">
-            and tz.farmZoneCode like concat('%',#{farmZoneCode},'%')
+            and tz.farmZoneCode=#{farmZoneCode}
         </if>
         <if test="cattleCode!=null and cattleCode!=''">
-            and tc.cattleCode like concat('%',#{cattleCode},'%')
+            and tc.cattleCode=#{cattleCode}
         </if>
         <if test="resultDayStart!=null and resultDayStart!=''">
             and t.resultDay &gt;= #{resultDayStart}
@@ -255,7 +152,7 @@
             and t.resultDay &lt;= #{resultDayEnd}
         </if>
         <if test="operaUser!=null and operaUser!=''">
-            and t.operaUser like concat('%',#{operaUser},'%')
+            and t.operaUser=#{operaUser}
         </if>
         <if test="result!=null and result!=''">
             and t.result=#{result}
@@ -266,33 +163,12 @@
         order by resultDay desc,farmName,farmZoneCode,cattleCode
     </select>
 
-    <select id="listBreedPregnancyResultByIds" resultType="com.manage.cattle.dto.breed.BreedPregnancyResultDTO">
-        select
-        t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
-        t.registerId,tz.farmCode,tf.farmName,tf.farmOwner,
-        tz.farmZoneCode,tc.cattleCode,
-        t.resultDay,t.operaUser,t.result,t.remark,
-        t.childFarmZoneCode,t.childCattleCode,t.breed,sb.value breedValue,
-        t.sex,t.color,t.weight
-        from t_breed_pregnancy_result t
-        left join t_breed_register tr on t.registerId=tr.registerId
-        left join t_cattle tc on tr.cattleCode=tc.cattleCode
-        left join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
-        left join t_farm tf on tz.farmCode=tf.farmCode
-        left join t_sys_config sb on sb.code='cattleBreed' and t.breed=sb.key
-        where t.id in
-        <foreach collection="list" item="item" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-        order by resultDay desc,farmName,farmZoneCode,cattleCode
-    </select>
-
     <insert id="addBreedPregnancyResult">
         insert into t_breed_pregnancy_result(createUser,createTime,updateUser,updateTime,
-                                             registerId,resultDay,operaUser,result,remark,
+                                             cattleCode,resultDay,operaUser,result,remark,
                                              childFarmZoneCode,childCattleCode,breed,sex,color,weight)
         values (#{createUser},now(),#{updateUser},now(),
-                #{registerId},#{resultDay},#{operaUser},#{result},#{remark},
+                #{cattleCode},#{resultDay},#{operaUser},#{result},#{remark},
                 #{childFarmZoneCode},#{childCattleCode},#{breed},#{sex},#{color},#{weight})
     </insert>
 

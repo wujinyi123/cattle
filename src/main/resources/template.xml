@@ -58,7 +58,6 @@
     <template code="breedRegister"
               exportMethed="com.manage.cattle.service.bread.BreedService#listBreedRegister"
               qo="com.manage.cattle.qo.breed.BreedRegisterQO">
-        <field name="registerId" title="登记号"/>
         <field name="farmName" title="牧场名称"/>
         <field name="farmZoneCode" title="圈舍编号"/>
         <field name="cattleCode" title="牛只耳牌号"/>
@@ -72,7 +71,6 @@
     <template code="breedPregnancyCheck"
               exportMethed="com.manage.cattle.service.bread.BreedService#listBreedPregnancyCheck"
               qo="com.manage.cattle.qo.breed.BreedPregnancyCheckQO">
-        <field name="registerId" title="登记号"/>
         <field name="farmName" title="牧场名称"/>
         <field name="farmZoneCode" title="圈舍编号"/>
         <field name="cattleCode" title="牛只耳牌号"/>
@@ -83,7 +81,6 @@
     <template code="breedPregnancyResult"
               exportMethed="com.manage.cattle.service.bread.BreedService#listBreedPregnancyResult"
               qo="com.manage.cattle.qo.breed.BreedPregnancyResultQO">
-        <field name="registerId" title="登记号"/>
         <field name="farmName" title="牧场名称"/>
         <field name="farmZoneCode" title="圈舍编号"/>
         <field name="cattleCode" title="牛只耳牌号"/>

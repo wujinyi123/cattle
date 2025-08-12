@@ -9,8 +9,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class BreedBaseDTO extends BaseDTO {
-    private String registerId;
-    private List<String> registerIds;
     private String farmCode;
     private String farmName;
     private String farmOwner;
