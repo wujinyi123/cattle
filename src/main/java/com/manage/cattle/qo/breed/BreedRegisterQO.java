@@ -16,4 +16,5 @@ public class BreedRegisterQO extends PageQO {
     private String breedingDayEnd;
     private String breedingMethod;
     private String operateUser;
+    private Integer overDays;
 }

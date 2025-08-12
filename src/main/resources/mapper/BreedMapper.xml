@@ -46,6 +46,9 @@
         <if test="operateUser!=null and operateUser!=''">
             and t.operateUser=#{operateUser}
         </if>
+        <if test="overDays!=null">
+            and now() &gt;= DATE_ADD(t.breedingDay, INTERVAL ${overDays} DAY)
+        </if>
         order by breedingDay desc,farmName,farmZoneCode,cattleCode
     </select>
 

@@ -304,6 +304,9 @@ public class CommonServiceImpl implements CommonService {
         info.setCode(templateCode);
         String fileName = templateElement.attributeValue("fileName");
         info.setFileName(StrUtil.isBlank(fileName) ? templateCode + ".xlsx" : fileName);
+        if (StrUtil.isNotBlank(params.get("fileName"))) {
+            info.setFileName(params.get("fileName"));
+        }
         info.setExportMethed(templateElement.attributeValue("exportMethed"));
         info.setImportMethed(templateElement.attributeValue("importMethed"));
         info.setDtoClass(templateElement.attributeValue("dto"));

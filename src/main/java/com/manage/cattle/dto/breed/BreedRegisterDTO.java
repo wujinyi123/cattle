@@ -16,4 +16,6 @@ public class BreedRegisterDTO extends BreedBaseDTO {
     private String breedingMethod;
     private String breedingMethodValue;
     private String operateUser;
+    private Integer checkCount;
+    private String checkDays;
 }

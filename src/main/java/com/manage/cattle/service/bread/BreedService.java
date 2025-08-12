@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dto.breed.BreedPregnancyCheckDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyResultDTO;
 import com.manage.cattle.dto.breed.BreedRegisterDTO;
+import com.manage.cattle.dto.common.FileByteInfo;
 import com.manage.cattle.qo.breed.BreedPregnancyCheckQO;
 import com.manage.cattle.qo.breed.BreedPregnancyResultQO;
 import com.manage.cattle.qo.breed.BreedRegisterQO;
@@ -34,4 +35,6 @@ public interface BreedService {
     int addBreedPregnancyResult(BreedPregnancyResultDTO dto);
 
     int delBreedPregnancyResult(List<Integer> ids);
+
+    List<BreedRegisterDTO> downloadRegisterCattle(BreedRegisterQO qo);
 }

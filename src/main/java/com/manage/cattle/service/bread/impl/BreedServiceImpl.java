@@ -24,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -146,6 +148,36 @@ public class BreedServiceImpl implements BreedService {
     @Override
     public int delBreedPregnancyResult(List<Integer> ids) {
         return breedDao.delBreedPregnancyResult(ids);
+    }
+
+    @Override
+    public List<BreedRegisterDTO> downloadRegisterCattle(BreedRegisterQO qo) {
+        List<BreedRegisterDTO> allRegister = breedDao.listBreedRegister(qo);
+        Map<String, List<BreedRegisterDTO>> groupByCattle = allRegister.stream().collect(Collectors.groupingBy(BreedRegisterDTO::getCattleCode));
+        List<BreedRegisterDTO> registerList = new ArrayList<>();
+        for (List<BreedRegisterDTO> value : groupByCattle.values()) {
+            List<BreedRegisterDTO> temp = new ArrayList<>(value);
+            temp.sort((a, b) -> b.getBreedingDay().compareTo(a.getBreedingDay()));
+            registerList.add(temp.get(0));
+        }
+        BreedPregnancyCheckQO breedPregnancyCheckQO = new BreedPregnancyCheckQO();
+        breedPregnancyCheckQO.setFarmCode(qo.getFarmCode());
+        List<BreedPregnancyCheckDTO> checkList = breedDao.listBreedPregnancyCheck(breedPregnancyCheckQO);
+        for (BreedRegisterDTO dto : registerList) {
+            String cattleCode = dto.getCattleCode();
+            String dayStart = dto.getBreedingDay();
+            String dayEnd = qo.getOverDays() == 60 ? dto.getFirstCheckDay() : dto.getReCheckDay();
+            List<String> dayList = checkList.stream()
+                    .filter(item -> cattleCode.equals(item.getCattleCode())
+                            && item.getCheckDay().compareTo(dayStart) >= 0
+                            && item.getCheckDay().compareTo(dayEnd) <= 0)
+                    .map(BreedPregnancyCheckDTO::getCheckDay)
+                    .sorted()
+                    .toList();
+            dto.setCheckCount(dayList.size());
+            dto.setCheckDays(String.join(",", dayList));
+        }
+        return registerList;
     }
 
     private void checkCattleCode(BreedBaseDTO dto) {
