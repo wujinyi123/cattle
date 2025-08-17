@@ -1,8 +1,10 @@
 package com.manage.cattle.dao.breed;
 
+import com.manage.cattle.dto.breed.BreedFrozenSemenDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyCheckDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyResultDTO;
 import com.manage.cattle.dto.breed.BreedRegisterDTO;
+import com.manage.cattle.qo.breed.BreedFrozenSemenQO;
 import com.manage.cattle.qo.breed.BreedPregnancyCheckQO;
 import com.manage.cattle.qo.breed.BreedPregnancyResultQO;
 import com.manage.cattle.qo.breed.BreedRegisterQO;
@@ -10,6 +12,18 @@ import com.manage.cattle.qo.breed.BreedRegisterQO;
 import java.util.List;
 
 public interface BreedDao {
+    List<BreedFrozenSemenDTO> listBreedFrozenSemen(BreedFrozenSemenQO qo);
+
+    BreedFrozenSemenDTO getBreedFrozenSemen(String frozenSemenCode);
+
+    int addBreedFrozenSemen(BreedFrozenSemenDTO dto);
+
+    int updateBreedFrozenSemen(BreedFrozenSemenDTO dto);
+
+    int delBreedFrozenSemen(List<Integer> list);
+
+    List<String> listRefFrozenSemenCode(List<Integer> list);
+
     List<BreedRegisterDTO> listBreedRegister(BreedRegisterQO qo);
 
     int addBreedRegister(BreedRegisterDTO dto);

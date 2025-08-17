@@ -1,9 +1,11 @@
 package com.manage.cattle.controller.breed;
 
 import com.github.pagehelper.PageInfo;
+import com.manage.cattle.dto.breed.BreedFrozenSemenDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyCheckDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyResultDTO;
 import com.manage.cattle.dto.breed.BreedRegisterDTO;
+import com.manage.cattle.qo.breed.BreedFrozenSemenQO;
 import com.manage.cattle.qo.breed.BreedPregnancyCheckQO;
 import com.manage.cattle.qo.breed.BreedPregnancyResultQO;
 import com.manage.cattle.qo.breed.BreedRegisterQO;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -22,6 +25,31 @@ import java.util.List;
 public class BreedController {
     @Resource
     private BreedService breedService;
+
+    @GetMapping("/pageBreedFrozenSemen")
+    public PageInfo<BreedFrozenSemenDTO> pageBreedFrozenSemen(BreedFrozenSemenQO qo) {
+        return breedService.pageBreedFrozenSemen(qo);
+    }
+
+    @GetMapping("/listBreedFrozenSemen")
+    public List<BreedFrozenSemenDTO> listBreedFrozenSemen(BreedFrozenSemenQO qo) {
+        return breedService.listBreedFrozenSemen(qo);
+    }
+
+    @GetMapping("/getBreedFrozenSemen")
+    public BreedFrozenSemenDTO getBreedFrozenSemen(@RequestParam String frozenSemenCode) {
+        return breedService.getBreedFrozenSemen(frozenSemenCode);
+    }
+
+    @PostMapping("/saveBreedFrozenSemen")
+    public int saveBreedFrozenSemen(@RequestParam String type, @RequestBody BreedFrozenSemenDTO dto) {
+        return breedService.saveBreedFrozenSemen(type, dto);
+    }
+
+    @PostMapping("/delBreedFrozenSemen")
+    public int delBreedFrozenSemen(@RequestBody List<Integer> ids) {
+        return breedService.delBreedFrozenSemen(ids);
+    }
 
     @GetMapping("/pageBreedRegister")
     public PageInfo<BreedRegisterDTO> pageBreedRegister(BreedRegisterQO qo) {

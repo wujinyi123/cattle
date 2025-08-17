@@ -55,6 +55,18 @@
         <field name="age" title="年龄" noImport="true"/>
         <field name="remark" title="备注"/>
     </template>
+    <template code="breedFrozenSemen"
+              exportMethed="com.manage.cattle.service.bread.BreedService#listBreedFrozenSemen"
+              importMethed="com.manage.cattle.service.bread.BreedService#importBreedFrozenSemen"
+              qo="com.manage.cattle.qo.breed.BreedFrozenSemenQO"
+              dto="com.manage.cattle.dto.breed.BreedFrozenSemenDTO">
+        <field name="frozenSemenCode" title="冻精号" require="true"/>
+        <field name="frozenSemenBreedValue" title="冻精品种" require="true"/>
+        <field name="sexControl" title="性控类型" require="true" enumVal="普通,性控,超级性控"/>
+        <field name="color" title="颜色"/>
+        <field name="fatherCode" title="父亲耳牌号"/>
+        <field name="motherCode" title="母亲耳牌号"/>
+    </template>
     <template code="breedRegister"
               exportMethed="com.manage.cattle.service.bread.BreedService#listBreedRegister"
               qo="com.manage.cattle.qo.breed.BreedRegisterQO">
@@ -62,6 +74,7 @@
         <field name="cattleCode" title="牛只耳牌号"/>
         <field name="frozenSemenCode" title="冻精号"/>
         <field name="frozenSemenBreedValue" title="冻精品种"/>
+        <field name="sexControl" title="性控类型"/>
         <field name="breedingDay" title="配种日期"/>
         <field name="breedingMethodValue" title="配种方法"/>
         <field name="operateUser" title="输配员"/>
@@ -74,6 +87,7 @@
         <field name="cattleCode" title="牛只耳牌号"/>
         <field name="frozenSemenCode" title="冻精号"/>
         <field name="frozenSemenBreedValue" title="冻精品种"/>
+        <field name="sexControl" title="性控类型"/>
         <field name="breedingDay" title="配种日期"/>
         <field name="firstCheckDay" title="计划初检日期"/>
         <field name="reCheckDay" title="计划复检日期"/>

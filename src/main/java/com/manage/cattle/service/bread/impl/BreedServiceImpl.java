@@ -7,18 +7,23 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.CattleDao;
 import com.manage.cattle.dao.base.FarmDao;
+import com.manage.cattle.dao.base.SysDao;
 import com.manage.cattle.dao.breed.BreedDao;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.FarmZoneDTO;
 import com.manage.cattle.dto.CattleBaseDTO;
+import com.manage.cattle.dto.breed.BreedFrozenSemenDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyCheckDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyResultDTO;
 import com.manage.cattle.dto.breed.BreedRegisterDTO;
+import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.qo.base.CattleQO;
+import com.manage.cattle.qo.breed.BreedFrozenSemenQO;
 import com.manage.cattle.qo.breed.BreedPregnancyCheckQO;
 import com.manage.cattle.qo.breed.BreedPregnancyResultQO;
 import com.manage.cattle.qo.breed.BreedRegisterQO;
+import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.bread.BreedService;
 import com.manage.cattle.util.UserUtil;
 import jakarta.annotation.Resource;
@@ -41,6 +46,81 @@ public class BreedServiceImpl implements BreedService {
 
     @Resource
     private FarmDao farmDao;
+
+    @Resource
+    private SysDao sysDao;
+
+    @Override
+    public PageInfo<BreedFrozenSemenDTO> pageBreedFrozenSemen(BreedFrozenSemenQO qo) {
+        PageHelper.startPage(qo);
+        return new PageInfo<>(breedDao.listBreedFrozenSemen(qo));
+    }
+
+    @Override
+    public List<BreedFrozenSemenDTO> listBreedFrozenSemen(BreedFrozenSemenQO qo) {
+        return breedDao.listBreedFrozenSemen(qo);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public List<String> importBreedFrozenSemen(List<BreedFrozenSemenDTO> importList) {
+        List<String> errorList = new ArrayList<>();
+        SysConfigQO sysConfigQO = new SysConfigQO();
+        sysConfigQO.setCode("cattleBreed");
+        Map<String, String> breedMap = sysDao.listSysConfig(sysConfigQO).stream().collect(Collectors.toMap(SysConfigDTO::getValue,
+                SysConfigDTO::getKey));
+        for (BreedFrozenSemenDTO dto : importList) {
+            if (StrUtil.isNotBlank(dto.getImportError())) {
+                errorList.add(dto.getImportError());
+                continue;
+            }
+            BreedFrozenSemenQO qo = new BreedFrozenSemenQO();
+            qo.setFrozenSemenCode(dto.getFrozenSemenCode());
+            if (breedDao.listBreedFrozenSemen(qo).size() > 0) {
+                errorList.add("冻精号(" + dto.getFrozenSemenCode() + ")已存在");
+                continue;
+            }
+            dto.setFrozenSemenBreed(breedMap.get(dto.getFrozenSemenBreedValue()));
+            if (StrUtil.isBlank(dto.getFrozenSemenBreed())) {
+                errorList.add("冻精品种不正确");
+                continue;
+            }
+            int res = breedDao.addBreedFrozenSemen(dto);
+            if (res == 0) {
+                errorList.add("添加失败");
+            }
+        }
+        return errorList;
+    }
+
+    @Override
+    public BreedFrozenSemenDTO getBreedFrozenSemen(String frozenSemenCode) {
+        return breedDao.getBreedFrozenSemen(frozenSemenCode);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int saveBreedFrozenSemen(String type, BreedFrozenSemenDTO dto) {
+        BreedFrozenSemenQO qo = new BreedFrozenSemenQO();
+        qo.setFrozenSemenCode(dto.getFrozenSemenCode());
+        if ("add".equals(type) && breedDao.listBreedFrozenSemen(qo).size() > 0) {
+            throw new BusinessException("冻精号已存在");
+        }
+        String username = UserUtil.getCurrentUsername();
+        dto.setCreateUser(username);
+        dto.setUpdateUser(username);
+        return "add".equals(type) ? breedDao.addBreedFrozenSemen(dto) : breedDao.updateBreedFrozenSemen(dto);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int delBreedFrozenSemen(List<Integer> ids) {
+        List<String> resCodeList = breedDao.listRefFrozenSemenCode(ids);
+        if (resCodeList.size() > 0) {
+            throw new BusinessException("冻精号已被引用");
+        }
+        return breedDao.delBreedFrozenSemen(ids);
+    }
 
     @Override
     public PageInfo<BreedRegisterDTO> pageBreedRegister(BreedRegisterQO qo) {

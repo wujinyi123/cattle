@@ -2,12 +2,87 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.manage.cattle.dao.breed.BreedDao">
+    <select id="listBreedFrozenSemen" resultType="com.manage.cattle.dto.breed.BreedFrozenSemenDTO">
+        select
+            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+            t.frozenSemenCode,t.frozenSemenBreed,sf.value frozenSemenBreedValue,
+            t.sexControl,t.color,t.fatherCode,t.motherCode
+        from t_breed_frozen_semen t
+        left join t_sys_config sf on sf.code='cattleBreed' and t.frozenSemenBreed=sf.key
+        where 1=1
+        <if test="frozenSemenCode!=null and frozenSemenCode!=''">
+            and t.frozenSemenCode=#{frozenSemenCode}
+        </if>
+        <if test="frozenSemenBreed!=null and frozenSemenBreed!=''">
+            and t.frozenSemenBreed=#{frozenSemenBreed}
+        </if>
+        <if test="sexControl!=null and sexControl!=''">
+            and t.sexControl=#{sexControl}
+        </if>
+        <if test="color!=null and color!=''">
+            and t.color like concat('%',#{color},'%')
+        </if>
+        <if test="fatherCode!=null and fatherCode!=''">
+            and t.fatherCode=#{fatherCode}
+        </if>
+        <if test="motherCode!=null and motherCode!=''">
+            and t.motherCode=#{motherCode}
+        </if>
+        order by sf.sort,t.frozenSemenCode
+    </select>
+
+    <select id="getBreedFrozenSemen" resultType="com.manage.cattle.dto.breed.BreedFrozenSemenDTO">
+        select
+            t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+            t.frozenSemenCode,t.frozenSemenBreed,sf.value frozenSemenBreedValue,
+            t.sexControl,t.color,t.fatherCode,t.motherCode
+        from t_breed_frozen_semen t
+        left join t_sys_config sf on sf.code='cattleBreed' and t.frozenSemenBreed=sf.key
+        where t.frozenSemenCode=#{frozenSemenCode}
+    </select>
+
+    <insert id="addBreedFrozenSemen">
+        insert into t_breed_frozen_semen(createUser,createTime,updateUser,updateTime,
+                                         frozenSemenCode,frozenSemenBreed,sexControl,
+                                         color,fatherCode,motherCode)
+        values (#{createUser},now(),#{updateUser},now(),
+                #{frozenSemenCode},#{frozenSemenBreed},#{sexControl},
+                #{color},#{fatherCode},#{motherCode})
+    </insert>
+
+    <update id="updateBreedFrozenSemen">
+        update t_breed_frozen_semen
+        set updateUser=#{updateUser},updateTime=now(),
+            frozenSemenBreed=#{frozenSemenBreed},sexControl=#{sexControl},
+            color=#{color},fatherCode=#{fatherCode},motherCode=#{motherCode}
+        where frozenSemenCode=#{frozenSemenCode}
+    </update>
+
+    <delete id="delBreedFrozenSemen">
+        delete from t_breed_frozen_semen
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="listRefFrozenSemenCode" resultType="string">
+        select frozenSemenCode
+        from t_breed_register
+        where frozenSemenCode in
+        (select frozenSemenCode from t_breed_frozen_semen
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>)
+    </select>
+
     <select id="listBreedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
         select
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
             tz.farmCode,tf.farmName,tf.farmOwner,
             tz.farmZoneCode,tc.cattleCode,
-            t.frozenSemenCode,t.frozenSemenBreed,sf.value frozenSemenBreedValue,
+            t.frozenSemenCode,fs.frozenSemenBreed,sf.value frozenSemenBreedValue,fs.sexControl,
             t.breedingDay,DATE_ADD(t.breedingDay, INTERVAL 60 DAY) firstCheckDay,
             DATE_ADD(t.breedingDay, INTERVAL 90 DAY) reCheckDay,
             DATE_ADD(t.breedingDay, INTERVAL 270 DAY) expectedDay,
@@ -16,7 +91,8 @@
         join t_cattle tc on t.cattleCode=tc.cattleCode
         join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
         join t_farm tf on tz.farmCode=tf.farmCode
-        left join t_sys_config sf on sf.code='cattleBreed' and t.frozenSemenBreed=sf.key
+        left join t_breed_frozen_semen fs on t.frozenSemenCode=fs.frozenSemenCode
+        left join t_sys_config sf on sf.code='cattleBreed' and fs.frozenSemenBreed=sf.key
         left join t_sys_config sb on sb.code='breedingMethod' and t.breedingMethod=sb.key
         where 1=1
         <if test="farmCode!=null and farmCode!=''">
@@ -32,7 +108,7 @@
             and t.frozenSemenCode=#{frozenSemenCode}
         </if>
         <if test="frozenSemenBreed!=null and frozenSemenBreed!=''">
-            and t.frozenSemenBreed=#{frozenSemenBreed}
+            and fs.frozenSemenBreed=#{frozenSemenBreed}
         </if>
         <if test="breedingDayStart!=null and breedingDayStart!=''">
             and t.breedingDay &gt;= #{breedingDayStart}
@@ -51,12 +127,12 @@
 
     <insert id="addBreedRegister">
         insert into t_breed_register(createUser,createTime,updateUser,updateTime,
-                                     cattleCode,frozenSemenCode,frozenSemenBreed,
+                                     cattleCode,frozenSemenCode,
                                      breedingDay,breedingMethod,operateUser)
         values
         <foreach collection="cattleCodeList" item="item" separator=",">
             (#{createUser},now(),#{updateUser},now(),
-            #{item},#{frozenSemenCode},#{frozenSemenBreed},
+            #{item},#{frozenSemenCode},
             #{breedingDay},#{breedingMethod},#{operateUser})
         </foreach>
     </insert>

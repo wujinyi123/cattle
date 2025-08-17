@@ -165,7 +165,7 @@ public class CattleServiceImpl implements CattleService {
                 continue;
             }
             if (cattleDao.getCattle(dto.getCattleCode()) != null) {
-                errorList.add("耳牌号已存在");
+                errorList.add("耳牌号(" + dto.getCattleCode() + ")已存在");
                 continue;
             }
             dto.setBreed(breedMap.get(dto.getBreedValue()));
@@ -199,7 +199,7 @@ public class CattleServiceImpl implements CattleService {
         String username = UserUtil.getCurrentUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);
-        if (cattleDao.updateCattleZone(dto)==0) {
+        if (cattleDao.updateCattleZone(dto) == 0) {
             throw new BusinessException("转舍失败");
         }
         return cattleDao.addCattleChangeZone(dto);
