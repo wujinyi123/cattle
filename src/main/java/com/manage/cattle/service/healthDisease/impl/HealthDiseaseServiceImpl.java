@@ -38,7 +38,12 @@ public class HealthDiseaseServiceImpl implements HealthDiseaseService {
         CattleQO qo = new CattleQO();
         qo.setCattleCodeList(dto.getCattleCodeList());
         List<CattleDTO> cattleList = cattleDao.listCattle(qo);
-        List<String> errorCattleCode = cattleList.stream()
+        List<String> existCode = cattleList.stream().map(CattleDTO::getCattleCode).toList();
+        List<String> errorCattleCode = dto.getCattleCodeList().stream().filter(item->!existCode.contains(item)).toList();
+        if (errorCattleCode.size() > 0) {
+            throw new BusinessException("耳牌号(" + String.join(",", errorCattleCode) + ")不存在");
+        }
+        errorCattleCode = cattleList.stream()
                 .filter(item -> !StrUtil.equals(item.getFarmCode(), dto.getFarmCode()))
                 .map(CattleDTO::getCattleCode)
                 .toList();
@@ -67,7 +72,12 @@ public class HealthDiseaseServiceImpl implements HealthDiseaseService {
         CattleQO qo = new CattleQO();
         qo.setCattleCodeList(dto.getCattleCodeList());
         List<CattleDTO> cattleList = cattleDao.listCattle(qo);
-        List<String> errorCattleCode = cattleList.stream()
+        List<String> existCode = cattleList.stream().map(CattleDTO::getCattleCode).toList();
+        List<String> errorCattleCode = dto.getCattleCodeList().stream().filter(item->!existCode.contains(item)).toList();
+        if (errorCattleCode.size() > 0) {
+            throw new BusinessException("耳牌号(" + String.join(",", errorCattleCode) + ")不存在");
+        }
+        errorCattleCode = cattleList.stream()
                 .filter(item -> !StrUtil.equals(item.getFarmCode(), dto.getFarmCode()))
                 .map(CattleDTO::getCattleCode)
                 .toList();
