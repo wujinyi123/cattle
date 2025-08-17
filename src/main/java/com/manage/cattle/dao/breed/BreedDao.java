@@ -6,7 +6,6 @@ import com.manage.cattle.dto.breed.BreedRegisterDTO;
 import com.manage.cattle.qo.breed.BreedPregnancyCheckQO;
 import com.manage.cattle.qo.breed.BreedPregnancyResultQO;
 import com.manage.cattle.qo.breed.BreedRegisterQO;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 

@@ -1,11 +1,12 @@
 package com.manage.cattle.dto.breed;
 
+import com.manage.cattle.dto.CattleBaseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class BreedRegisterDTO extends BreedBaseDTO {
+public class BreedRegisterDTO extends CattleBaseDTO {
     private String frozenSemenCode;
     private String frozenSemenBreed;
     private String frozenSemenBreedValue;

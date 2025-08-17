@@ -1,6 +1,5 @@
-package com.manage.cattle.dto.breed;
+package com.manage.cattle.dto;
 
-import com.manage.cattle.dto.BaseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -8,7 +7,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class BreedBaseDTO extends BaseDTO {
+public class CattleBaseDTO extends BaseDTO {
     private String farmCode;
     private String farmName;
     private String farmOwner;

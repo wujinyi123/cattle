@@ -1,5 +1,7 @@
 package com.manage.cattle.service.bread.impl;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -8,7 +10,7 @@ import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.breed.BreedDao;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.FarmZoneDTO;
-import com.manage.cattle.dto.breed.BreedBaseDTO;
+import com.manage.cattle.dto.CattleBaseDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyCheckDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyResultDTO;
 import com.manage.cattle.dto.breed.BreedRegisterDTO;
@@ -160,6 +162,9 @@ public class BreedServiceImpl implements BreedService {
             temp.sort((a, b) -> b.getBreedingDay().compareTo(a.getBreedingDay()));
             registerList.add(temp.get(0));
         }
+        DateTime now = DateTime.now();
+        String breedingDay = now.offsetNew(DateField.DAY_OF_YEAR, -1 * qo.getOverDays()).toDateStr();
+        registerList = registerList.stream().filter(item -> breedingDay.compareTo(item.getBreedingDay()) >= 0).toList();
         BreedPregnancyCheckQO breedPregnancyCheckQO = new BreedPregnancyCheckQO();
         breedPregnancyCheckQO.setFarmCode(qo.getFarmCode());
         List<BreedPregnancyCheckDTO> checkList = breedDao.listBreedPregnancyCheck(breedPregnancyCheckQO);
@@ -180,7 +185,7 @@ public class BreedServiceImpl implements BreedService {
         return registerList;
     }
 
-    private void checkCattleCode(BreedBaseDTO dto) {
+    private void checkCattleCode(CattleBaseDTO dto) {
         if (CollectionUtils.isEmpty(dto.getCattleCodeList())) {
             throw new BusinessException("牛只耳牌号不能为空");
         }
