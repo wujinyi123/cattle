@@ -108,7 +108,6 @@ public class CattleServiceImpl implements CattleService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int saveCattle(String type, CattleDTO dto) {
-        PermissionUtil.onlySysAdmin();
         String username = UserUtil.getCurrentUsername();
         dto.setCreateUser(username);
         dto.setUpdateUser(username);

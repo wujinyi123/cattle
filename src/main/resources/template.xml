@@ -54,6 +54,7 @@
         <field name="birthday" title="出生日期" require="true" regex="^\d{4}-\d{2}-\d{2}$"/>
         <field name="age" title="年龄" noImport="true"/>
         <field name="remark" title="备注"/>
+        <field name="source" title="来源" require="true" enumVal="购入,自产,现有"/>
     </template>
     <template code="breedFrozenSemen"
               exportMethed="com.manage.cattle.service.bread.BreedService#listBreedFrozenSemen"

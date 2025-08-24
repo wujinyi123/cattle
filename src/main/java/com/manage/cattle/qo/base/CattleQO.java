@@ -19,6 +19,7 @@ public class CattleQO extends PageQO {
     private String birthdayStart;
     private String birthdayEnd;
     private String remark;
+    private String source;
     private List<String> cattleCodeList;
     private List<String> farmZoneCodeList;
 }

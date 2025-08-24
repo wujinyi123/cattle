@@ -66,6 +66,7 @@ public class inventoryServiceImpl implements inventoryService {
         if (farmZoneDTO.getSize() <= cattleList.size()) {
             throw new BusinessException("圈舍" + farmZoneDTO.getFarmZoneCode() + "牛只已满");
         }
+        dto.setSource("购入");
         if (cattleDao.addCattle(dto) == 0) {
             throw new BusinessException("添加牛只失败");
         }

@@ -213,6 +213,7 @@ public class BreedServiceImpl implements BreedService {
             cattleDTO.setSex(dto.getSex());
             cattleDTO.setColor(dto.getColor());
             cattleDTO.setBirthday(dto.getResultDay());
+            cattleDTO.setSource("自产");
             if (cattleDao.addCattle(cattleDTO) == 0) {
                 throw new BusinessException("添加牛犊子失败");
             }
