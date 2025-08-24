@@ -11,7 +11,6 @@ public class FarmZoneDTO extends BaseDTO {
     private String farmName;
     private String farmOwner;
     private String farmZoneCode;
-    private String farmZoneName;
     private String farmZoneRemark;
     private Integer size;
     private Integer currentSize;

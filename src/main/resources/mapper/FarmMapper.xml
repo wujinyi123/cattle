@@ -70,7 +70,7 @@
         select
             fz.id,fz.createUser,fz.createTime,fz.updateUser,fz.updateTime,
             f.farmCode,f.farmName,f.farmOwner,
-            fz.farmZoneCode,fz.farmZoneName,fz.farmZoneRemark,fz.size
+            fz.farmZoneCode,fz.farmZoneRemark,fz.size
         from t_farm_zone fz
         left join t_farm f on fz.farmCode=f.farmCode
         where 1=1
@@ -79,9 +79,6 @@
         </if>
         <if test="farmZoneCode!=null and farmZoneCode!=''">
             and fz.farmZoneCode like concat('%',#{farmZoneCode},'%')
-        </if>
-        <if test="farmZoneName!=null and farmZoneName!=''">
-            and fz.farmZoneName like concat('%',#{farmZoneName},'%')
         </if>
         <if test="farmZoneRemark!=null and farmZoneRemark!=''">
             and fz.farmZoneRemark like concat('%',#{farmZoneRemark},'%')
@@ -104,22 +101,22 @@
     <select id="getFarmZone" resultType="com.manage.cattle.dto.base.FarmZoneDTO">
         select
             id,createUser,createTime,updateUser,updateTime,
-            farmCode,farmZoneCode,farmZoneName,farmZoneRemark,size
+            farmCode,farmZoneCode,farmZoneRemark,size
         from t_farm_zone
         where farmZoneCode=#{farmZoneCode}
     </select>
 
     <insert id="addFarmZone">
         insert into t_farm_zone(createUser,createTime,updateUser,updateTime,
-                                farmCode,farmZoneCode,farmZoneName,farmZoneRemark,size)
+                                farmCode,farmZoneCode,farmZoneRemark,size)
         values (#{createUser},now(),#{updateUser},now(),
-                #{farmCode},#{farmZoneCode},#{farmZoneName},#{farmZoneRemark},#{size})
+                #{farmCode},#{farmZoneCode},#{farmZoneRemark},#{size})
     </insert>
 
     <update id="updateFarmZone">
         update t_farm_zone
         set updateUser=#{updateUser},updateTime=now(),
-            farmZoneName=#{farmZoneName},farmZoneRemark=#{farmZoneRemark},size=#{size}
+            farmZoneRemark=#{farmZoneRemark},size=#{size}
         where farmZoneCode=#{farmZoneCode}
     </update>
 

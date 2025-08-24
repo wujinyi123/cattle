@@ -33,7 +33,6 @@
         <field name="farmName" title="牧场名称"/>
         <field name="farmOwner" title="牧场负责人"/>
         <field name="farmZoneCode" title="圈舍编号"/>
-        <field name="farmZoneName" title="圈舍名称"/>
         <field name="farmZoneRemark" title="圈舍备注"/>
         <field name="size" title="容量"/>
         <field name="currentSize" title="当前容量"/>
