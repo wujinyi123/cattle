@@ -252,7 +252,7 @@ public class BreedServiceImpl implements BreedService {
         for (BreedRegisterDTO dto : registerList) {
             String cattleCode = dto.getCattleCode();
             String dayStart = dto.getBreedingDay();
-            String dayEnd = qo.getOverDays() == 60 ? dto.getFirstCheckDay() : dto.getReCheckDay();
+            String dayEnd = now.toString();
             List<String> dayList = checkList.stream()
                     .filter(item -> cattleCode.equals(item.getCattleCode())
                             && item.getCheckDay().compareTo(dayStart) >= 0

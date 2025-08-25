@@ -127,6 +127,9 @@ public class FarmServiceImpl implements FarmService {
         if ("add".equals(type) && farmDao.getFarmZone(dto.getFarmZoneCode()) != null) {
             throw new BusinessException("圈舍编号已存在");
         }
+        if ("add".equals(type) && !dto.getFarmZoneCode().startsWith(farmDTO.getFarmName())) {
+            throw new BusinessException("圈舍编号请以“" + farmDTO.getFarmName() + "”开头");
+        }
         int result = "add".equals(type) ? farmDao.addFarmZone(dto) : farmDao.updateFarmZone(dto);
         if (result == 0) {
             throw new BusinessException("保存失败");
