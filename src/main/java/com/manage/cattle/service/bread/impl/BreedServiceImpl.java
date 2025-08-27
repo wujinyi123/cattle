@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -63,34 +64,35 @@ public class BreedServiceImpl implements BreedService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public List<String> importBreedFrozenSemen(List<BreedFrozenSemenDTO> importList) {
-        List<String> errorList = new ArrayList<>();
+    public Map<Integer, String> importBreedFrozenSemen(List<BreedFrozenSemenDTO> importList) {
+        Map<Integer, String> errorMap = new HashMap<>();
         SysConfigQO sysConfigQO = new SysConfigQO();
         sysConfigQO.setCode("cattleBreed");
         Map<String, String> breedMap = sysDao.listSysConfig(sysConfigQO).stream().collect(Collectors.toMap(SysConfigDTO::getValue,
                 SysConfigDTO::getKey));
-        for (BreedFrozenSemenDTO dto : importList) {
+        for (int index = 0; index < importList.size(); index++) {
+            BreedFrozenSemenDTO dto = importList.get(index);
             if (StrUtil.isNotBlank(dto.getImportError())) {
-                errorList.add(dto.getImportError());
+                errorMap.put(index, dto.getImportError());
                 continue;
             }
             BreedFrozenSemenQO qo = new BreedFrozenSemenQO();
             qo.setFrozenSemenCode(dto.getFrozenSemenCode());
             if (breedDao.listBreedFrozenSemen(qo).size() > 0) {
-                errorList.add("冻精号(" + dto.getFrozenSemenCode() + ")已存在");
+                errorMap.put(index, "冻精号(" + dto.getFrozenSemenCode() + ")已存在");
                 continue;
             }
             dto.setFrozenSemenBreed(breedMap.get(dto.getFrozenSemenBreedValue()));
             if (StrUtil.isBlank(dto.getFrozenSemenBreed())) {
-                errorList.add("冻精品种不正确");
+                errorMap.put(index, "冻精品种(" + dto.getFrozenSemenBreedValue() + ")不正确");
                 continue;
             }
             int res = breedDao.addBreedFrozenSemen(dto);
             if (res == 0) {
-                errorList.add("添加失败");
+                errorMap.put(index, "添加(" + dto.getFrozenSemenCode() + ")失败");
             }
         }
-        return errorList;
+        return errorMap;
     }
 
     @Override

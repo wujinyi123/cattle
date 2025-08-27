@@ -11,13 +11,14 @@ import com.manage.cattle.qo.breed.BreedPregnancyResultQO;
 import com.manage.cattle.qo.breed.BreedRegisterQO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface BreedService {
     PageInfo<BreedFrozenSemenDTO> pageBreedFrozenSemen(BreedFrozenSemenQO qo);
 
     List<BreedFrozenSemenDTO> listBreedFrozenSemen(BreedFrozenSemenQO qo);
 
-    List<String> importBreedFrozenSemen(List<BreedFrozenSemenDTO> importList);
+    Map<Integer, String> importBreedFrozenSemen(List<BreedFrozenSemenDTO> importList);
 
     BreedFrozenSemenDTO getBreedFrozenSemen(String frozenSemenCode);
 

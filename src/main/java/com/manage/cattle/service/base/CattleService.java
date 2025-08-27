@@ -22,7 +22,7 @@ public interface CattleService {
 
     int delCattle(List<String> cattleCodeList);
 
-    List<String> importCattle(List<CattleDTO> importList);
+    Map<Integer, String> importCattle(List<CattleDTO> importList);
 
     PageInfo<CattleChangeZoneDTO> pageCattleChangeZone(CattleChangeZoneQO qo);
 

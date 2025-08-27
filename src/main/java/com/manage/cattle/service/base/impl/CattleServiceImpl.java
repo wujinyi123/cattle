@@ -143,7 +143,7 @@ public class CattleServiceImpl implements CattleService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public List<String> importCattle(List<CattleDTO> importList) {
+    public Map<Integer, String> importCattle(List<CattleDTO> importList) {
         FarmZoneQO farmZoneQO = new FarmZoneQO();
         farmZoneQO.setFarmCode(importList.get(0).getFarmCode());
         Map<String, FarmZoneDTO> farmZoneMap = farmDao.listFarmZone(farmZoneQO).stream().collect(Collectors.toMap(FarmZoneDTO::getFarmZoneCode,
@@ -152,38 +152,40 @@ public class CattleServiceImpl implements CattleService {
         sysConfigQO.setCode("cattleBreed");
         Map<String, String> breedMap = sysDao.listSysConfig(sysConfigQO).stream().collect(Collectors.toMap(SysConfigDTO::getValue,
                 SysConfigDTO::getKey));
-        List<String> errorList = new ArrayList<>();
-        for (CattleDTO dto : importList) {
+        Map<Integer, String> errorMap = new HashMap<>();
+        for (int index = 0; index < importList.size(); index++) {
+            CattleDTO dto = importList.get(index);
             if (StrUtil.isNotBlank(dto.getImportError())) {
-                errorList.add(dto.getImportError());
+                errorMap.put(index, dto.getImportError());
                 continue;
             }
             FarmZoneDTO farmZoneDTO = farmZoneMap.get(dto.getFarmZoneCode());
             if (farmZoneDTO == null) {
-                errorList.add("圈舍编号不正确");
+                errorMap.put(index, "圈舍编号(" + dto.getFarmZoneCode() + ")不正确");
                 continue;
             }
             if (cattleDao.getCattle(dto.getCattleCode()) != null) {
-                errorList.add("耳牌号(" + dto.getCattleCode() + ")已存在");
+                errorMap.put(index, "耳牌号(" + dto.getCattleCode() + ")已存在");
                 continue;
             }
             dto.setBreed(breedMap.get(dto.getBreedValue()));
             if (StrUtil.isBlank(dto.getBreed())) {
-                errorList.add("品种不正确");
+                errorMap.put(index, "品种(" + dto.getBreedValue() + ")不正确");
                 continue;
             }
             CattleQO cattleQO = new CattleQO();
             cattleQO.setFarmZoneCode(dto.getFarmZoneCode());
             List<CattleDTO> cattleList = cattleDao.listCattle(cattleQO);
             if (farmZoneDTO.getSize() <= cattleList.size()) {
-                throw new BusinessException("圈舍" + farmZoneDTO.getFarmZoneCode() + "牛只已满");
+                errorMap.put(index, "圈舍编号(" + farmZoneDTO.getFarmZoneCode() + ")牛只已满");
+                continue;
             }
             int res = cattleDao.addCattle(dto);
             if (res == 0) {
-                errorList.add("添加失败");
+                errorMap.put(index, "添加(" + dto.getCattleCode() + ")失败");
             }
         }
-        return errorList;
+        return errorMap;
     }
 
     @Override

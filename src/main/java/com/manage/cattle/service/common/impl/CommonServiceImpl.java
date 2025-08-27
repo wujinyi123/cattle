@@ -47,6 +47,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -233,10 +234,11 @@ public class CommonServiceImpl implements CommonService {
             Class<?> clazz = Class.forName(classMethod[0]);
             Method method = clazz.getDeclaredMethod(classMethod[1], List.class);
             Object bean = applicationContext.getBean(clazz);
-            List<String> errorMessage = (List<String>) method.invoke(bean, importList);
+            Map<Integer, String> errorMap = (Map<Integer, String>) method.invoke(bean, importList);
             List<String> errorList = new ArrayList<>();
-            for (int index = 0; index < errorMessage.size(); index++) {
-                errorList.add("第" + (index + 2) + "行：" + errorMessage.get(index));
+            List<Integer> keyList = errorMap.keySet().stream().sorted(Comparator.comparingInt(a -> a)).toList();
+            for (Integer index : keyList) {
+                errorList.add("第" + (index + 2) + "行：" + errorMap.get(index));
             }
             ImportInfo importInfo = new ImportInfo();
             importInfo.setSuccess(importList.size() - errorList.size());
@@ -244,7 +246,7 @@ public class CommonServiceImpl implements CommonService {
             importInfo.setErrorList(errorList);
             return importInfo;
         } catch (Exception e) {
-            log.error("导入方法导入失败", e);
+            log.error(CommonUtil.getExceptionDetails("导入方法导入失败", e));
             throw new BusinessException("导入方法导入失败");
         }
     }
