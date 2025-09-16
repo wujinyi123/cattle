@@ -4,9 +4,11 @@ import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dto.base.CattleChangeZoneDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.CattleTransferDTO;
+import com.manage.cattle.dto.base.CattleTransferReviewDTO;
 import com.manage.cattle.qo.base.CattleChangeZoneQO;
 import com.manage.cattle.qo.base.CattleQO;
 import com.manage.cattle.qo.base.CattleTransferQO;
+import com.manage.cattle.qo.base.CattleTransferReviewQO;
 import com.manage.cattle.service.base.CattleService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -83,5 +85,32 @@ public class CattleController {
     @GetMapping("/getCattleTransferNum")
     public Map<?,?> getCattleTransferNum(@RequestParam("currentFarmCode") String currentFarmCode) {
         return cattleService.getCattleTransferNum(currentFarmCode);
+    }
+
+
+
+    @GetMapping("/pageCattleTransferReview")
+    public PageInfo<CattleTransferReviewDTO> pageCattleTransferReview(CattleTransferReviewQO qo) {
+        return cattleService.pageCattleTransferReview(qo);
+    }
+
+    @PostMapping("/addCattleTransferReview")
+    public int addCattleTransferReview(@RequestBody CattleTransferReviewDTO dto) {
+        return cattleService.addCattleTransferReview(dto);
+    }
+
+    @PostMapping("/updateCattleTransferReviewApprover")
+    public int updateCattleTransferReviewApprover(@RequestBody CattleTransferReviewDTO dto) {
+        return cattleService.updateCattleTransferReviewApprover(dto);
+    }
+
+    @PostMapping("/updateCattleTransferReviewStatus")
+    public int updateCattleTransferReviewStatus(@RequestBody CattleTransferReviewDTO dto) {
+        return cattleService.updateCattleTransferReviewStatus(dto);
+    }
+
+    @GetMapping("/getCattleTransferReviewNum")
+    public Map<?,?> getCattleTransferReviewNum(@RequestParam("currentFarmCode") String currentFarmCode) {
+        return cattleService.getCattleTransferReviewNum(currentFarmCode);
     }
 }

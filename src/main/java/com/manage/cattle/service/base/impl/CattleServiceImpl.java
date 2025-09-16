@@ -7,17 +7,10 @@ import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.CattleDao;
 import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.base.SysDao;
-import com.manage.cattle.dto.base.CattleChangeZoneDTO;
-import com.manage.cattle.dto.base.CattleDTO;
-import com.manage.cattle.dto.base.CattleTransferDTO;
-import com.manage.cattle.dto.base.FarmDTO;
-import com.manage.cattle.dto.base.FarmZoneDTO;
+import com.manage.cattle.dto.base.*;
 import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.exception.BusinessException;
-import com.manage.cattle.qo.base.CattleChangeZoneQO;
-import com.manage.cattle.qo.base.CattleQO;
-import com.manage.cattle.qo.base.CattleTransferQO;
-import com.manage.cattle.qo.base.FarmZoneQO;
+import com.manage.cattle.qo.base.*;
 import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.base.CattleService;
 import com.manage.cattle.util.CommonUtil;
@@ -29,12 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -319,6 +307,125 @@ public class CattleServiceImpl implements CattleService {
         qo.setCurrentFarmCode(currentFarmCode);
         qo.setStatus("进行中");
         List<CattleTransferDTO> list = cattleDao.listCattleTransfer(qo);
+        String username = UserUtil.getCurrentUsername();
+        Map<String, Long> map = new HashMap<>();
+        map.put("myCreate", list.stream().filter(item -> username.equals(item.getSubmitUser())).count());
+        map.put("todo", list.stream().filter(item -> username.equals(item.getApprover())).count());
+        return map;
+    }
+
+    @Override
+    public PageInfo<CattleTransferReviewDTO> pageCattleTransferReview(CattleTransferReviewQO qo) {
+        PageHelper.startPage(qo);
+        return new PageInfo<>(cattleDao.listCattleTransferReview(qo));
+    }
+
+    @Override
+    public int addCattleTransferReview(CattleTransferReviewDTO dto) {
+        List<String> cattleCodeList = Arrays.asList(dto.getCattleCodeList().split(","));
+        CattleQO qo = new CattleQO();
+        qo.setCattleCodeList(cattleCodeList);
+        List<CattleDTO> cattleList = cattleDao.listCattle(qo);
+        List<String> existCode = cattleList.stream().map(CattleDTO::getCattleCode).toList();
+        List<String> errorCattleCode = cattleCodeList.stream().filter(item -> !existCode.contains(item)).toList();
+        if (!errorCattleCode.isEmpty()) {
+            throw new BusinessException("耳牌号(" + String.join(",", errorCattleCode) + ")不存在");
+        }
+        List<String> errorCattleFarm = cattleList.stream().filter(item -> !StrUtil.equals(dto.getOldFarmCode(), item.getFarmCode())).map(CattleDTO::getCattleCode).toList();
+        if (!errorCattleFarm.isEmpty()) {
+            throw new BusinessException("耳牌号(" + String.join(",", errorCattleFarm) + ")不是当前牛场的");
+        }
+        List<String> workList = cattleDao.listCattleTransferReviewWork();
+        Set<String> workSet = new HashSet<>();
+        for (String str : workList) {
+            workSet.addAll(Arrays.asList(str.split(",")));
+        }
+        List<String> errorCattleWork = cattleCodeList.stream().filter(workSet::contains).toList();
+        if (!errorCattleWork.isEmpty()) {
+            throw new BusinessException("耳牌号(" + String.join(",", errorCattleWork) + ")正在转场流程中");
+        }
+        String username = UserUtil.getCurrentUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
+        FarmDTO oldFarm = farmDao.getFarm(dto.getOldFarmCode());
+        if (!"Y".equals(isSysAdmin) && !username.equals(oldFarm.getFarmOwner())) {
+            throw new BusinessException("请输入当前牛场负责人(" + oldFarm.getFarmOwner() + ")提交");
+        }
+        dto.setCreateUser(username);
+        dto.setUpdateUser(username);
+        dto.setSubmitUser(username);
+        FarmDTO newFarm = farmDao.getFarm(dto.getNewFarmCode());
+        dto.setApprover(newFarm.getFarmOwner());
+        dto.setStatus("进行中");
+        dto.setReviewId(String.valueOf(System.currentTimeMillis()));
+        return cattleDao.addCattleTransferReview(dto);
+    }
+
+    @Override
+    public int updateCattleTransferReviewApprover(CattleTransferReviewDTO dto) {
+        if (StrUtil.isBlank(dto.getReviewId()) || StrUtil.isBlank(dto.getApprover())) {
+            throw new BusinessException("流程号和评审人不能为空");
+        }
+        CattleTransferReviewDTO cattleTransferReview = cattleDao.getCattleTransferReview(dto.getReviewId());
+        if (cattleTransferReview == null) {
+            throw new BusinessException("转场流程不存在");
+        }
+
+        String username = UserUtil.getCurrentUsername();
+        String isSysAdmin = UserUtil.getIsSysAdmin();
+        if (!"Y".equals(isSysAdmin) && !username.equals(cattleTransferReview.getApprover())) {
+            throw new BusinessException("请当前评审人(" + cattleTransferReview.getApprover() + ")提交修改");
+        }
+        dto.setUpdateUser(username);
+        return cattleDao.updateCattleTransferReviewApprover(dto);
+    }
+
+    @Override
+    public int updateCattleTransferReviewStatus(CattleTransferReviewDTO dto) {
+        if (StrUtil.isBlank(dto.getReviewId()) || StrUtil.isBlank(dto.getOpinion()) || StrUtil.isBlank(dto.getStatus())) {
+            throw new BusinessException("流程号/意见/状态不能为空");
+        }
+        if (!List.of("取消", "完成", "拒绝").contains(dto.getStatus())) {
+            throw new BusinessException("状态取值不正确");
+        }
+        CattleTransferReviewDTO cattleTransferReview = cattleDao.getCattleTransferReview(dto.getReviewId());
+        if (cattleTransferReview == null) {
+            throw new BusinessException("转场流程不存在");
+        }
+        String username = UserUtil.getCurrentUsername();
+        dto.setOperator(username);
+        if ("取消".equals(dto.getStatus()) && !username.equals(cattleTransferReview.getSubmitUser())) {
+            throw new BusinessException("流程提交人(" + cattleTransferReview.getSubmitUser() + ")才能取消");
+        }
+        if (List.of("完成", "拒绝").contains(dto.getStatus()) && !username.equals(cattleTransferReview.getApprover())) {
+            throw new BusinessException("流程评审人(" + cattleTransferReview.getApprover() + ")才能操作");
+        }
+        if ("完成".equals(dto.getStatus())) {
+            if (StrUtil.isBlank(dto.getNewFarmZoneCode())) {
+                throw new BusinessException("新圈舍编号不能为空");
+            }
+            FarmZoneDTO farmZone = farmDao.getFarmZone(dto.getNewFarmZoneCode());
+            if (!StrUtil.equals(cattleTransferReview.getNewFarmCode(), farmZone.getFarmCode())) {
+                throw new BusinessException("圈舍编号不正确");
+            }
+            CattleQO cattleQO = new CattleQO();
+            cattleQO.setFarmZoneCode(dto.getNewFarmZoneCode());
+            List<CattleDTO> cattleList = cattleDao.listCattle(cattleQO);
+            if (farmZone.getSize() - cattleList.size() < cattleTransferReview.getCattleCodeList().split(",").length) {
+                throw new BusinessException("圈舍" + farmZone.getFarmZoneCode() + "牛只已满");
+            }
+            if (cattleDao.batchTransferCattle(username, cattleTransferReview.getCattleCodeList(), dto.getNewFarmZoneCode()) == 0) {
+                throw new BusinessException("转场失败");
+            }
+        }
+        return cattleDao.updateCattleTransferReviewStatus(dto);
+    }
+
+    @Override
+    public Map<?, ?> getCattleTransferReviewNum(String currentFarmCode) {
+        CattleTransferReviewQO qo = new CattleTransferReviewQO();
+        qo.setCurrentFarmCode(currentFarmCode);
+        qo.setStatus("进行中");
+        List<CattleTransferReviewDTO> list = cattleDao.listCattleTransferReview(qo);
         String username = UserUtil.getCurrentUsername();
         Map<String, Long> map = new HashMap<>();
         map.put("myCreate", list.stream().filter(item -> username.equals(item.getSubmitUser())).count());
