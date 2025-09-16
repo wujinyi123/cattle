@@ -5,6 +5,8 @@ import com.manage.cattle.dto.base.CattleDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class InventoryDeathDTO extends BaseDTO {
@@ -12,6 +14,7 @@ public class InventoryDeathDTO extends BaseDTO {
     private String farmName;
     private String farmOwner;
     private String cattleCode;
+    private List<String> cattleCodeList;
     private String cattleInfo;
     private String reason;
     private String handleMethod;

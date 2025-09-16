@@ -23,7 +23,11 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class inventoryServiceImpl implements inventoryService {
@@ -97,21 +101,34 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addInventorySell(InventorySellDTO dto) {
+        CattleQO qo = new CattleQO();
+        qo.setFarmCode(dto.getFarmCode());
+        qo.setCattleCodeList(dto.getCattleCodeList());
+        List<CattleDTO> cattleList = cattleDao.listCattle(qo);
+        List<String> codeList = cattleList.stream().map(CattleDTO::getCattleCode).toList();
+        List<String> errorCodeList = dto.getCattleCodeList().stream().filter(item -> !codeList.contains(item)).toList();
+        if (!errorCodeList.isEmpty()) {
+            throw new BusinessException("耳牌号(" + String.join(",", errorCodeList) + ")不正确或非当前牛场的");
+        }
         String username = UserUtil.getCurrentUsername();
-        CattleDTO cattleDTO = cattleDao.getCattle(dto.getCattleCode());
-        if (cattleDTO == null) {
-            throw new BusinessException("耳牌号不存在");
+        List<InventorySellDTO> sellList = new ArrayList<>();
+        for (CattleDTO cattleDTO : cattleList) {
+            InventorySellDTO sellDTO = new InventorySellDTO();
+            sellDTO.setCreateUser(username);
+            sellDTO.setUpdateUser(username);
+            sellDTO.setFarmCode(cattleDTO.getFarmCode());
+            sellDTO.setCattleCode(cattleDTO.getCattleCode());
+            sellDTO.setCattleInfo(JSONUtil.toJsonStr(cattleDTO));
+            sellDTO.setBuyerInfo(dto.getBuyerInfo());
+            sellDTO.setPrice(dto.getPrice());
+            sellDTO.setQuarantineCertificate(dto.getQuarantineCertificate());
+            sellDTO.setSellDay(dto.getSellDay());
+            sellList.add(sellDTO);
         }
-        if (!StrUtil.equals(dto.getFarmCode(), cattleDTO.getFarmCode())) {
-            throw new BusinessException("请输入当前牛场的牛只耳牌号");
-        }
-        dto.setCattleInfo(JSONUtil.toJsonStr(cattleDTO));
-        if (cattleDao.delCattle(List.of(dto.getCattleCode())) == 0) {
+        if (cattleDao.delCattle(codeList) == 0) {
             throw new BusinessException("删除牛只失败");
         }
-        dto.setCreateUser(username);
-        dto.setUpdateUser(username);
-        int result = inventoryDao.addInventorySell(dto);
+        int result = inventoryDao.batchAddInventorySell(sellList);
         if (result == 0) {
             throw new BusinessException("添加失败");
         }
@@ -138,21 +155,33 @@ public class inventoryServiceImpl implements inventoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int addInventoryDeath(InventoryDeathDTO dto) {
+        CattleQO qo = new CattleQO();
+        qo.setFarmCode(dto.getFarmCode());
+        qo.setCattleCodeList(dto.getCattleCodeList());
+        List<CattleDTO> cattleList = cattleDao.listCattle(qo);
+        List<String> codeList = cattleList.stream().map(CattleDTO::getCattleCode).toList();
+        List<String> errorCodeList = dto.getCattleCodeList().stream().filter(item -> !codeList.contains(item)).toList();
+        if (!errorCodeList.isEmpty()) {
+            throw new BusinessException("耳牌号(" + String.join(",", errorCodeList) + ")不正确或非当前牛场的");
+        }
         String username = UserUtil.getCurrentUsername();
-        CattleDTO cattleDTO = cattleDao.getCattle(dto.getCattleCode());
-        if (cattleDTO == null) {
-            throw new BusinessException("耳牌号不存在");
+        List<InventoryDeathDTO> deathList = new ArrayList<>();
+        for (CattleDTO cattleDTO : cattleList) {
+            InventoryDeathDTO deathDTO = new InventoryDeathDTO();
+            deathDTO.setCreateUser(username);
+            deathDTO.setUpdateUser(username);
+            deathDTO.setFarmCode(cattleDTO.getFarmCode());
+            deathDTO.setCattleCode(cattleDTO.getCattleCode());
+            deathDTO.setCattleInfo(JSONUtil.toJsonStr(cattleDTO));
+            deathDTO.setReason(dto.getReason());
+            deathDTO.setHandleMethod(dto.getHandleMethod());
+            deathDTO.setDeathDay(dto.getDeathDay());
+            deathList.add(deathDTO);
         }
-        if (!StrUtil.equals(dto.getFarmCode(), cattleDTO.getFarmCode())) {
-            throw new BusinessException("请输入当前牛场的牛只耳牌号");
-        }
-        dto.setCattleInfo(JSONUtil.toJsonStr(cattleDTO));
-        if (cattleDao.delCattle(List.of(dto.getCattleCode())) == 0) {
+        if (cattleDao.delCattle(codeList) == 0) {
             throw new BusinessException("删除牛只失败");
         }
-        dto.setCreateUser(username);
-        dto.setUpdateUser(username);
-        int result = inventoryDao.addInventoryDeath(dto);
+        int result = inventoryDao.batchAddInventoryDeath(deathList);
         if (result == 0) {
             throw new BusinessException("添加失败");
         }

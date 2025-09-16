@@ -20,11 +20,15 @@ public interface InventoryDao {
 
     int addInventorySell(InventorySellDTO dto);
 
+    int batchAddInventorySell(List<InventorySellDTO> list);
+
     int delInventorySell(List<Integer> ids);
 
     List<InventoryDeathDTO> listInventoryDeath(InventoryDeathQO qo);
 
     int addInventoryDeath(InventoryDeathDTO dto);
+
+    int batchAddInventoryDeath(List<InventoryDeathDTO> list);
 
     int delInventoryDeath(List<Integer> ids);
 }

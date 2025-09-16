@@ -91,6 +91,18 @@
                 #{farmCode},#{cattleCode},#{cattleInfo},#{buyerInfo},#{price},#{quarantineCertificate},#{sellDay})
     </insert>
 
+    <insert id="batchAddInventorySell">
+        insert into t_inventory_sell(createUser,createTime,updateUser,updateTime,
+                                     farmCode,cattleCode,cattleInfo,
+                                     buyerInfo,price,quarantineCertificate,sellDay)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.createUser},now(),#{item.updateUser},now(),
+            #{item.farmCode},#{item.cattleCode},#{item.cattleInfo},
+            #{item.buyerInfo},#{item.price},#{item.quarantineCertificate},#{item.sellDay})
+        </foreach>
+    </insert>
+
     <delete id="delInventorySell">
         delete from t_inventory_sell
         where id in
@@ -139,6 +151,18 @@
                                       farmCode,cattleCode,cattleInfo,reason,handleMethod,deathDay)
         values (#{createUser},now(),#{updateUser},now(),
                 #{farmCode},#{cattleCode},#{cattleInfo},#{reason},#{handleMethod},#{deathDay})
+    </insert>
+
+    <insert id="batchAddInventoryDeath">
+        insert into t_inventory_death(createUser,createTime,updateUser,updateTime,
+                                      farmCode,cattleCode,cattleInfo,
+                                      reason,handleMethod,deathDay)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.createUser},now(),#{item.updateUser},now(),
+            #{item.farmCode},#{item.cattleCode},#{item.cattleInfo},
+            #{item.reason},#{item.handleMethod},#{item.deathDay})
+        </foreach>
     </insert>
 
     <delete id="delInventoryDeath">
