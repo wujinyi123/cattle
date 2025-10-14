@@ -40,7 +40,6 @@ public interface CattleService {
 
     Map<?,?> getCattleTransferNum(String currentFarmCode);
 
-
     PageInfo<CattleTransferReviewDTO> pageCattleTransferReview(CattleTransferReviewQO qo);
 
     int addCattleTransferReview(CattleTransferReviewDTO dto);

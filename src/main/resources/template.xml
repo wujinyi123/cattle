@@ -70,6 +70,7 @@
     <template code="breedRegister"
               exportMethed="com.manage.cattle.service.bread.BreedService#listBreedRegister"
               qo="com.manage.cattle.qo.breed.BreedRegisterQO">
+        <field name="farmName" title="牧场名称"/>
         <field name="farmZoneCode" title="圈舍编号"/>
         <field name="cattleCode" title="牛只耳牌号"/>
         <field name="frozenSemenCode" title="冻精号"/>
@@ -83,6 +84,7 @@
     <template code="downloadRegisterCattle"
               exportMethed="com.manage.cattle.service.bread.BreedService#downloadRegisterCattle"
               qo="com.manage.cattle.qo.breed.BreedRegisterQO">
+        <field name="farmName" title="牧场名称"/>
         <field name="farmZoneCode" title="圈舍编号"/>
         <field name="cattleCode" title="牛只耳牌号"/>
         <field name="frozenSemenCode" title="冻精号"/>
@@ -100,6 +102,7 @@
     <template code="breedPregnancyCheck"
               exportMethed="com.manage.cattle.service.bread.BreedService#listBreedPregnancyCheck"
               qo="com.manage.cattle.qo.breed.BreedPregnancyCheckQO">
+        <field name="farmName" title="牧场名称"/>
         <field name="farmZoneCode" title="圈舍编号"/>
         <field name="cattleCode" title="牛只耳牌号"/>
         <field name="checkDay" title="检查日期"/>
@@ -109,6 +112,7 @@
     <template code="breedPregnancyResult"
               exportMethed="com.manage.cattle.service.bread.BreedService#listBreedPregnancyResult"
               qo="com.manage.cattle.qo.breed.BreedPregnancyResultQO">
+        <field name="farmName" title="牧场名称"/>
         <field name="farmZoneCode" title="圈舍编号"/>
         <field name="cattleCode" title="牛只耳牌号"/>
         <field name="resultDay" title="日期"/>
