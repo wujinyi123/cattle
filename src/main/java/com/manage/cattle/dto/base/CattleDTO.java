@@ -24,4 +24,10 @@ public class CattleDTO extends BaseDTO {
     private String age;
     private String remark;
     private String source;
+    private String breedingDay;
+    private String firstCheckDay;
+    private String firstCheckResult;
+    private String reCheckDay;
+    private String reCheckResult;
+    private String expectedDay;
 }

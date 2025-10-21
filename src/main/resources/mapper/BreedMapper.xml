@@ -125,6 +125,22 @@
         order by breedingDay desc,farmName,farmZoneCode,cattleCode
     </select>
 
+    <select id="listLastBreedRegister" resultType="com.manage.cattle.dto.breed.BreedRegisterDTO">
+        select
+               t.cattleCode,
+               t.breedingDay,
+               DATE_ADD(t.breedingDay, INTERVAL 60 DAY) firstCheckDay,
+               DATE_ADD(t.breedingDay, INTERVAL 90 DAY) reCheckDay,
+               DATE_ADD(t.breedingDay, INTERVAL 270 DAY) expectedDay
+        from
+        (select cattleCode,max(breedingDay) breedingDay from t_breed_register
+        where cattleCode in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        group by cattleCode) t
+    </select>
+
     <insert id="addBreedRegister">
         insert into t_breed_register(createUser,createTime,updateUser,updateTime,
                                      cattleCode,frozenSemenCode,
@@ -177,6 +193,23 @@
         <if test="result!=null and result!=''">
             and t.result like concat('%',#{result},'%')
         </if>
+        order by checkDay desc,farmName,farmZoneCode,cattleCode
+    </select>
+
+    <select id="listBreedPregnancyCheckByCattleCode" resultType="com.manage.cattle.dto.breed.BreedPregnancyCheckDTO">
+        select
+        t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+        tz.farmCode,tf.farmName,tf.farmOwner,
+        tz.farmZoneCode,tc.cattleCode,
+        t.checkDay,t.checkUser,t.result
+        from t_breed_pregnancy_check t
+        join t_cattle tc on t.cattleCode=tc.cattleCode
+        join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
+        join t_farm tf on tz.farmCode=tf.farmCode
+        where t.cattleCode in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
         order by checkDay desc,farmName,farmZoneCode,cattleCode
     </select>
 

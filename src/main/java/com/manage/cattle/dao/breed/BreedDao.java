@@ -26,11 +26,15 @@ public interface BreedDao {
 
     List<BreedRegisterDTO> listBreedRegister(BreedRegisterQO qo);
 
+    List<BreedRegisterDTO> listLastBreedRegister(List<String> list);
+
     int addBreedRegister(BreedRegisterDTO dto);
 
     int delBreedRegister(List<Integer> list);
 
     List<BreedPregnancyCheckDTO> listBreedPregnancyCheck(BreedPregnancyCheckQO qo);
+
+    List<BreedPregnancyCheckDTO> listBreedPregnancyCheckByCattleCode(List<String> list);
 
     int addBreedPregnancyCheck(BreedPregnancyCheckDTO dto);
 

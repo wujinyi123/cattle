@@ -7,7 +7,11 @@ import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.CattleDao;
 import com.manage.cattle.dao.base.FarmDao;
 import com.manage.cattle.dao.base.SysDao;
+import com.manage.cattle.dao.breed.BreedDao;
+import com.manage.cattle.dto.CattleBaseDTO;
 import com.manage.cattle.dto.base.*;
+import com.manage.cattle.dto.breed.BreedPregnancyCheckDTO;
+import com.manage.cattle.dto.breed.BreedRegisterDTO;
 import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.qo.base.*;
@@ -19,6 +23,7 @@ import com.manage.cattle.util.UserUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -35,13 +40,23 @@ public class CattleServiceImpl implements CattleService {
     private FarmDao farmDao;
 
     @Resource
+    private BreedDao breedDao;
+
+    @Resource
     private SysDao sysDao;
 
     @Override
     public PageInfo<CattleDTO> pageCattle(CattleQO qo) {
-        PageHelper.startPage(qo);
-        PageInfo<CattleDTO> pageInfo = new PageInfo<>(cattleDao.listCattle(qo));
-        pageInfo.getList().forEach(this::setAge);
+        List<CattleDTO> list = cattleDao.listCattle(qo);
+        setBreedInfo(list);
+        list.forEach(this::setAge);
+        int begin = (qo.getPageNum() - 1) * qo.getPageSize();
+        int end = Math.min(qo.getPageNum() * qo.getPageSize(), list.size());
+        PageInfo<CattleDTO> pageInfo = new PageInfo<>();
+        pageInfo.setPageNum(qo.getPageNum());
+        pageInfo.setPageSize(qo.getPageSize());
+        pageInfo.setTotal(list.size());
+        pageInfo.setList(begin < end ? list.subList(begin, end) : new ArrayList<>());
         return pageInfo;
     }
 
@@ -91,6 +106,54 @@ public class CattleServiceImpl implements CattleService {
             age += days + "天";
         }
         dto.setAge(age);
+    }
+
+    private void setBreedInfo(List<CattleDTO> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return;
+        }
+        List<String> cattleCodeList = list.stream().map(CattleDTO::getCattleCode).toList();
+        Map<String, BreedRegisterDTO> breedingDayMap = breedDao.listLastBreedRegister(cattleCodeList)
+                .stream()
+                .collect(Collectors.toMap(BreedRegisterDTO::getCattleCode,
+                        Function.identity(),
+                        (key1, key2) -> key2));
+        List<String> checkCattleCodeList = new ArrayList<>();
+        list.forEach(item -> {
+            BreedRegisterDTO dto = breedingDayMap.get(item.getCattleCode());
+            if (dto != null) {
+                checkCattleCodeList.add(item.getCattleCode());
+                item.setBreedingDay(dto.getBreedingDay());
+                item.setFirstCheckDay(dto.getFirstCheckDay());
+                item.setReCheckDay(dto.getReCheckDay());
+                item.setExpectedDay(dto.getExpectedDay());
+            }
+        });
+        List<BreedPregnancyCheckDTO> checkList = new ArrayList<>();
+        if (checkCattleCodeList.size() > 0) {
+            checkList = breedDao.listBreedPregnancyCheckByCattleCode(checkCattleCodeList);
+        }
+        for (CattleDTO dto : list) {
+            if (StrUtil.isBlank(dto.getBreedingDay())) {
+                continue;
+            }
+            List<BreedPregnancyCheckDTO> tempCheckList = checkList
+                    .stream()
+                    .filter(item -> item.getCheckDay().compareTo(dto.getFirstCheckDay()) >= 0
+                            && item.getCheckDay().compareTo(dto.getReCheckDay()) < 0)
+                    .toList();
+            if (tempCheckList.size() > 0) {
+                dto.setFirstCheckResult(tempCheckList.get(0).getResult());
+            }
+            tempCheckList = checkList
+                    .stream()
+                    .filter(item -> item.getCheckDay().compareTo(dto.getReCheckDay()) >= 0
+                            && item.getCheckDay().compareTo(dto.getExpectedDay()) < 0)
+                    .toList();
+            if (tempCheckList.size() > 0) {
+                dto.setReCheckResult(tempCheckList.get(0).getResult());
+            }
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
