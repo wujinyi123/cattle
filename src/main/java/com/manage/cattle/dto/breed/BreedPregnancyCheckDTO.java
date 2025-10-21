@@ -10,4 +10,5 @@ public class BreedPregnancyCheckDTO extends CattleBaseDTO {
     private String checkDay;
     private String checkUser;
     private String result;
+    private String remark;
 }

@@ -166,7 +166,7 @@
             t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
             tz.farmCode,tf.farmName,tf.farmOwner,
             tz.farmZoneCode,tc.cattleCode,
-            t.checkDay,t.checkUser,t.result
+            t.checkDay,t.checkUser,t.result,t.remark
         from t_breed_pregnancy_check t
         join t_cattle tc on t.cattleCode=tc.cattleCode
         join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
@@ -201,7 +201,7 @@
         t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
         tz.farmCode,tf.farmName,tf.farmOwner,
         tz.farmZoneCode,tc.cattleCode,
-        t.checkDay,t.checkUser,t.result
+        t.checkDay,t.checkUser,t.result,t.remark
         from t_breed_pregnancy_check t
         join t_cattle tc on t.cattleCode=tc.cattleCode
         join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
@@ -215,11 +215,11 @@
 
     <insert id="addBreedPregnancyCheck">
         insert into t_breed_pregnancy_check(createUser,createTime,updateUser,updateTime,
-        cattleCode,checkDay,checkUser,result)
+        cattleCode,checkDay,checkUser,result,remark)
         values
         <foreach collection="cattleCodeList" item="item" separator=",">
             (#{createUser},now(),#{updateUser},now(),
-            #{item},#{checkDay},#{checkUser},#{result})
+            #{item},#{checkDay},#{checkUser},#{result},#{remark})
         </foreach>
     </insert>
 
@@ -269,6 +269,26 @@
         <if test="remark!=null and remark!=''">
             and tc.remark like concat('%',#{remark},'%')
         </if>
+        order by resultDay desc,farmName,farmZoneCode,cattleCode
+    </select>
+
+    <select id="listBreedPregnancyResultByCattleCode" resultType="com.manage.cattle.dto.breed.BreedPregnancyResultDTO">
+        select
+        t.id,t.createUser,t.createTime,t.updateUser,t.updateTime,
+        tz.farmCode,tf.farmName,tf.farmOwner,
+        tz.farmZoneCode,tc.cattleCode,
+        t.resultDay,t.operaUser,t.result,t.remark,
+        t.childFarmZoneCode,t.childCattleCode,t.breed,sb.value breedValue,
+        t.sex,t.color,t.weight
+        from t_breed_pregnancy_result t
+        join t_cattle tc on t.cattleCode=tc.cattleCode
+        join t_farm_zone tz on tc.farmZoneCode=tz.farmZoneCode
+        join t_farm tf on tz.farmCode=tf.farmCode
+        left join t_sys_config sb on sb.code='cattleBreed' and t.breed=sb.key
+        where t.cattleCode in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
         order by resultDay desc,farmName,farmZoneCode,cattleCode
     </select>
 

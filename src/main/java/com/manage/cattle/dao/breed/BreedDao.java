@@ -42,6 +42,8 @@ public interface BreedDao {
 
     List<BreedPregnancyResultDTO> listBreedPregnancyResult(BreedPregnancyResultQO qo);
 
+    List<BreedPregnancyResultDTO> listBreedPregnancyResultByCattleCode(List<String> list);
+
     int addBreedPregnancyResult(BreedPregnancyResultDTO dto);
 
     int delBreedPregnancyResult(List<Integer> list);

@@ -11,6 +11,7 @@ import com.manage.cattle.dao.breed.BreedDao;
 import com.manage.cattle.dto.CattleBaseDTO;
 import com.manage.cattle.dto.base.*;
 import com.manage.cattle.dto.breed.BreedPregnancyCheckDTO;
+import com.manage.cattle.dto.breed.BreedPregnancyResultDTO;
 import com.manage.cattle.dto.breed.BreedRegisterDTO;
 import com.manage.cattle.dto.common.SysConfigDTO;
 import com.manage.cattle.exception.BusinessException;
@@ -27,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -50,6 +52,9 @@ public class CattleServiceImpl implements CattleService {
         List<CattleDTO> list = cattleDao.listCattle(qo);
         setBreedInfo(list);
         list.forEach(this::setAge);
+        if (StrUtil.isNotBlank(qo.getBreedStatus())) {
+            list = list.stream().filter(item -> qo.getBreedStatus().equals(item.getBreedStatus())).toList();
+        }
         int begin = (qo.getPageNum() - 1) * qo.getPageSize();
         int end = Math.min(qo.getPageNum() * qo.getPageSize(), list.size());
         PageInfo<CattleDTO> pageInfo = new PageInfo<>();
@@ -63,7 +68,11 @@ public class CattleServiceImpl implements CattleService {
     @Override
     public List<CattleDTO> listCattle(CattleQO qo) {
         List<CattleDTO> list = cattleDao.listCattle(qo);
+        setBreedInfo(list);
         list.forEach(this::setAge);
+        if (StrUtil.isNotBlank(qo.getBreedStatus())) {
+            list = list.stream().filter(item -> qo.getBreedStatus().equals(item.getBreedStatus())).toList();
+        }
         return list;
     }
 
@@ -133,25 +142,57 @@ public class CattleServiceImpl implements CattleService {
         if (checkCattleCodeList.size() > 0) {
             checkList = breedDao.listBreedPregnancyCheckByCattleCode(checkCattleCodeList);
         }
+        List<BreedPregnancyResultDTO> resultList = new ArrayList<>();
+        if (checkCattleCodeList.size() > 0) {
+            resultList = breedDao.listBreedPregnancyResultByCattleCode(checkCattleCodeList);
+        }
+        String nowDate = CommonUtil.dateToStr(new Date());
         for (CattleDTO dto : list) {
             if (StrUtil.isBlank(dto.getBreedingDay())) {
+                dto.setBreedStatus("空怀");
                 continue;
             }
             List<BreedPregnancyCheckDTO> tempCheckList = checkList
                     .stream()
-                    .filter(item -> item.getCheckDay().compareTo(dto.getFirstCheckDay()) >= 0
+                    .filter(item -> dto.getCattleCode().equals(item.getCattleCode())
+                            && item.getCheckDay().compareTo(dto.getFirstCheckDay()) >= 0
                             && item.getCheckDay().compareTo(dto.getReCheckDay()) < 0)
                     .toList();
             if (tempCheckList.size() > 0) {
+                dto.setActualFirstCheckDay(tempCheckList.get(0).getCheckDay());
                 dto.setFirstCheckResult(tempCheckList.get(0).getResult());
+                dto.setBreedStatus("Y".equals(dto.getFirstCheckResult()) ? "初检有孕" : "初检未孕");
+            } else {
+                dto.setBreedStatus("已配未检");
+                continue;
             }
             tempCheckList = checkList
                     .stream()
-                    .filter(item -> item.getCheckDay().compareTo(dto.getReCheckDay()) >= 0
+                    .filter(item -> dto.getCattleCode().equals(item.getCattleCode())
+                            && item.getCheckDay().compareTo(dto.getReCheckDay()) >= 0
                             && item.getCheckDay().compareTo(dto.getExpectedDay()) < 0)
                     .toList();
             if (tempCheckList.size() > 0) {
+                dto.setActualReCheckDay(tempCheckList.get(0).getCheckDay());
                 dto.setReCheckResult(tempCheckList.get(0).getResult());
+                dto.setBreedStatus("Y".equals(dto.getReCheckResult()) ? "复检有胎" : "复检无胎");
+            }
+            List<BreedPregnancyResultDTO> tempResultList = resultList
+                    .stream()
+                    .filter(item -> dto.getCattleCode().equals(item.getCattleCode())
+                            && item.getResultDay().compareTo(dto.getReCheckDay()) >= 0
+                            && item.getResultDay().compareTo(dto.getExpectedDay()) <= 0)
+                    .toList();
+            if (tempResultList.size() > 0) {
+                dto.setBreedStatus("空怀");
+                dto.setActualExpectedDay(tempResultList.get(0).getResultDay());
+                dto.setExpectedResult(tempResultList.stream().map(BreedPregnancyResultDTO::getResult).distinct().sorted().collect(Collectors.joining(",")));
+            }
+            if (Arrays.asList(dto.getFirstCheckResult(), dto.getReCheckResult()).contains("Y") && StrUtil.isBlank(dto.getExpectedResult())) {
+                LocalDate startDate = LocalDate.parse(dto.getBreedingDay());
+                LocalDate endDate = LocalDate.parse(nowDate);
+                long days = ChronoUnit.DAYS.between(startDate, endDate);
+                dto.setPregnancyDays((int) days);
             }
         }
     }
