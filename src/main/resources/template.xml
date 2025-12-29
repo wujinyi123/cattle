@@ -38,6 +38,7 @@
         <field name="currentSize" title="当前容量"/>
     </template>
     <template code="cattle"
+              fileName="牛只信息"
               exportMethed="com.manage.cattle.service.base.CattleService#listCattle"
               importMethed="com.manage.cattle.service.base.CattleService#importCattle"
               qo="com.manage.cattle.qo.base.CattleQO"
@@ -68,6 +69,7 @@
         <field name="motherCode" title="母亲耳牌号"/>
     </template>
     <template code="breedRegister"
+              fileName="配种登记"
               exportMethed="com.manage.cattle.service.bread.BreedService#listBreedRegister"
               qo="com.manage.cattle.qo.breed.BreedRegisterQO">
         <field name="farmName" title="牧场名称"/>
@@ -77,9 +79,11 @@
         <field name="frozenSemenBreedValue" title="冻精品种"/>
         <field name="sexControl" title="性控类型"/>
         <field name="breedingDay" title="配种日期"/>
+        <field name="firstCheckDay" title="计划初检日期"/>
+        <field name="reCheckDay" title="计划复检日期"/>
+        <field name="expectedDay" title="预产日期"/>
         <field name="breedingMethodValue" title="配种方法"/>
         <field name="operateUser" title="输配员"/>
-        <field name="pregnancyResultValue" title="妊娠结果"/>
     </template>
     <template code="downloadRegisterCattle"
               exportMethed="com.manage.cattle.service.bread.BreedService#downloadRegisterCattle"
@@ -100,6 +104,7 @@
         <field name="checkDays" title="检查日期"/>
     </template>
     <template code="breedPregnancyCheck"
+              fileName="妊检登记"
               exportMethed="com.manage.cattle.service.bread.BreedService#listBreedPregnancyCheck"
               qo="com.manage.cattle.qo.breed.BreedPregnancyCheckQO">
         <field name="farmName" title="牧场名称"/>
@@ -107,9 +112,11 @@
         <field name="cattleCode" title="牛只耳牌号"/>
         <field name="checkDay" title="检查日期"/>
         <field name="checkUser" title="检查员"/>
-        <field name="result" title="检查结果"/>
+        <field name="result" title="是否怀孕"/>
+        <field name="remark" title="备注"/>
     </template>
     <template code="breedPregnancyResult"
+              fileName="产犊登记"
               exportMethed="com.manage.cattle.service.bread.BreedService#listBreedPregnancyResult"
               qo="com.manage.cattle.qo.breed.BreedPregnancyResultQO">
         <field name="farmName" title="牧场名称"/>
@@ -119,7 +126,12 @@
         <field name="operaUser" title="操作员"/>
         <field name="result" title="结果"/>
         <field name="remark" title="备注"/>
-        <field name="childrenCodeList" title="后代"/>
+        <field name="childFarmZoneCode" title="牛犊子圈舍编号"/>
+        <field name="childCattleCode" title="牛犊子耳牌号"/>
+        <field name="breedValue" title="牛犊子品种"/>
+        <field name="sex" title="牛犊子性别"/>
+        <field name="color" title="牛犊子颜色"/>
+        <field name="weight" title="牛犊子体重"/>
     </template>
     <template code="inventoryBuy"
               exportMethed="com.manage.cattle.service.inventory.InventoryService#listInventoryBuy"

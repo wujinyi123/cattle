@@ -5,6 +5,7 @@ import com.manage.cattle.dto.base.CattleChangeZoneDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.CattleTransferDTO;
 import com.manage.cattle.dto.base.CattleTransferReviewDTO;
+import com.manage.cattle.dto.common.FileByteInfo;
 import com.manage.cattle.qo.base.CattleChangeZoneQO;
 import com.manage.cattle.qo.base.CattleQO;
 import com.manage.cattle.qo.base.CattleTransferQO;
@@ -17,6 +18,8 @@ public interface CattleService {
     PageInfo<CattleDTO> pageCattle(CattleQO qo);
 
     List<CattleDTO> listCattle(CattleQO qo);
+
+    FileByteInfo exportCatailDetail(CattleQO qo);
 
     CattleDTO getCattle(String cattleCode);
 

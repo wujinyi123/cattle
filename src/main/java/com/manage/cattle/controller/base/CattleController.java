@@ -5,12 +5,15 @@ import com.manage.cattle.dto.base.CattleChangeZoneDTO;
 import com.manage.cattle.dto.base.CattleDTO;
 import com.manage.cattle.dto.base.CattleTransferDTO;
 import com.manage.cattle.dto.base.CattleTransferReviewDTO;
+import com.manage.cattle.dto.common.FileByteInfo;
 import com.manage.cattle.qo.base.CattleChangeZoneQO;
 import com.manage.cattle.qo.base.CattleQO;
 import com.manage.cattle.qo.base.CattleTransferQO;
 import com.manage.cattle.qo.base.CattleTransferReviewQO;
 import com.manage.cattle.service.base.CattleService;
+import com.manage.cattle.util.CommonUtil;
 import jakarta.annotation.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +38,12 @@ public class CattleController {
     @GetMapping("/listCattle")
     public List<CattleDTO> listCattle(CattleQO qo) {
         return cattleService.listCattle(qo);
+    }
+
+    @GetMapping("/exportCatailDetail")
+    public ResponseEntity<byte[]> exportCatailDetail(CattleQO qo) {
+        FileByteInfo info = cattleService.exportCatailDetail(qo);
+        return CommonUtil.responseByteArr(info);
     }
 
     @GetMapping("/getCattle")
@@ -83,10 +92,9 @@ public class CattleController {
     }
 
     @GetMapping("/getCattleTransferNum")
-    public Map<?,?> getCattleTransferNum(@RequestParam("currentFarmCode") String currentFarmCode) {
+    public Map<?, ?> getCattleTransferNum(@RequestParam("currentFarmCode") String currentFarmCode) {
         return cattleService.getCattleTransferNum(currentFarmCode);
     }
-
 
 
     @GetMapping("/pageCattleTransferReview")
@@ -110,7 +118,7 @@ public class CattleController {
     }
 
     @GetMapping("/getCattleTransferReviewNum")
-    public Map<?,?> getCattleTransferReviewNum(@RequestParam("currentFarmCode") String currentFarmCode) {
+    public Map<?, ?> getCattleTransferReviewNum(@RequestParam("currentFarmCode") String currentFarmCode) {
         return cattleService.getCattleTransferReviewNum(currentFarmCode);
     }
 }

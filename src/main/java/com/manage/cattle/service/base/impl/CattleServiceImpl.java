@@ -1,7 +1,9 @@
 package com.manage.cattle.service.base.impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.manage.cattle.dao.base.CattleDao;
@@ -13,19 +15,29 @@ import com.manage.cattle.dto.base.*;
 import com.manage.cattle.dto.breed.BreedPregnancyCheckDTO;
 import com.manage.cattle.dto.breed.BreedPregnancyResultDTO;
 import com.manage.cattle.dto.breed.BreedRegisterDTO;
+import com.manage.cattle.dto.common.FileByteInfo;
 import com.manage.cattle.dto.common.SysConfigDTO;
+import com.manage.cattle.dto.common.TemplateInfo;
 import com.manage.cattle.exception.BusinessException;
 import com.manage.cattle.qo.base.*;
+import com.manage.cattle.qo.breed.BreedPregnancyCheckQO;
+import com.manage.cattle.qo.breed.BreedPregnancyResultQO;
+import com.manage.cattle.qo.breed.BreedRegisterQO;
 import com.manage.cattle.qo.common.SysConfigQO;
 import com.manage.cattle.service.base.CattleService;
 import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.PermissionUtil;
 import com.manage.cattle.util.UserUtil;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
@@ -33,6 +45,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class CattleServiceImpl implements CattleService {
     @Resource
@@ -74,6 +87,55 @@ public class CattleServiceImpl implements CattleService {
             list = list.stream().filter(item -> qo.getBreedStatus().equals(item.getBreedStatus())).toList();
         }
         return list;
+    }
+
+    @Override
+    public FileByteInfo exportCatailDetail(CattleQO qo) {
+        // 牛只信息
+        List<CattleDTO> cattleList = listCattle(qo);
+        List<String> cattleCodeList = cattleList.stream().map(CattleDTO::getCattleCode).toList();
+        // 配种登记
+        BreedRegisterQO breedRegisterQO = new BreedRegisterQO();
+        breedRegisterQO.setCattleCodeList(cattleCodeList);
+        List<BreedRegisterDTO> breedRegisterList = breedDao.listBreedRegister(breedRegisterQO);
+        // 妊检登记
+        BreedPregnancyCheckQO breedPregnancyCheckQO = new BreedPregnancyCheckQO();
+        breedPregnancyCheckQO.setCattleCodeList(cattleCodeList);
+        List<BreedPregnancyCheckDTO> breedPregnancyCheckList = breedDao.listBreedPregnancyCheck(breedPregnancyCheckQO);
+        // 产犊登记
+        BreedPregnancyResultQO breedPregnancyResultQO = new BreedPregnancyResultQO();
+        breedPregnancyResultQO.setCattleCodeList(cattleCodeList);
+        List<BreedPregnancyResultDTO> breedPregnancyResultList = breedDao.listBreedPregnancyResult(breedPregnancyResultQO);
+        // 导出
+        byte[] bytes;
+        TemplateInfo info;
+        Sheet sheet;
+        try (Workbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            // 牛只信息
+            info = CommonUtil.getTemplateInfo("cattle");
+            sheet = workbook.createSheet("牛只信息");
+            CommonUtil.writeSheet(sheet, info, cattleList);
+            // 配种登记
+            info = CommonUtil.getTemplateInfo("breedRegister");
+            sheet = workbook.createSheet("配种登记");
+            CommonUtil.writeSheet(sheet, info, breedRegisterList);
+            // 妊检登记
+            info = CommonUtil.getTemplateInfo("breedPregnancyCheck");
+            sheet = workbook.createSheet("妊检登记");
+            CommonUtil.writeSheet(sheet, info, breedPregnancyCheckList);
+            // 产犊登记
+            info = CommonUtil.getTemplateInfo("breedPregnancyResult");
+            sheet = workbook.createSheet("产犊登记");
+            CommonUtil.writeSheet(sheet, info, breedPregnancyResultList);
+            // 生成文件流
+            workbook.write(outputStream);
+            bytes = outputStream.toByteArray();
+        } catch (Exception e) {
+            log.error(CommonUtil.getExceptionDetails("生成xlsx失败", e));
+            throw new BusinessException("生成xlsx失败");
+        }
+        return new FileByteInfo("牛只详情信息.xlsx", bytes);
     }
 
     @Override

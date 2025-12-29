@@ -1,39 +1,24 @@
 package com.manage.cattle.service.common.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.manage.cattle.dto.BaseDTO;
 import com.manage.cattle.dto.common.FileByteInfo;
 import com.manage.cattle.dto.common.ImportInfo;
 import com.manage.cattle.dto.common.TemplateInfo;
 import com.manage.cattle.exception.BusinessException;
-import com.manage.cattle.qo.PageQO;
 import com.manage.cattle.service.common.CommonService;
 import com.manage.cattle.util.CommonUtil;
 import com.manage.cattle.util.UserUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -51,7 +35,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -66,7 +49,7 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public FileByteInfo exportFile(Map<String, String> params, String templateCode) {
-        TemplateInfo info = getTemplateInfo(params, templateCode);
+        TemplateInfo info = CommonUtil.getTemplateInfo(params, templateCode);
         String[] classMethod = info.getExportMethed().split("#");
         JSONArray jsonArray;
         try {
@@ -84,7 +67,7 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public FileByteInfo templateFile(String templateCode) {
-        TemplateInfo info = getTemplateInfo(new HashMap<>(), templateCode, true);
+        TemplateInfo info = CommonUtil.getTemplateInfo(templateCode);
         info.setFileName("模板_" + info.getFileName());
         return getFileByteInfo(info, new JSONArray());
     }
@@ -94,33 +77,7 @@ public class CommonServiceImpl implements CommonService {
         try (Workbook workbook = new XSSFWorkbook();
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("sheet");
-            // 默认行高、列宽
-            sheet.setDefaultRowHeightInPoints(20);
-            sheet.setDefaultColumnWidth(20);
-            // 默认单元格格式
-            CellStyle defaultStyle = getDefaultStyle(workbook);
-            // 标题单元格格式
-            CellStyle titleStyle = getTitleStyle(workbook);
-            // 设置默认格式及标题赋值
-            Row row = sheet.createRow(0);
-            Cell cell;
-            for (int index = 0; index < info.getFields().size(); index++) {
-                sheet.setDefaultColumnStyle(index, defaultStyle);
-                cell = row.createCell(index, CellType.STRING);
-                cell.setCellStyle(titleStyle);
-                cell.setCellValue(info.getFields().get(index).getTitle());
-            }
-            // 内容赋值
-            for (int i = 0; i < jsonArray.size(); i++) {
-                row = sheet.createRow(i + 1);
-                JSONObject jsonObject = (JSONObject) jsonArray.get(i);
-                for (int j = 0; j < info.getFields().size(); j++) {
-                    cell = row.createCell(j, CellType.STRING);
-                    String key = info.getFields().get(j).getName();
-                    String value = jsonObject.getStr(key);
-                    cell.setCellValue(value == null ? "" : value);
-                }
-            }
+            CommonUtil.writeSheet(sheet, info, jsonArray);
             workbook.write(outputStream);
             bytes = outputStream.toByteArray();
         } catch (Exception e) {
@@ -130,50 +87,15 @@ public class CommonServiceImpl implements CommonService {
         return new FileByteInfo(info.getFileName(), bytes);
     }
 
-    private CellStyle getDefaultStyle(Workbook workbook) {
-        CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setDataFormat(workbook.createDataFormat().getFormat("@"));
-        Font font = workbook.createFont();
-        font.setFontHeightInPoints((short) 11);
-        cellStyle.setFont(font);
-        cellStyle.setAlignment(HorizontalAlignment.LEFT);
-        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        cellStyle.setWrapText(true);
-        return cellStyle;
-    }
-
-    private CellStyle getTitleStyle(Workbook workbook) {
-        CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setDataFormat(workbook.createDataFormat().getFormat("@"));
-        Font font = workbook.createFont();
-        font.setFontHeightInPoints((short) 12);
-        font.setBold(true);
-        cellStyle.setFont(font);
-        cellStyle.setAlignment(HorizontalAlignment.CENTER);
-        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        cellStyle.setWrapText(true);
-        // 边框
-        cellStyle.setBorderTop(BorderStyle.THIN);
-        cellStyle.setBorderRight(BorderStyle.THIN);
-        cellStyle.setBorderBottom(BorderStyle.THIN);
-        cellStyle.setBorderLeft(BorderStyle.THIN);
-        // 背景颜色
-        XSSFColor color = new XSSFColor();
-        color.setARGBHex("CCCCCC");
-        ((XSSFCellStyle) cellStyle).setFillForegroundColor(color);
-        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        return cellStyle;
-    }
-
     @Override
     public List<String> importRequireField(String templateCode) {
-        TemplateInfo info = getTemplateInfo(new HashMap<>(), templateCode, true);
+        TemplateInfo info = CommonUtil.getTemplateInfo(templateCode);
         return info.getFields().stream().filter(item -> "true".equals(item.getRequire())).map(TemplateInfo.Field::getTitle).toList();
     }
 
     @Override
     public ImportInfo importFile(MultipartFile file, String templateCode, String farmCode) {
-        TemplateInfo info = getTemplateInfo(new HashMap<>(), templateCode, true);
+        TemplateInfo info = CommonUtil.getTemplateInfo(templateCode);
         List<Map<String, String>> list = new ArrayList<>();
         try (InputStream inputStream = file.getInputStream();
              Workbook workbook = new XSSFWorkbook(inputStream)) {
@@ -282,74 +204,6 @@ public class CommonServiceImpl implements CommonService {
         if (StrUtil.isNotBlank(importError)) {
             map.put("importError", "格式不正确：" + importError);
         }
-    }
-
-    private TemplateInfo getTemplateInfo(Map<String, String> params, String templateCode) {
-        return getTemplateInfo(params, templateCode, false);
-    }
-
-    private TemplateInfo getTemplateInfo(Map<String, String> params, String templateCode, boolean isImport) {
-        SAXReader reader = new SAXReader();
-        Document document;
-        try (InputStream inputStream = ResourceUtil.getStream("template.xml")) {
-            document = reader.read(inputStream);
-        } catch (Exception e) {
-            throw new BusinessException("读取配置文件失败");
-        }
-        Element rootElement = document.getRootElement();
-        List<Element> templateList = rootElement.elements("template");
-        Element templateElement = templateList.stream().filter(item -> templateCode.equals(item.attributeValue("code"))).findFirst().orElse(null);
-        if (Objects.isNull(templateElement)) {
-            throw new BusinessException("templateCode不正确");
-        }
-        TemplateInfo info = new TemplateInfo();
-        info.setCode(templateCode);
-        String fileName = templateElement.attributeValue("fileName");
-        info.setFileName(StrUtil.isBlank(fileName) ? templateCode + ".xlsx" : fileName);
-        if (StrUtil.isNotBlank(params.get("fileName"))) {
-            info.setFileName(params.get("fileName"));
-        }
-        info.setExportMethed(templateElement.attributeValue("exportMethed"));
-        info.setImportMethed(templateElement.attributeValue("importMethed"));
-        info.setDtoClass(templateElement.attributeValue("dto"));
-        if (!isImport) {
-            try {
-                Class<? extends PageQO> qoClass = (Class<? extends PageQO>) Class.forName(templateElement.attributeValue("qo"));
-                Field[] fields = qoClass.getDeclaredFields();
-                Map<String, String> map = new HashMap<>();
-                for (Field field : fields) {
-                    String value = params.get(field.getName());
-                    if (StrUtil.isBlank(value)) {
-                        continue;
-                    }
-                    map.put(field.getName(), value);
-                }
-                String json = JSONUtil.toJsonStr(map);
-                info.setQo(JSONUtil.toBean(json, qoClass));
-            } catch (Exception e) {
-                throw new BusinessException("通过配置文件赋值qo失败");
-            }
-        }
-        List<Element> fieldList = templateElement.elements("field");
-        for (Element fieldElement : fieldList) {
-            String noImport = fieldElement.attributeValue("noImport");
-            if (isImport && "true".equals(noImport)) {
-                continue;
-            }
-            String name = fieldElement.attributeValue("name");
-            String title = fieldElement.attributeValue("title");
-            String require = fieldElement.attributeValue("require");
-            String enumVal = fieldElement.attributeValue("enumVal");
-            String regex = fieldElement.attributeValue("regex");
-            TemplateInfo.Field field = new TemplateInfo.Field();
-            field.setName(name);
-            field.setTitle(title);
-            field.setRequire(require);
-            field.setEnumVal(enumVal);
-            field.setRegex(regex);
-            info.getFields().add(field);
-        }
-        return info;
     }
 
     @Override

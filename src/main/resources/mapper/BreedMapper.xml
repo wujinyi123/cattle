@@ -104,6 +104,12 @@
         <if test="cattleCode!=null and cattleCode!=''">
             and tc.cattleCode=#{cattleCode}
         </if>
+        <if test="cattleCodeList!=null and cattleCodeList.size()>0">
+            and tc.cattleCode in
+            <foreach collection="cattleCodeList" item="code" open="(" separator="," close=")">
+                #{code}
+            </foreach>
+        </if>
         <if test="frozenSemenCode!=null and frozenSemenCode!=''">
             and t.frozenSemenCode=#{frozenSemenCode}
         </if>
@@ -181,6 +187,12 @@
         <if test="cattleCode!=null and cattleCode!=''">
             and tc.cattleCode=#{cattleCode}
         </if>
+        <if test="cattleCodeList!=null and cattleCodeList.size()>0">
+            and tc.cattleCode in
+            <foreach collection="cattleCodeList" item="code" open="(" separator="," close=")">
+                #{code}
+            </foreach>
+        </if>
         <if test="checkDayStart!=null and checkDayStart!=''">
             and t.checkDay &gt;= #{checkDayStart}
         </if>
@@ -253,6 +265,12 @@
         </if>
         <if test="cattleCode!=null and cattleCode!=''">
             and tc.cattleCode=#{cattleCode}
+        </if>
+        <if test="cattleCodeList!=null and cattleCodeList.size()>0">
+            and tc.cattleCode in
+            <foreach collection="cattleCodeList" item="code" open="(" separator="," close=")">
+                #{code}
+            </foreach>
         </if>
         <if test="resultDayStart!=null and resultDayStart!=''">
             and t.resultDay &gt;= #{resultDayStart}
